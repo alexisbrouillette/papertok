@@ -42,7 +42,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Fallback all non-API GET requests to index.html for client-side routing (Vite SPA)
-app.get('*', (req, res, next) => {
+app.get('/*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return next();
   }

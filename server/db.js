@@ -12,9 +12,15 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
+let resolveDbReady;
+export const dbReady = new Promise((resolve) => {
+  resolveDbReady = resolve;
+});
+
 export const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Failed to connect to SQLite database:', err);
+    resolveDbReady(); // Resolve to avoid hanging server
   } else {
     console.log('Connected to SQLite database at:', dbPath);
     initializeSchema();
@@ -113,7 +119,11 @@ function initializeSchema() {
     db.run(`ALTER TABLE user_streaks ADD COLUMN last_unlock_alert_sent_at DATETIME`, () => {});
     db.run(`ALTER TABLE user_streaks ADD COLUMN last_reminder_sent_date TEXT`, () => {});
 
-    console.log('SQLite database schemas initialized.');
+    db.run("SELECT 1", (err) => {
+      if (err) console.error('Failed to complete DB initialization:', err);
+      else console.log('SQLite database schemas initialized.');
+      resolveDbReady();
+    });
   });
 }
 

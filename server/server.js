@@ -7,7 +7,7 @@ import progressRouter from './routes/progress.js';
 import pushRouter from './routes/push.js';
 import { startNotificationScheduler } from './services/notificationScheduler.js';
 import { initializeDigestQueue } from './services/digestQueue.js';
-import './db.js'; // Trigger database initialization
+import { dbReady } from './db.js'; // Trigger database initialization and import ready promise
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -37,8 +37,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error.' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`PaperTok backend server running on http://localhost:${PORT}`);
+  await dbReady; // Wait for SQLite schema tables to be fully created
   startNotificationScheduler();
   initializeDigestQueue();
 });

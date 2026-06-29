@@ -9,8 +9,18 @@ import { startNotificationScheduler } from './services/notificationScheduler.js'
 import { initializeDigestQueue } from './services/digestQueue.js';
 import { dbReady } from './db.js'; // Trigger database initialization and import ready promise
 
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Serve static assets in production
+const distPath = join(__dirname, '../dist');
+app.use(express.static(distPath));
 
 app.use(cors({
   origin: '*', // For local dev, allow all origins
@@ -29,6 +39,14 @@ app.use('/api/push', pushRouter);
 // Basic healthcheck
 app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });
+});
+
+// Fallback all non-API GET requests to index.html for client-side routing (Vite SPA)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(join(distPath, 'index.html'));
 });
 
 // Global error handler

@@ -118,16 +118,28 @@ function assignPapersToCategories(papers: FoundationalPaper[]): Partial<Record<C
 }
 
 /* ─── Build digest nodes from papers ────────────────────────── */
-function buildNodes(topic: string, papers: FoundationalPaper[]): DigestNode[] {
-  // For MVP: one single digest node containing all 5 papers
-  return [
-    {
-      id: 'node-0',
-      title: topic,
-      papers: assignPapersToCategories(papers),
-      readCategories: [],
-    },
-  ];
+function buildNodes(topic: string, papers: FoundationalPaper[], debugDayOffset: number): DigestNode[] {
+  const list: DigestNode[] = [];
+  
+  // Render completed nodes for previous days
+  for (let i = 0; i < debugDayOffset; i++) {
+    list.push({
+      id: `node-${i}`,
+      title: `${topic} (Day ${i + 1})`,
+      papers: {},
+      readCategories: ['foundation', 'surprise', 'crossfield', 'novel', 'wildcard'],
+    });
+  }
+
+  // Render current active node
+  list.push({
+    id: `node-${debugDayOffset}`,
+    title: topic,
+    papers: assignPapersToCategories(papers),
+    readCategories: [],
+  });
+
+  return list;
 }
 
 /* ─── Progress Ring SVG Component ───────────────────────────── */
@@ -313,7 +325,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
   useEffect(() => {
     if (papers.length > 0) {
-      const initialNodes = buildNodes(topic, papers);
+      const initialNodes = buildNodes(topic, papers, debugDayOffset);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNodes(initialNodes);
 
@@ -332,6 +344,10 @@ export const DigestMap: React.FC<DigestMapProps> = ({
             
             setNodes((prev) => 
               prev.map((node) => {
+                // If it is a past node, it is complete by definition
+                if (node.id !== `node-${debugDayOffset}`) {
+                  return node;
+                }
                 const readCategories = (Object.keys(node.papers) as CategoryKey[]).filter((catKey) => {
                   const paper = node.papers[catKey];
                   return paper && readList.some((r: { topic: string; paper_title: string; category_key: string }) => 
@@ -351,7 +367,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
       fetchProgress();
     }
-  }, [papers, topic]);
+  }, [papers, topic, debugDayOffset]);
 
   /* Open node drawer */
   const handleNodeClick = (nodeId: string) => {

@@ -23,7 +23,7 @@ async function retryWithDelay(fn, retries = 2, delay = 1200) {
 
 // 1. Generate digest (Supports SSE for real-time progress)
 router.get('/generate', requireAuth, async (req, res) => {
-  const { topic, bypassCache } = req.query;
+  const { topic, bypassCache, debugDayOffset } = req.query;
   const userId = req.userId;
 
   if (!topic || topic.trim() === '') {
@@ -31,6 +31,14 @@ router.get('/generate', requireAuth, async (req, res) => {
   }
 
   const cleanTopic = topic.trim();
+
+  // Resolve target digest date
+  const dayOffset = Number(debugDayOffset) || 0;
+  const d = new Date();
+  if (dayOffset !== 0) {
+    d.setDate(d.getDate() + dayOffset);
+  }
+  const digestDate = d.toISOString().split('T')[0];
 
   // Set headers for Server-Sent Events (SSE)
   res.setHeader('Content-Type', 'text/event-stream');
@@ -44,7 +52,10 @@ router.get('/generate', requireAuth, async (req, res) => {
   // 1. Check SQLite Cache First (unless explicitly bypassing)
   if (bypassCache !== 'true') {
     try {
-      const cachedRow = await dbGet('SELECT papers_json FROM cached_digests WHERE LOWER(topic) = LOWER(?)', [cleanTopic]);
+      const cachedRow = await dbGet(
+        'SELECT papers_json FROM cached_digests WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ?',
+        [userId, cleanTopic, digestDate]
+      );
       if (cachedRow) {
         sendProgress(100, 'Loading cached digest from database...');
         res.write(`data: ${JSON.stringify({ done: true, papers: JSON.parse(cachedRow.papers_json) })}\n\n`);
@@ -78,15 +89,18 @@ router.get('/generate', requireAuth, async (req, res) => {
   }
 
   try {
-    // 1. Enqueue task with priority = 1 (urgent priority for new users)
-    await enqueueDigestGeneration(userId, cleanTopic, 1);
+    // 1. Enqueue task with priority = 1 (urgent priority for new users) and target date
+    await enqueueDigestGeneration(userId, cleanTopic, 1, digestDate);
 
     // 2. Poll queue task status and stream updates to the client
     let attempts = 0;
     const maxAttempts = 300; // 5 minutes max
     while (attempts < maxAttempts) {
       // Check cache first in case task completed
-      const cachedRow = await dbGet('SELECT papers_json FROM cached_digests WHERE LOWER(topic) = LOWER(?)', [cleanTopic]);
+      const cachedRow = await dbGet(
+        'SELECT papers_json FROM cached_digests WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ?',
+        [userId, cleanTopic, digestDate]
+      );
       if (cachedRow) {
         sendProgress(100, 'Loading generated papers...');
         res.write(`data: ${JSON.stringify({ done: true, papers: JSON.parse(cachedRow.papers_json) })}\n\n`);
@@ -97,9 +111,9 @@ router.get('/generate', requireAuth, async (req, res) => {
       // Check queue status
       const queueTask = await dbGet(`
         SELECT status, progress, status_text FROM generation_queue 
-        WHERE user_id = ? AND topic = ? 
+        WHERE user_id = ? AND topic = ? AND digest_date = ?
         ORDER BY id DESC LIMIT 1
-      `, [userId, cleanTopic]);
+      `, [userId, cleanTopic, digestDate]);
 
       if (queueTask) {
         if (queueTask.status === 'failed') {

@@ -86,6 +86,8 @@ interface PaperCardProps {
   index: number;
   total: number;
   hideHeader?: boolean;
+  children?: React.ReactNode;
+  onContentScroll?: (scrollTop: number) => void;
 }
 
 export const PaperCard: React.FC<PaperCardProps> = ({
@@ -98,6 +100,8 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   index,
   total,
   hideHeader = false,
+  children,
+  onContentScroll
 }) => {
   const [metadata, setMetadata] = useState<EnrichedMetadata>({ source: 'google-scholar' });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
@@ -305,7 +309,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
       )}
 
       {/* Scrollable Paper Content */}
-      <div className="card-scroll-content">
+      <div
+        className="card-scroll-content"
+        onScroll={(e) => {
+          onContentScroll?.(e.currentTarget.scrollTop);
+        }}
+      >
+        {children}
         {/* Core Intuition / Vulgarized Idea */}
         <div className="summary-block highlight">
           <div className="core-intuition-header">

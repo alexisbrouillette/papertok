@@ -36,6 +36,8 @@ interface DigestMapProps {
   onOpenSettings: () => void;
   onSignOut: () => void;
   onStreakUpdated?: (streak: number) => void;
+  debugDayOffset: number;
+  onAdvanceDay: () => void;
 }
 
 /* ─── Category Definitions ───────────────────────────────────── */
@@ -182,17 +184,19 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   streak,
   onOpenSettings,
   onSignOut,
-  onStreakUpdated
+  onStreakUpdated,
+  debugDayOffset,
+  onAdvanceDay
 }) => {
   const [nodes, setNodes] = useState<DigestNode[]>([]);
   const isCompleted = nodes.length > 0 && nodes.every(node => node.readCategories.length === CATEGORIES.length);
   const [openNodeId, setOpenNodeId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerFullscreen, setDrawerFullscreen] = useState(false);
   const [particleNodeId, setParticleNodeId] = useState<string | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [activeScrollIdx, setActiveScrollIdx] = useState(0); // index of paper currently in view
-  const [debugDayOffset, setDebugDayOffset] = useState(0); // For fast-forwarding days
   const drawerRef = useRef<HTMLDivElement>(null);
   const completionFiredRef = useRef(false); // prevent double-fire
 
@@ -360,6 +364,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   /* Close drawer */
   const handleCloseDrawer = () => {
     setDrawerVisible(false);
+    setDrawerFullscreen(false);
     setTimeout(() => {
       setOpenNodeId(null);
       setSelectedCategory(null);
@@ -370,6 +375,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const handleBackToDeck = () => {
     setSelectedCategory(null);
     setActiveScrollIdx(0);
+    setDrawerFullscreen(false);
   };
 
   /* Mark a category as read imperatively */
@@ -546,20 +552,9 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
   /* ─── No JS stars needed — ambient glow is done in CSS ─── */
   const handleDebugAdvanceDay = () => {
-    const nextOffset = debugDayOffset + 1;
-    setDebugDayOffset(nextOffset);
     setShowCompletion(false); // Hide completion/timer UI
-    
-    // Simulate streak increment during debugging
     onStreakUpdated?.(streak + 1);
-
-    // We update the active node's id and reset its categories to unread
-    setNodes([{
-      id: `node-${nextOffset}`,
-      title: `${topic} (Day ${nextOffset + 1})`,
-      papers: assignPapersToCategories(papers),
-      readCategories: []
-    }]);
+    onAdvanceDay();
   };
 
   return (
@@ -763,7 +758,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           onClick={handleCloseDrawer}
         >
           <div
-            className={`digest-drawer ${drawerVisible ? 'open' : ''} ${selectedCategory ? 'paper-mode' : ''}`}
+            className={`digest-drawer ${drawerVisible ? 'open' : ''} ${selectedCategory ? 'paper-mode' : ''} ${drawerFullscreen ? 'fullscreen' : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
             {selectedCategory ? (
@@ -814,7 +809,18 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                 </div>
 
                 {/* Snap-scroll container: each child = one full page */}
-                <div className="paper-stack-scroll" ref={drawerRef}>
+                <div
+                  className="paper-stack-scroll"
+                  ref={drawerRef}
+                  onScroll={(e) => {
+                    const scrollTop = e.currentTarget.scrollTop;
+                    if (scrollTop > 10) {
+                      setDrawerFullscreen(true);
+                    } else {
+                      setDrawerFullscreen(false);
+                    }
+                  }}
+                >
                   {CATEGORIES.map((cat, idx) => {
                     const paper = openNode.papers[cat.key];
                     if (!paper) return null;
@@ -824,7 +830,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                       /* data-paper-key = snap target + inner-scroll root */
                       <div key={cat.key} className="paper-stack-item" data-paper-key={cat.key}>
                         <div className="paper-sticky-boundary">
-                          {/* Sticky Header Group: Category Banner + Paper Badge + Title + Authors */}
+                          {/* Sticky Header Group: Category Banner only */}
                           <div className="paper-stack-header-group">
                             <div
                               className="paper-stack-cat-header"
@@ -839,7 +845,27 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                                 <CheckCircle size={16} className="paper-stack-cat-check" />
                               )}
                             </div>
+                          </div>
 
+                          {/* Paper content */}
+                          <PaperCard
+                            paper={paper}
+                            s2ApiKey={s2ApiKey}
+                            rating={ratings[paper.title] || null}
+                            onLike={() => handleLike(paper.title)}
+                            onDislike={() => handleDislike(paper.title)}
+                            onOpenChat={(p, meta) => handleOpenChat(p, meta)}
+                            index={idx}
+                            total={total}
+                            hideHeader={true}
+                            onContentScroll={(scrollTop) => {
+                              if (scrollTop > 10) {
+                                setDrawerFullscreen(true);
+                              } else {
+                                setDrawerFullscreen(false);
+                              }
+                            }}
+                          >
                             <div className="paper-stack-title-header">
                               <div className="card-badge-header">
                                 {paper.explanation?.paperType ? (
@@ -862,20 +888,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                                 <span className="meta-year">{paper.year}</span>
                               </div>
                             </div>
-                          </div>
-
-                          {/* Paper content */}
-                          <PaperCard
-                            paper={paper}
-                            s2ApiKey={s2ApiKey}
-                            rating={ratings[paper.title] || null}
-                            onLike={() => handleLike(paper.title)}
-                            onDislike={() => handleDislike(paper.title)}
-                            onOpenChat={(p, meta) => handleOpenChat(p, meta)}
-                            index={idx}
-                            total={total}
-                            hideHeader={true}
-                          />
+                          </PaperCard>
                         </div>
 
                         {isLast ? (
@@ -1257,10 +1270,10 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
           border-top: 1px solid var(--border-glass);
           border-radius: 24px 24px 0 0;
-          max-height: 90vh;
+          max-height: 100vh;
           overflow-y: auto;
           transform: translateY(100%);
-          transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+          transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), height 0.35s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.35s cubic-bezier(0.32, 0.72, 0, 1);
           padding-bottom: env(safe-area-inset-bottom, 24px);
           box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
         }
@@ -1271,6 +1284,10 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           height: 90vh;
           overflow-y: hidden;
           padding-bottom: 0;
+        }
+        .digest-drawer.paper-mode.fullscreen {
+          height: 100vh;
+          border-radius: 0;
         }
 
         /* Handle */
@@ -1519,11 +1536,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
         /* Sticky header block for category, title, meta */
         .paper-stack-header-group {
-          position: sticky;
-          top: 0;
-          z-index: 15;
-          background: var(--bg-darker);
-          border-bottom: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
         }
@@ -1584,14 +1596,16 @@ export const DigestMap: React.FC<DigestMapProps> = ({
         }
 
         /* Category header (double as IO target for dot tracking) */
-        .paper-stack-cat-header {
+         .paper-stack-cat-header {
+          position: sticky;
+          top: 0;
+          z-index: 15;
           display: flex;
           align-items: center;
           gap: 12px;
           padding: 16px 20px 12px;
-          background: linear-gradient(135deg, var(--cat-color, rgba(27, 73, 49, 0.05)), transparent);
-          border-bottom: 1px solid rgba(9, 9, 11, 0.06);
-          position: relative;
+          background: linear-gradient(135deg, var(--cat-color, rgba(27, 73, 49, 0.05)), transparent), var(--bg-darker);
+          border-bottom: 1px solid var(--border-glass);
         }
         .paper-stack-cat-icon {
           font-size: 22px;

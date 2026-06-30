@@ -73,14 +73,17 @@ function initializeSchema() {
       )
     `);
 
-    // 5. Global digests cache table
+    // 5. User-specific digests cache table
+    db.run("DROP TABLE IF EXISTS cached_digests");
     db.run(`
       CREATE TABLE IF NOT EXISTS cached_digests (
+        user_id INTEGER NOT NULL,
         topic TEXT NOT NULL,
         digest_date TEXT NOT NULL,
         papers_json TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (topic, digest_date)
+        PRIMARY KEY (user_id, topic, digest_date),
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
 
@@ -96,17 +99,19 @@ function initializeSchema() {
     `);
 
     // 7. Background digest generation queue table
+    db.run("DROP TABLE IF EXISTS generation_queue");
     db.run(`
       CREATE TABLE IF NOT EXISTS generation_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         topic TEXT NOT NULL,
+        digest_date TEXT NOT NULL,
         status TEXT DEFAULT 'pending',
         priority INTEGER DEFAULT 0,
         progress INTEGER DEFAULT 0,
         status_text TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, topic, status)
+        UNIQUE(user_id, topic, digest_date, status)
       )
     `);
 

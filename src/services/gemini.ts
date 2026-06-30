@@ -73,10 +73,11 @@ export async function generateFoundationalPapers(
   interest: string,
   _apiKey: string,
   onProgress?: (progress: number, statusText: string) => void,
-  bypassCache = false
+  bypassCache = false,
+  debugDayOffset = 0
 ): Promise<FoundationalPaper[]> {
   const token = localStorage.getItem('papertok_token');
-  const url = `/api/digest/generate?topic=${encodeURIComponent(interest)}${bypassCache ? '&bypassCache=true' : ''}`;
+  const url = `/api/digest/generate?topic=${encodeURIComponent(interest)}${bypassCache ? '&bypassCache=true' : ''}&debugDayOffset=${debugDayOffset}`;
 
   const response = await fetch(url, {
     headers: {

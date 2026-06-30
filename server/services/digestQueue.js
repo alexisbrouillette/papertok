@@ -10,15 +10,24 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * Enqueue a digest pre-generation task.
  */
-export async function enqueueDigestGeneration(userId, topic, priority = 0) {
+export async function enqueueDigestGeneration(userId, topic, priority = 0, digestDate = null) {
   try {
     const cleanTopic = topic.trim();
+    
+    // Resolve target digest date (default tomorrow if not provided)
+    let targetDate = digestDate;
+    if (!targetDate) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      targetDate = tomorrow.toISOString().split('T')[0];
+    }
+
     // Insert or update priority if already pending
     await dbRun(`
-      INSERT INTO generation_queue (user_id, topic, status, priority, progress, status_text)
-      VALUES (?, ?, 'pending', ?, 0, 'Queued')
-      ON CONFLICT(user_id, topic, status) DO UPDATE SET priority = max(priority, excluded.priority)
-    `, [userId, cleanTopic, priority]);
+      INSERT INTO generation_queue (user_id, topic, digest_date, status, priority, progress, status_text)
+      VALUES (?, ?, ?, 'pending', ?, 0, 'Queued')
+      ON CONFLICT(user_id, topic, digest_date, status) DO UPDATE SET priority = max(priority, excluded.priority)
+    `, [userId, cleanTopic, targetDate, priority]);
 
     console.log(`[DigestQueue] Enqueued generation task for user ${userId}, topic "${cleanTopic}" (priority: ${priority})`);
     
@@ -69,10 +78,7 @@ async function processQueue() {
       throw new Error('No Gemini API key available for user or system.');
     }
 
-    // Calculate tomorrow's date for pre-generation
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const digestDate = tomorrow.toISOString().split('T')[0];
+    const digestDate = task.digest_date;
 
     // 4. Generate the digest (this caches it automatically inside sqlite database)
     await generateAndCacheDigest(task.topic, digestDate, geminiApiKey, async (progress, statusText) => {
@@ -85,7 +91,7 @@ async function processQueue() {
       } catch (err) {
         console.error('[DigestQueue] Failed to update task progress:', err);
       }
-    });
+    }, task.user_id);
 
     // 5. Mark as completed
     await dbRun('UPDATE generation_queue SET status = \'completed\' WHERE id = ?', [task.id]);

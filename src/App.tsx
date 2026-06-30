@@ -23,6 +23,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [loadingStatus, setLoadingStatus] = useState<string>('');
+  const [debugDayOffset, setDebugDayOffset] = useState<number>(0);
 
   const handleSignOut = () => {
     localStorage.removeItem('papertok_token');
@@ -159,7 +160,7 @@ function App() {
     setCurrentScreen('search');
   };
 
-  const handleSearch = async (query: string, bypassCache = false) => {
+  const handleSearch = async (query: string, bypassCache = false, dayOffset = 0) => {
     // 1. Update history
     const historyList = Array.isArray(searchHistory) ? searchHistory : [];
     const filteredHistory = historyList.filter((item) => item && typeof item === 'string' && item.toLowerCase() !== query.toLowerCase());
@@ -172,12 +173,13 @@ function App() {
     setPapers([]);
     setError(null);
     setCurrentScreen('map');
+    setDebugDayOffset(dayOffset);
 
-    // Check if we have cached results for this query (case-insensitive)
+    // Check if we have cached results for this query (case-insensitive) - only on day 0
     const cachedTopic = localStorage.getItem('papertok_cached_topic');
     const cachedPapersStr = localStorage.getItem('papertok_cached_papers');
 
-    if (!bypassCache && cachedTopic && cachedPapersStr && cachedTopic.toLowerCase() === query.toLowerCase()) {
+    if (!bypassCache && dayOffset === 0 && cachedTopic && cachedPapersStr && cachedTopic.toLowerCase() === query.toLowerCase()) {
       try {
         const cachedPapers = JSON.parse(cachedPapersStr);
         setPapers(cachedPapers);
@@ -198,11 +200,14 @@ function App() {
           setLoadingProgress(progress);
           setLoadingStatus(statusText);
         },
-        bypassCache
+        bypassCache,
+        dayOffset
       );
-      // Save cache
-      localStorage.setItem('papertok_cached_topic', query);
-      localStorage.setItem('papertok_cached_papers', JSON.stringify(generatedPapers));
+      // Save cache - only on day 0
+      if (dayOffset === 0) {
+        localStorage.setItem('papertok_cached_topic', query);
+        localStorage.setItem('papertok_cached_papers', JSON.stringify(generatedPapers));
+      }
       setPapers(generatedPapers);
     } catch (err) {
       console.error(err);
@@ -307,6 +312,13 @@ function App() {
               onOpenSettings={() => setShowSettings(true)}
               onSignOut={handleSignOut}
               onStreakUpdated={setStreak}
+              debugDayOffset={debugDayOffset}
+              onAdvanceDay={async () => {
+                const nextOffset = debugDayOffset + 1;
+                setDebugDayOffset(nextOffset);
+                localStorage.removeItem('papertok_cached_papers'); // clear local client cache
+                await handleSearch(activeTopic, true, nextOffset); // request fresh papers bypassCache=true
+              }}
             />
           )}
         </>

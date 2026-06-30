@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { dbGet, dbRun } from '../db.js';
+import { dbGet, dbRun, dbAll } from '../db.js';
 
 // Helper function to retry a function with exponential backoff.
 async function retryWithDelay(fn, retries = 5, delay = 5000, factor = 2) {
@@ -309,12 +309,33 @@ Do not wrap response in markdown blocks - return the raw JSON object.`;
 /**
  * High-level service function to perform the full digest generation.
  */
-export async function generateAndCacheDigest(topic, digestDate, geminiApiKey, onProgress = () => {}) {
+export async function generateAndCacheDigest(topic, digestDate, geminiApiKey, onProgress = () => {}, userId = null) {
   const cleanTopic = topic.trim();
   const genAI = new GoogleGenerativeAI(geminiApiKey);
 
+  // Fetch papers the user has already read
+  let excludedPapersList = [];
+  if (userId) {
+    try {
+      const rows = await dbAll('SELECT DISTINCT paper_title FROM reading_progress WHERE user_id = ?', [userId]);
+      excludedPapersList = rows.map(r => r.paper_title);
+    } catch (dbErr) {
+      console.error('[DigestService] Failed to fetch user read history for exclusion:', dbErr);
+    }
+  }
+
+  let exclusionPromptPart = '';
+  if (excludedPapersList.length > 0) {
+    exclusionPromptPart = `
+CRITICAL: DO NOT SELECT any of the following papers under any circumstances because the user has already read/seen them in their history:
+${excludedPapersList.map(title => `- "${title}"`).join('\n')}
+
+Ensure that the 5 landmark papers you select are completely different from this list, even if they are closely related or from the same authors. Use other landmark publications.`;
+  }
+
   const prompt = `You are a world-class academic research advisor and science communicator.
 The user's research interest is: "${cleanTopic}".
+${exclusionPromptPart}
 
 Identify exactly 5 crucial, landmark papers in this specific field, selecting exactly one paper to fit each of the following 5 categories:
 1. 'foundation': The bedrock paper that defined this concept or established the field.
@@ -425,9 +446,10 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
 
   // Save to database cache
   try {
+    const cacheUser = userId || 1; // Default to user 1 if not provided (e.g., from cron CLI script)
     await dbRun(
-      'INSERT OR REPLACE INTO cached_digests (topic, digest_date, papers_json, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)',
-      [cleanTopic, digestDate, JSON.stringify(enrichedPapers)]
+      'INSERT OR REPLACE INTO cached_digests (user_id, topic, digest_date, papers_json, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)',
+      [cacheUser, cleanTopic, digestDate, JSON.stringify(enrichedPapers)]
     );
   } catch (dbErr) {
     console.error('Failed to cache generated digest in database:', dbErr);

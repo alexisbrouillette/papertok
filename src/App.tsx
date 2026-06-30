@@ -173,13 +173,31 @@ function App() {
     setPapers([]);
     setError(null);
     setCurrentScreen('map');
-    setDebugDayOffset(dayOffset);
+    // Resolve the progression offset based on completed digests in history
+    let targetOffset = dayOffset;
+    if (dayOffset === 0) {
+      try {
+        const token = localStorage.getItem('papertok_token');
+        const res = await fetch('/api/progress', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const readList = data.readPapers || [];
+          const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
+          targetOffset = Math.floor(papersForThisTopic.length / 5);
+        }
+      } catch (err) {
+        console.error('Failed to pre-fetch progress for day offset calculation:', err);
+      }
+    }
+    setDebugDayOffset(targetOffset);
 
     // Check if we have cached results for this query (case-insensitive) - only on day 0
     const cachedTopic = localStorage.getItem('papertok_cached_topic');
     const cachedPapersStr = localStorage.getItem('papertok_cached_papers');
 
-    if (!bypassCache && dayOffset === 0 && cachedTopic && cachedPapersStr && cachedTopic.toLowerCase() === query.toLowerCase()) {
+    if (!bypassCache && targetOffset === 0 && cachedTopic && cachedPapersStr && cachedTopic.toLowerCase() === query.toLowerCase()) {
       try {
         const cachedPapers = JSON.parse(cachedPapersStr);
         setPapers(cachedPapers);
@@ -201,10 +219,10 @@ function App() {
           setLoadingStatus(statusText);
         },
         bypassCache,
-        dayOffset
+        targetOffset
       );
       // Save cache - only on day 0
-      if (dayOffset === 0) {
+      if (targetOffset === 0) {
         localStorage.setItem('papertok_cached_topic', query);
         localStorage.setItem('papertok_cached_papers', JSON.stringify(generatedPapers));
       }

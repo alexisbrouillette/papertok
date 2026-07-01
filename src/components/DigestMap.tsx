@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, X, Sparkles, BookOpen, Globe, Rocket, Shuffle, CheckCircle, RefreshCw, Flame, Settings, LogOut } from 'lucide-react';
 import type { FoundationalPaper, ChatMessage } from '../services/gemini';
-import { askPaperQuestion } from '../services/gemini';
+import { askPaperQuestion, generateFoundationalPapers } from '../services/gemini';
 import { PaperCard } from './PaperCard';
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -201,7 +201,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   onAdvanceDay
 }) => {
   const [nodes, setNodes] = useState<DigestNode[]>([]);
-  const isCompleted = nodes.length > 0 && nodes.every(node => node.readCategories.length === CATEGORIES.length);
   const [openNodeId, setOpenNodeId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -210,7 +209,12 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [showCompletion, setShowCompletion] = useState(false);
   const [activeScrollIdx, setActiveScrollIdx] = useState(0); // index of paper currently in view
   const drawerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(520);
   const completionFiredRef = useRef(false); // prevent double-fire
+  const [loadingPastNode, setLoadingPastNode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   // Local progress ratings and AI follow-up chat state
   const [ratings, setRatings] = useState<Record<string, 'like' | 'dislike' | null>>({});
@@ -218,15 +222,85 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [chatMetadata, setChatMetadata] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState('');
 
-  useEffect(() => {
-    if (!isCompleted && !showCompletion) return;
+  /* ─── SVG path geometry ─────────────────────────────── */
+  const svgWidth = 320;
+  
+  const windowStart = 0;
+  const windowEnd = Math.max(8, debugDayOffset + 5);
+  const totalNodesToGenerate = windowEnd + 1;
 
+  const nodePositions = Array.from({ length: totalNodesToGenerate }).map((_, index) => {
+    const x = 160 + (index === 0 ? 0 : (index % 2 === 1 ? 75 : -75));
+    const y = 440 - index * 120;
+    return { x, y };
+  });
+
+  const minY = nodePositions[windowEnd].y - 80;
+  const maxY = nodePositions[windowStart].y + 80;
+  const svgHeight = maxY - minY;
+
+  const generatePath = (positions: typeof nodePositions) => {
+    if (positions.length < 2) return '';
+    
+    // If showing the first node, start path at the bottom edge (maxY) and draw straight up to it
+    const startY = windowStart === 0 ? maxY : positions[0].y;
+    let d = `M ${positions[0].x} ${startY}`;
+    
+    if (windowStart === 0) {
+      d += ` L ${positions[0].x} ${positions[0].y}`;
+    }
+    
+    for (let i = 0; i < positions.length - 1; i++) {
+      const p0 = positions[i];
+      const p1 = positions[i + 1];
+      const cpX0 = p0.x + (i % 2 === 0 ? 85 : -85);
+      const cpY0 = p0.y - 60;
+      const cpX1 = p1.x + (i % 2 === 0 ? 85 : -85);
+      const cpY1 = p1.y + 60;
+      d += ` C ${cpX0} ${cpY0}, ${cpX1} ${cpY1}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  };
+  const pathD = generatePath(nodePositions);
+
+  const activeY = nodePositions[debugDayOffset]?.y ?? 440;
+
+  useEffect(() => {
+    if (!scrollAreaRef.current) return;
+    const updateHeight = () => {
+      setContainerHeight(scrollAreaRef.current?.clientHeight || 520);
+    };
+    updateHeight();
+    
+    const observer = new ResizeObserver(() => updateHeight());
+    observer.observe(scrollAreaRef.current);
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!scrollAreaRef.current || papers.length === 0) return;
+    const topPx = activeY - minY;
+    const targetScrollTop = topPx - (containerHeight * 2 / 3);
+    const isFirstScroll = scrollAreaRef.current.scrollTop === 0;
+    scrollAreaRef.current.scrollTo({
+      top: Math.max(0, targetScrollTop),
+      behavior: isFirstScroll ? 'auto' : 'smooth'
+    });
+  }, [debugDayOffset, containerHeight, activeY, minY, papers.length]);
+
+  useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
       const target = new Date(now);
-      // Target is 7:00 AM of the next day (tomorrow)
-      target.setDate(target.getDate() + 1 + debugDayOffset);
       target.setHours(7, 0, 0, 0);
+      
+      // If past 7:00 AM today, next digest unlocks 7:00 AM tomorrow
+      if (now.getHours() >= 7) {
+        target.setDate(target.getDate() + 1);
+      }
       
       const diffMs = target.getTime() - now.getTime();
       
@@ -242,7 +316,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     calculateTimeLeft();
     const interval = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(interval);
-  }, [isCompleted, showCompletion, debugDayOffset]);
+  }, []);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -329,52 +403,101 @@ export const DigestMap: React.FC<DigestMapProps> = ({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNodes(initialNodes);
 
-      // Fetch progress from backend
-      const fetchProgress = async () => {
+      // Fetch progress and history from backend
+      const fetchHistoryAndProgress = async () => {
         try {
           const token = localStorage.getItem('papertok_token');
-          const response = await fetch('/api/progress', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+          
+          // 1. Fetch History to populate past nodes' papers
+          const historyRes = await fetch(`/api/digest/history?topic=${encodeURIComponent(topic)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
-          if (response.ok) {
-            const data = await response.json();
-            const readList = data.readPapers || [];
-            
-            setNodes((prev) => 
-              prev.map((node) => {
-                // If it is a past node, it is complete by definition
-                if (node.id !== `node-${debugDayOffset}`) {
-                  return node;
-                }
-                const readCategories = (Object.keys(node.papers) as CategoryKey[]).filter((catKey) => {
-                  const paper = node.papers[catKey];
-                  return paper && readList.some((r: { topic: string; paper_title: string; category_key: string }) => 
-                    r.topic.toLowerCase() === topic.toLowerCase() && 
-                    r.paper_title.toLowerCase() === paper.title.toLowerCase() && 
-                    r.category_key === catKey
-                  );
-                });
-                return { ...node, readCategories };
-              })
-            );
+          let historyList: { date: string; papers: FoundationalPaper[] }[] = [];
+          if (historyRes.ok) {
+            const historyData = await historyRes.json();
+            historyList = historyData.history || [];
           }
+
+          // 2. Fetch reading progress list
+          const progressRes = await fetch('/api/progress', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          let readList = [];
+          if (progressRes.ok) {
+            const progressData = await progressRes.json();
+            readList = progressData.readPapers || [];
+          }
+
+          // 3. Map history list and read progress to nodes
+          setNodes((prev) => 
+            prev.map((node) => {
+              const nodeIdx = parseInt(node.id.replace('node-', ''), 10);
+              
+              // Populate papers if it's a past node and we have cached papers in history (matching by sequence index)
+              let nodePapers = node.papers;
+              if (nodeIdx < debugDayOffset && historyList[nodeIdx]) {
+                nodePapers = assignPapersToCategories(historyList[nodeIdx].papers);
+              }
+
+              // Calculate read categories
+              if (nodeIdx < debugDayOffset) {
+                // Past nodes are complete by definition
+                return { ...node, papers: nodePapers };
+              }
+
+              const readCategories = (Object.keys(nodePapers) as CategoryKey[]).filter((catKey) => {
+                const paper = nodePapers[catKey];
+                return paper && readList.some((r: { topic: string; paper_title: string; category_key: string }) => 
+                  r.topic.toLowerCase() === topic.toLowerCase() && 
+                  r.paper_title.toLowerCase() === paper.title.toLowerCase() && 
+                  r.category_key === catKey
+                );
+              });
+
+              return { ...node, papers: nodePapers, readCategories };
+            })
+          );
         } catch (err) {
-          console.error('Failed to fetch reading progress:', err);
+          console.error('Failed to fetch history and progress:', err);
         }
       };
 
-      fetchProgress();
+      fetchHistoryAndProgress();
     }
   }, [papers, topic, debugDayOffset]);
 
   /* Open node drawer */
-  const handleNodeClick = (nodeId: string) => {
+  const handleNodeClick = async (nodeId: string) => {
     setOpenNodeId(nodeId);
     setSelectedCategory(null);
     completionFiredRef.current = false;
     requestAnimationFrame(() => setDrawerVisible(true));
+
+    const nodeIdx = parseInt(nodeId.replace('node-', ''), 10);
+    const targetNode = nodes.find(n => n.id === nodeId);
+    
+    // If it is a past node (nodeIdx < debugDayOffset) and does not have papers, load them
+    if (nodeIdx < debugDayOffset && targetNode && Object.keys(targetNode.papers).length === 0) {
+      setLoadingPastNode(true);
+      try {
+        const generatedPapers = await generateFoundationalPapers(
+          topic,
+          geminiApiKey,
+          undefined, // no progress callback needed since cache is instant
+          false,
+          nodeIdx
+        );
+        
+        setNodes(prev => prev.map(n => n.id === nodeId ? {
+          ...n,
+          papers: assignPapersToCategories(generatedPapers)
+        } : n));
+      } catch (err) {
+        console.error('Failed to load past node papers:', err);
+      } finally {
+        setLoadingPastNode(false);
+      }
+    }
   };
 
   /* Close drawer */
@@ -527,44 +650,44 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
   const openNode = nodes.find((n) => n.id === openNodeId);
 
-  /* ─── SVG path geometry ─────────────────────────────── */
-  const svgWidth = 320;
-  
-  // Define sliding viewport window parameters around the active day
-  const windowStart = Math.max(0, debugDayOffset - 2);
-  const windowEnd = debugDayOffset + 5;
-  const totalNodesToGenerate = windowEnd + 1;
+  /* Search results across all nodes */
+  const searchResults = (() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase().trim();
+    const results: { node: DigestNode; paper: FoundationalPaper; category: CategoryKey }[] = [];
+    
+    nodes.forEach((node) => {
+      (Object.keys(node.papers) as CategoryKey[]).forEach((catKey) => {
+        const paper = node.papers[catKey];
+        if (!paper) return;
+        
+        const matchTitle = paper.title?.toLowerCase().includes(query);
+        const matchNickname = paper.nickname?.toLowerCase().includes(query);
+        const matchAuthor = paper.authors?.toLowerCase().includes(query);
+        const matchCoreIdea = paper.coreIdea?.toLowerCase().includes(query);
+        const matchPurpose = paper.purpose?.toLowerCase().includes(query);
+        
+        if (matchTitle || matchNickname || matchAuthor || matchCoreIdea || matchPurpose) {
+          results.push({ node, paper, category: catKey });
+        }
+      });
+    });
+    return results;
+  })();
 
-  const nodePositions = Array.from({ length: totalNodesToGenerate }).map((_, index) => {
-    const x = 160 + (index === 0 ? 0 : (index % 2 === 1 ? 75 : -75));
-    const y = 440 - index * 120;
-    return { x, y };
-  });
-
-  const minY = nodePositions[windowEnd].y - 80;
-  const maxY = nodePositions[windowStart].y + 80;
-  const svgHeight = maxY - minY;
-
-  const generatePath = (positions: typeof nodePositions) => {
-    if (positions.length < 2) return '';
-    let d = `M ${positions[0].x} ${positions[0].y}`;
-    for (let i = 0; i < positions.length - 1; i++) {
-      const p0 = positions[i];
-      const p1 = positions[i + 1];
-      const cpX0 = p0.x + (i % 2 === 0 ? 85 : -85);
-      const cpY0 = p0.y - 60;
-      const cpX1 = p1.x + (i % 2 === 0 ? 85 : -85);
-      const cpY1 = p1.y + 60;
-      d += ` C ${cpX0} ${cpY0}, ${cpX1} ${cpY1}, ${p1.x} ${p1.y}`;
-    }
-    return d;
+  const handleSearchResultClick = (nodeId: string, category: CategoryKey) => {
+    setOpenNodeId(nodeId);
+    setSelectedCategory(category);
+    const categoryIdx = (['foundation', 'surprise', 'crossfield', 'novel', 'wildcard'] as CategoryKey[]).indexOf(category);
+    setActiveScrollIdx(categoryIdx);
+    setSearchQuery(''); // clear query
+    requestAnimationFrame(() => {
+      setDrawerVisible(true);
+      setDrawerFullscreen(true);
+    });
   };
-  const pathD = generatePath(nodePositions);
 
-  /* ─── Map Scrolling Animation Translate Y ──────────────── */
-  const activeY = nodePositions[debugDayOffset]?.y ?? 440;
-  // Translate in absolute pixels: target visual position is 380px from top of viewport
-  const mapTranslateY = 380 - (activeY - minY);
+
 
   /* ─── No JS stars needed — ambient glow is done in CSS ─── */
   const handleDebugAdvanceDay = () => {
@@ -585,6 +708,31 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           <span className="back-hint-text" style={{ fontSize: '0.62rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-primary)' }}>Change Focus</span>
         </div>
 
+        {/* Centered Search Bar */}
+        {papers.length > 0 && (
+          <div className="map-search-wrapper" style={{ flex: 1, display: 'flex', justifyContent: 'center', margin: '0 16px' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
+              <input
+                type="text"
+                placeholder="Search history, concepts, authors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '6px 12px 6px 32px',
+                  borderRadius: '16px',
+                  fontSize: '0.78rem',
+                  border: '1px solid var(--border-glass)',
+                  color: 'var(--text-primary)',
+                  background: 'rgba(9, 9, 11, 0.25)',
+                  outline: 'none',
+                }}
+              />
+              <Sparkles size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-primary)' }} />
+            </div>
+          </div>
+        )}
+
         {/* Global actions: Progress, Settings, Sign Out */}
         <div className="header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto', flexShrink: 0 }}>
           {papers.length > 0 && (
@@ -601,6 +749,100 @@ export const DigestMap: React.FC<DigestMapProps> = ({
         </div>
       </header>
 
+      {streak > 0 && papers.length > 0 && (
+        <div className="map-streak-badge" title="Daily Reading Streak">
+          <Flame className="map-streak-flame" />
+          <div className="map-streak-text">
+            <span className="map-streak-val">{streak} Day{streak > 1 ? 's' : ''}</span>
+            <span className="map-streak-label">Streak</span>
+          </div>
+        </div>
+      )}
+
+      {searchQuery.trim() !== '' && (
+        <div 
+          className="map-search-results-overlay glass-panel" 
+          style={{
+            position: 'absolute',
+            top: '72px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 'calc(100% - 32px)',
+            maxWidth: '480px',
+            maxHeight: '400px',
+            overflowY: 'auto',
+            zIndex: 100,
+            borderRadius: '16px',
+            padding: '12px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            border: '1px solid var(--border-glass)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+              Search Results ({searchResults.length})
+            </span>
+            <button 
+              onClick={() => setSearchQuery('')}
+              style={{ fontSize: '0.7rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+            >
+              Clear
+            </button>
+          </div>
+          
+          {searchResults.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+              No matching papers found. Try searching for topics, authors, or concepts.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {searchResults.map(({ node, paper, category }) => {
+                const nodeIdx = parseInt(node.id.replace('node-', ''), 10);
+                return (
+                  <button
+                    key={`${node.id}-${paper.title}`}
+                    className="search-result-row"
+                    onClick={() => handleSearchResultClick(node.id, category)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'start',
+                      gap: '4px',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.04)',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'var(--color-primary-glow)', color: 'var(--color-primary)', textTransform: 'uppercase' }}>
+                        Day {nodeIdx + 1}
+                      </span>
+                      <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                        {CATEGORIES.find(c => c.key === category)?.label}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
+                      {paper.nickname || paper.title}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', gap: '4px' }}>
+                      <span>By {paper.authors}</span>
+                      <span>•</span>
+                      <span>{paper.year}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {papers.length === 0 ? (
         <div className="digest-map-loading">
           <div className="digest-loading-ring">
@@ -613,21 +855,11 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           <p className="digest-loading-pct">{loadingProgress}%</p>
         </div>
       ) : (
-        <div className="digest-map-scroll-area">
-          {streak > 0 && (
-            <div className="map-streak-badge" title="Daily Reading Streak">
-              <Flame className="map-streak-flame" />
-              <div className="map-streak-text">
-                <span className="map-streak-val">{streak} Day{streak > 1 ? 's' : ''}</span>
-                <span className="map-streak-label">Streak</span>
-              </div>
-            </div>
-          )}
+        <div className="digest-map-scroll-area" ref={scrollAreaRef}>
+
           <div 
             className="map-inner-container"
           style={{
-            transform: `translateY(${mapTranslateY}px)`,
-            transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
             position: 'relative',
             width: `${svgWidth}px`,
             height: `${svgHeight}px`,
@@ -695,7 +927,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           {/* Digest nodes overlaid on the SVG (absolute positioned via pixels) */}
           <div className="digest-map-nodes-overlay" style={{ position: 'absolute', top: 0, left: 0, width: `${svgWidth}px`, height: `${svgHeight}px`, transform: 'none', pointerEvents: 'none' }}>
             {nodes.map((node, i) => {
-              const nodeIndex = i + debugDayOffset;
+              const nodeIndex = i;
               if (nodeIndex >= nodePositions.length) return null;
 
               const pos = nodePositions[nodeIndex];
@@ -711,8 +943,61 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
               const nextNodePos = nodePositions[nodeIndex + 1];
 
+              // Extract populated papers from the node to preview on the opposite side
+              const paperNames = (Object.keys(node.papers) as CategoryKey[])
+                .map((k) => node.papers[k])
+                .filter((p): p is FoundationalPaper => !!p);
+
+              // Alternate left/right based on node's center alignment (pos.x = 160)
+              const isNodeOnRight = pos.x > 160;
+              const cardStyle: React.CSSProperties = {
+                position: 'absolute',
+                top: `${pos.y - minY}px`,
+                left: isNodeOnRight ? '16px' : 'auto',
+                right: !isNodeOnRight ? '16px' : 'auto',
+                transform: 'translateY(-50%)',
+                width: '110px',
+                padding: '8px',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.04)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                pointerEvents: 'all',
+                textAlign: isNodeOnRight ? 'left' : 'right',
+                zIndex: 5,
+              };
+
               return (
                 <React.Fragment key={node.id}>
+                  {paperNames.length > 0 && (
+                    <div style={cardStyle} className="glass-panel map-node-papers-card">
+                      <div style={{ fontSize: '0.52rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-primary)', marginBottom: '4px' }}>
+                        Day {nodeIndex + 1} focus
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {paperNames.map((p) => (
+                          <div 
+                            key={p.title} 
+                            style={{ 
+                              fontSize: '0.55rem', 
+                              fontWeight: 500, 
+                              color: 'var(--text-secondary)',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              cursor: 'pointer',
+                              transition: 'color 0.2s'
+                            }}
+                            onClick={() => handleSearchResultClick(node.id, p.category as CategoryKey)}
+                            title={p.title}
+                          >
+                            {p.nickname || p.title}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     className={`digest-node-btn ${isActive ? 'active' : ''} ${isNodeComplete ? 'complete' : ''} ${particleNodeId === node.id ? 'particle-burst' : ''}`}
                     style={{
@@ -737,7 +1022,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                     {isActive && <div className="digest-node-pulse" />}
                   </button>
 
-                  {isNodeComplete && nextNodePos && (
+                  {isNodeComplete && nextNodePos && nodeIndex === nodes.length - 1 && (
                     <div
                       className="digest-completed-sleeping-card glass-panel anim-slide-up"
                       style={{
@@ -777,7 +1062,12 @@ export const DigestMap: React.FC<DigestMapProps> = ({
             className={`digest-drawer ${drawerVisible ? 'open' : ''} ${selectedCategory ? 'paper-mode' : ''} ${drawerFullscreen ? 'fullscreen' : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {selectedCategory ? (
+            {loadingPastNode ? (
+              <div className="past-node-loading-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: '16px' }}>
+                <RefreshCw size={28} className="digest-loading-spinner" />
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500 }}>Retrieving archived digest...</p>
+              </div>
+            ) : selectedCategory ? (
               /* ── Snap-scroll paper view ── */
               <div className="digest-paper-detail">
                 {/* Nav bar — sits above the snap container, always visible */}
@@ -1121,7 +1411,8 @@ export const DigestMap: React.FC<DigestMapProps> = ({
       <style>{`
         /* ── Root Layout ───────────────────────────────────── */
         .digest-map-root {
-          min-height: 100vh;
+          height: 100vh;
+          max-height: 100vh;
           background:
             radial-gradient(ellipse 70% 50% at 20% 80%, rgba(27, 73, 49, 0.04) 0%, transparent 70%),
             radial-gradient(ellipse 50% 40% at 80% 20%, rgba(72, 46, 29, 0.03) 0%, transparent 60%),
@@ -1185,16 +1476,19 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           font-family: var(--font-mono);
         }
 
-        /* ── Map Scroll Area ─────────────────────────────────── */
         .digest-map-scroll-area {
           flex: 1;
-          overflow: hidden;
+          min-height: 0;
+          overflow-y: auto;
+          scrollbar-width: none; /* Firefox */
           display: flex;
           flex-direction: column;
           align-items: center;
           padding: 32px 20px 80px;
           position: relative;
-          height: 520px;
+        }
+        .digest-map-scroll-area::-webkit-scrollbar {
+          display: none; /* Safari and Chrome */
         }
 
         /* ── Node Overlay ────────────────────────────────────── */
@@ -1204,7 +1498,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           left: 50%;
           transform: translateX(-50%);
           width: 100%;
-          height: 520px;
+          height: 100%;
           pointer-events: none;
         }
 
@@ -2437,7 +2731,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
         /* ── Map Streak Badge ── */
         .map-streak-badge {
           position: absolute;
-          top: 16px;
+          top: 90px;
           right: 16px;
           z-index: 10;
           display: flex;

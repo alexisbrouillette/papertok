@@ -6,13 +6,55 @@ async function retryWithDelay(fn, retries = 5, delay = 5000, factor = 2) {
   try {
     return await fn();
   } catch (err) {
+    const errMsg = err.message || '';
+    const isRateLimit = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('Quota') || (err.status === 429);
+    const isDailyQuota = errMsg.includes('RequestsPerDay') || errMsg.includes('free_tier_requests') || err.isDailyQuota;
+
+    // If it is a daily requests quota limit (RPD), throw immediately and skip retries
+    if (isDailyQuota) {
+      err.isDailyQuota = true;
+      throw err;
+    }
+    
     if (retries > 0) {
-      console.warn(`[Retry] Operation failed. Retrying in ${delay}ms... (${retries} retries left). Error:`, err.message);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return retryWithDelay(fn, retries - 1, delay * factor);
+      // If it is a 429 rate limit (e.g. per minute), wait at least 20 seconds to allow the quota bucket to reset
+      const actualDelay = isRateLimit ? Math.max(20000, delay) : delay;
+      console.warn(`[Retry] Operation failed. Retrying in ${actualDelay}ms... (${retries} retries left). Error:`, errMsg);
+      await new Promise((resolve) => setTimeout(resolve, actualDelay));
+      return retryWithDelay(fn, retries - 1, isRateLimit ? actualDelay : (delay * factor), factor);
     }
     throw err;
   }
+}
+
+// Helper function to try generating content with sequential fallbacks (gemini-2.5-flash, gemini-2.0-flash)
+async function generateContentWithFallback(genAI, primaryModelName, prompt, config) {
+  const modelsToTry = [primaryModelName, 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
+  const uniqueModels = [...new Set(modelsToTry)];
+
+  let lastError;
+  for (const modelName of uniqueModels) {
+    try {
+      console.log(`[Gemini API] Attempting generation with model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName, generationConfig: config });
+      return await retryWithDelay(async () => {
+        try {
+          const result = await model.generateContent(prompt);
+          return result.response.text();
+        } catch (err) {
+          const errMsg = err.message || '';
+          if (errMsg.includes('RequestsPerDay') || errMsg.includes('free_tier_requests')) {
+            err.isDailyQuota = true;
+          }
+          throw err;
+        }
+      }, 3, 2000, 1.5);
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Gemini API] Model ${modelName} failed. Error: ${err.message}. Trying next model...`);
+    }
+  }
+  throw lastError;
 }
 
 // --- LITERATURE METADATA FETCH HELPERS ---
@@ -333,114 +375,215 @@ ${excludedPapersList.map(title => `- "${title}"`).join('\n')}
 Ensure that the 5 landmark papers you select are completely different from this list, even if they are closely related or from the same authors. Use other landmark publications.`;
   }
 
-  const prompt = `You are a world-class academic research advisor and science communicator.
+  // --- STEP 1: Search and Outline (Cheap model: gemini-1.5-flash) ---
+  const outlinePrompt = `You are a world-class academic research advisor and science communicator.
 The user's research interest is: "${cleanTopic}".
 ${exclusionPromptPart}
 
-Identify exactly 5 crucial, landmark papers in this specific field, selecting exactly one paper to fit each of the following 5 categories:
-1. 'foundation': The bedrock paper that defined this concept or established the field.
-2. 'surprise': A landmark paper with counter-intuitive findings, surprising results, or that challenged prevailing assumptions.
-3. 'crossfield': A paper showing how this concept or method bridges into other domains or combines ideas from different fields.
-4. 'novel': A highly significant recent breakthrough, modern state-of-the-art work, or recent development.
-5. 'wildcard': An unusual, unexpected, or hidden gem paper that is interesting and relevant to keep the digest fresh.
+Identify exactly 5 papers related to this research interest, selecting exactly one paper to fit each of the following 5 categories:
+1. 'foundation': One landmark paper (the bedrock paper that defined this concept or established the field).
+2. 'crossfield': One somehow related paper but from another field.
+3. 'novel': One very recent paper close to the user's research interests.
+4. 'surprise': One surprise paper (a landmark paper from another field that might interest the user).
+5. 'wildcard': One interesting paper from their field that they might have missed (not a landmark, but interesting).
 
-Format your response as a JSON array containing exactly 5 objects, ordered precisely in the sequence above (foundation, surprise, crossfield, novel, wildcard). Do not wrap it in markdown block - just return the raw JSON.`;
+Format your response as a JSON array containing exactly 5 objects, ordered precisely in the sequence above (foundation, crossfield, novel, surprise, wildcard).`;
 
-  onProgress(5, 'Connecting to Gemini AI and searching academic index...');
+  onProgress(10, 'Connecting to Gemini AI and researching paper index...');
 
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: "ARRAY",
-        items: {
-          type: "OBJECT",
-          properties: {
-            category: {
-              type: "STRING",
-              enum: ["foundation", "surprise", "crossfield", "novel", "wildcard"]
-            },
-            title: { type: "STRING" },
-            nickname: { type: "STRING" },
-            authors: { type: "STRING" },
-            year: { type: "INTEGER" },
-            purpose: { type: "STRING" },
-            historicalPlace: { type: "STRING" },
-            achievements: { type: "STRING" },
-            limitations: { type: "STRING" },
-            searchKeywords: { type: "STRING" },
-            references: {
-              type: "ARRAY",
-              items: { type: "STRING" }
-            }
+  const outlineConfig = {
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          category: {
+            type: "STRING",
+            enum: ["foundation", "surprise", "crossfield", "novel", "wildcard"]
           },
-          required: [
-            "category",
-            "title",
-            "nickname",
-            "authors",
-            "year",
-            "purpose",
-            "historicalPlace",
-            "achievements",
-            "limitations",
-            "searchKeywords",
-            "references"
-          ]
-        }
+          title: { type: "STRING" },
+          nickname: { type: "STRING" },
+          authors: { type: "STRING" },
+          year: { type: "INTEGER" },
+          purpose: { type: "STRING" },
+          historicalPlace: { type: "STRING" },
+          achievements: { type: "STRING" },
+          limitations: { type: "STRING" },
+          searchKeywords: { type: "STRING" },
+          references: {
+            type: "ARRAY",
+            items: { type: "STRING" }
+          }
+        },
+        required: [
+          "category",
+          "title",
+          "nickname",
+          "authors",
+          "year",
+          "purpose",
+          "historicalPlace",
+          "achievements",
+          "limitations",
+          "searchKeywords",
+          "references"
+        ]
       }
-    },
-  });
+    }
+  };
 
-  const textResponse = await retryWithDelay(async () => {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
-  });
+  const outlineResponse = await generateContentWithFallback(
+    genAI,
+    'gemini-2.5-flash',
+    outlinePrompt,
+    outlineConfig
+  );
 
-  let papersOutline = JSON.parse(textResponse);
+  let papersOutline = JSON.parse(outlineResponse);
   if (!Array.isArray(papersOutline) || papersOutline.length === 0) {
     throw new Error('Invalid JSON structure returned by model');
   }
 
-  onProgress(15, `Found ${papersOutline.length} foundational papers. Digesting technical concepts...`);
+  // --- STEP 2: Detailed Digest Composition (Better model: gemini-2.5-flash) ---
+  onProgress(45, `Found 5 papers. Composing technical details and deep summaries...`);
 
-  const enrichedPapers = [];
-  for (let i = 0; i < papersOutline.length; i++) {
-    const paper = papersOutline[i];
-    const displayIndex = i + 1;
-    const progressVal = Math.round(15 + (i / papersOutline.length) * 80);
-    
-    onProgress(
-      progressVal,
-      `Digesting paper ${displayIndex} of ${papersOutline.length}: "${paper.title}"...`
-    );
+  const detailsPrompt = `You are a world-class expert researcher and science communicator.
+We have selected the following 5 papers for a research digest on the interest topic: "${cleanTopic}".
 
-    try {
-      const details = await generatePaperDetails(paper, geminiApiKey);
-      enrichedPapers.push({
-        ...paper,
-        explanation: details.explanation,
-        taggedConcepts: details.taggedConcepts,
-        coreIdea: details.explanation.coreIntuition,
-      });
-    } catch (err) {
-      console.warn(`Failed to generate details for ${paper.title}, using fallback...`, err);
-      enrichedPapers.push({
-        ...paper,
-        explanation: {
-          paperType: 'methodology',
-          strategyUsed: 'contrast',
-          coreIdea: paper.coreIdea || 'No detailed intuition generated.',
-          deconstructedParts: [],
-          synthesis: 'No synthesis available.',
-          beforeState: paper.historicalPlace || 'No prior state details.',
-          afterState: paper.achievements || 'No achievement details.',
+For EACH of the papers listed below, compose a detailed conceptual explanation and extract key technical terms.
+
+Papers:
+${papersOutline.map((p, idx) => `
+[Paper ${idx + 1}]
+Category: ${p.category}
+Title: "${p.title}" (${p.year})
+Authors: ${p.authors}
+Purpose: ${p.purpose}
+Achievements: ${p.achievements}
+Historical Place: ${p.historicalPlace}
+`).join('\n')}
+
+For EACH paper, generate:
+1. A conceptual explanation based on the paper's genre:
+   - 'methodology': If it introduces a new algorithm, neural network architecture, system, baseline model, or software tool.
+   - 'empirical_study': If it presents an experimental trial, benchmark study, clinical trial, or scientific analysis of empirical observations.
+   - 'theoretical': If it is a math-heavy paper proving theorems or complexity limits.
+   - 'review_survey': If it is a review article surveying a large body of literature.
+2. Under "explanation", adapt style accordingly:
+   - For methodology/theoretical, specify strategyUsed ('metaphor', 'analogy', or 'contrast') and write a spot-on coreIntuition explanation.
+   - For empirical study, explain researchQuestion, studySetup, keyFindings, and interpretation.
+   - For review/survey, explain surveyScope, taxonomy, consensusAndTrends, and openChallenges.
+3. Identify technical terms, acronyms, prior methods, or baseline models mentioned in your explanations and extract them under "taggedConcepts" (excluding the paper itself).
+
+Format your response as a JSON array containing exactly 5 objects matching the order of the inputs above.`;
+
+  const detailsConfig = {
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          explanation: {
+            type: "OBJECT",
+            properties: {
+              paperType: {
+                type: "STRING",
+                enum: ["methodology", "empirical_study", "theoretical", "review_survey"]
+              },
+              strategyUsed: {
+                type: "STRING",
+                enum: ["metaphor", "analogy", "contrast"]
+              },
+              coreIntuition: { type: "STRING" },
+              beforeState: { type: "STRING" },
+              afterState: { type: "STRING" },
+              deconstructedParts: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    title: { type: "STRING" },
+                    explanation: { type: "STRING" }
+                  },
+                  required: ["title", "explanation"]
+                }
+              },
+              synthesis: { type: "STRING" },
+              researchQuestion: { type: "STRING" },
+              studySetup: { type: "STRING" },
+              keyFindings: { type: "STRING" },
+              interpretation: { type: "STRING" },
+              coreTheorem: { type: "STRING" },
+              assumptions: { type: "STRING" },
+              proofStrategy: { type: "STRING" },
+              theoreticalSignificance: { type: "STRING" },
+              surveyScope: { type: "STRING" },
+              taxonomy: { type: "STRING" },
+              consensusAndTrends: { type: "STRING" },
+              openChallenges: { type: "STRING" }
+            },
+            required: ["paperType", "coreIntuition", "beforeState", "afterState"]
+          },
+          taggedConcepts: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                term: { type: "STRING" },
+                nickname: { type: "STRING" },
+                definition: { type: "STRING" },
+                origin: { type: "STRING" },
+                paperUrl: { type: "STRING" },
+                relatedTerms: {
+                  type: "ARRAY",
+                  items: { type: "STRING" }
+                }
+              },
+              required: ["term", "nickname", "definition", "origin", "relatedTerms"]
+            }
+          }
         },
-        taggedConcepts: [],
-      });
+        required: ["explanation", "taggedConcepts"]
+      }
     }
+  };
+
+  const detailsResponse = await generateContentWithFallback(
+    genAI,
+    'gemini-2.5-flash',
+    detailsPrompt,
+    detailsConfig
+  );
+
+  let detailsArray = JSON.parse(detailsResponse);
+  if (!Array.isArray(detailsArray) || detailsArray.length === 0) {
+    throw new Error('Invalid JSON structure returned for paper details');
   }
+
+  onProgress(85, 'Assembling final digest and building feed...');
+
+  const enrichedPapers = papersOutline.map((paper, index) => {
+    const details = detailsArray[index] || {
+      explanation: {
+        paperType: 'methodology',
+        strategyUsed: 'contrast',
+        coreIntuition: 'No detailed intuition generated.',
+        deconstructedParts: [],
+        synthesis: 'No synthesis available.',
+        beforeState: paper.historicalPlace || 'No prior state details.',
+        afterState: paper.achievements || 'No achievement details.',
+      },
+      taggedConcepts: []
+    };
+    return {
+      ...paper,
+      explanation: details.explanation,
+      taggedConcepts: details.taggedConcepts,
+      coreIdea: details.explanation?.coreIntuition || 'No detailed intuition generated.'
+    };
+  });
 
   onProgress(100, 'All papers digested successfully! Building feed...');
 

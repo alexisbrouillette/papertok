@@ -48,9 +48,10 @@ export function triggerQueueRunner() {
 }
 
 async function processQueue() {
+  let task;
   try {
     // 1. Fetch the oldest pending task, prioritising high priority tasks first
-    const task = await dbGet(`
+    task = await dbGet(`
       SELECT * FROM generation_queue 
       WHERE status = 'pending' 
       ORDER BY priority DESC, id ASC 
@@ -65,7 +66,11 @@ async function processQueue() {
 
     console.log(`[DigestQueue] Processing task ${task.id} (priority: ${task.priority}): user ${task.user_id}, topic "${task.topic}"`);
     
-    // 2. Mark as processing
+    // 2. Mark as processing (safely deleting existing processing tasks to avoid UNIQUE constraint conflicts)
+    await dbRun(
+      'DELETE FROM generation_queue WHERE user_id = ? AND topic = ? AND digest_date = ? AND status = \'processing\'',
+      [task.user_id, task.topic, task.digest_date]
+    );
     await dbRun('UPDATE generation_queue SET status = \'processing\' WHERE id = ?', [task.id]);
 
     // 3. Fetch user's API key (fall back to env)
@@ -77,7 +82,7 @@ async function processQueue() {
     if (!geminiApiKey) {
       throw new Error('No Gemini API key available for user or system.');
     }
-
+    console.log(`Current gemini api key: ${geminiApiKey}`);
     const digestDate = task.digest_date;
 
     // 4. Generate the digest (this caches it automatically inside sqlite database)
@@ -94,6 +99,10 @@ async function processQueue() {
     }, task.user_id);
 
     // 5. Mark as completed
+    await dbRun(
+      'DELETE FROM generation_queue WHERE user_id = ? AND topic = ? AND digest_date = ? AND status = \'completed\'',
+      [task.user_id, task.topic, task.digest_date]
+    );
     await dbRun('UPDATE generation_queue SET status = \'completed\' WHERE id = ?', [task.id]);
     console.log(`[DigestQueue] Task ${task.id} completed successfully for topic "${task.topic}".`);
 
@@ -101,7 +110,15 @@ async function processQueue() {
     console.error('[DigestQueue] Error processing task:', err);
     // Mark as failed instead of looping infinitely
     try {
-      await dbRun('UPDATE generation_queue SET status = \'failed\' WHERE status = \'processing\'');
+      if (task) {
+        await dbRun(
+          'DELETE FROM generation_queue WHERE user_id = ? AND topic = ? AND digest_date = ? AND status = \'failed\'',
+          [task.user_id, task.topic, task.digest_date]
+        );
+        await dbRun('UPDATE generation_queue SET status = \'failed\' WHERE id = ?', [task.id]);
+      } else {
+        await dbRun('UPDATE generation_queue SET status = \'failed\' WHERE status = \'processing\'');
+      }
     } catch (dbErr) {
       console.error('[DigestQueue] Failed to mark task as failed:', dbErr);
     }

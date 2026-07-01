@@ -92,16 +92,25 @@ function App() {
         } else {
           const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
           const cachedPapersStr = localStorage.getItem('papertok_cached_papers') || '';
-          if (cachedTopic && cachedPapersStr) {
-            try {
-              const cachedPapers = JSON.parse(cachedPapersStr);
-              setActiveTopic(cachedTopic);
-              setPapers(cachedPapers);
-              setCurrentScreen('map');
-              return;
-            } catch (e) {
-              console.error('Failed to parse cached papers:', e);
+          const historyList = savedHistory ? JSON.parse(savedHistory) : [];
+          const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
+          const activeTopicToLoad = cachedTopic || fallbackTopic;
+
+          if (activeTopicToLoad) {
+            if (cachedPapersStr && activeTopicToLoad === cachedTopic) {
+              try {
+                const cachedPapers = JSON.parse(cachedPapersStr);
+                setActiveTopic(activeTopicToLoad);
+                setPapers(cachedPapers);
+                setCurrentScreen('map');
+                return;
+              } catch (e) {
+                console.error('Failed to parse cached papers:', e);
+              }
             }
+            setActiveTopic(activeTopicToLoad);
+            handleSearch(activeTopicToLoad);
+            return;
           }
           setCurrentScreen('search');
         }
@@ -135,16 +144,26 @@ function App() {
       } else {
         const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
         const cachedPapersStr = localStorage.getItem('papertok_cached_papers') || '';
-        if (cachedTopic && cachedPapersStr) {
-          try {
-            const cachedPapers = JSON.parse(cachedPapersStr);
-            setActiveTopic(cachedTopic);
-            setPapers(cachedPapers);
-            setCurrentScreen('map');
-            return;
-          } catch (e) {
-            console.error('Failed to parse cached papers:', e);
+        const savedHistoryStr = localStorage.getItem('papertok_history');
+        const historyList = savedHistoryStr ? JSON.parse(savedHistoryStr) : [];
+        const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
+        const activeTopicToLoad = cachedTopic || fallbackTopic;
+
+        if (activeTopicToLoad) {
+          if (cachedPapersStr && activeTopicToLoad === cachedTopic) {
+            try {
+              const cachedPapers = JSON.parse(cachedPapersStr);
+              setActiveTopic(activeTopicToLoad);
+              setPapers(cachedPapers);
+              setCurrentScreen('map');
+              return;
+            } catch (e) {
+              console.error('Failed to parse cached papers:', e);
+            }
           }
+          setActiveTopic(activeTopicToLoad);
+          handleSearch(activeTopicToLoad);
+          return;
         }
         setCurrentScreen('search');
       }
@@ -161,6 +180,14 @@ function App() {
   };
 
   const handleSearch = async (query: string, bypassCache = false, dayOffset = 0) => {
+    if (!query || query.trim() === '') return;
+    
+    // If selecting the currently active topic and we already have papers, just return to the map instantly
+    if (activeTopic.toLowerCase() === query.trim().toLowerCase() && papers.length > 0 && dayOffset === 0 && !bypassCache) {
+      setCurrentScreen('map');
+      return;
+    }
+
     // 1. Update history
     const historyList = Array.isArray(searchHistory) ? searchHistory : [];
     const filteredHistory = historyList.filter((item) => item && typeof item === 'string' && item.toLowerCase() !== query.toLowerCase());
@@ -170,30 +197,51 @@ function App() {
 
     // 2. Set active state
     setActiveTopic(query);
-    setPapers([]);
     setError(null);
-    setCurrentScreen('map');
+
     // Resolve the progression offset based on completed digests in history
     let targetOffset = dayOffset;
-    if (dayOffset === 0) {
-      try {
-        const token = localStorage.getItem('papertok_token');
-        const res = await fetch('/api/progress', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const readList = data.readPapers || [];
-          const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
-          targetOffset = Math.floor(papersForThisTopic.length / 5);
-        }
-      } catch (err) {
-        console.error('Failed to pre-fetch progress for day offset calculation:', err);
+    try {
+      const token = localStorage.getItem('papertok_token');
+      const res = await fetch('/api/progress', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const readList = data.readPapers || [];
+        const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
+        targetOffset = Math.floor(papersForThisTopic.length / 5);
       }
+    } catch (err) {
+      console.error('Failed to pre-fetch progress for day offset calculation:', err);
     }
     setDebugDayOffset(targetOffset);
 
-    // Check if we have cached results for this query (case-insensitive) - only on day 0
+    // Check if the SQLite database has this day offset already generated in its history (instant load)
+    if (!bypassCache) {
+      try {
+        const token = localStorage.getItem('papertok_token');
+        const historyRes = await fetch(`/api/digest/history?topic=${encodeURIComponent(query)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          const historyList = historyData.history || [];
+          if (historyList[targetOffset]) {
+            const targetPapers = historyList[targetOffset].papers;
+            localStorage.setItem('papertok_cached_topic', query);
+            localStorage.setItem('papertok_cached_papers', JSON.stringify(targetPapers));
+            setPapers(targetPapers);
+            setCurrentScreen('map');
+            return; // cache hit from database!
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check database history cache:', err);
+      }
+    }
+
+    // Check if we have cached results for this query in local storage (case-insensitive) - only on day 0
     const cachedTopic = localStorage.getItem('papertok_cached_topic');
     const cachedPapersStr = localStorage.getItem('papertok_cached_papers');
 
@@ -201,11 +249,16 @@ function App() {
       try {
         const cachedPapers = JSON.parse(cachedPapersStr);
         setPapers(cachedPapers);
-        return; // loaded from cache!
+        setCurrentScreen('map');
+        return; // loaded from local storage cache!
       } catch {
         console.error('Failed to parse cached papers, calling API...');
       }
     }
+
+    // If cache missed, clear papers, show map screen with loading spinner, and fetch from API
+    setPapers([]);
+    setCurrentScreen('map');
 
     // 3. Request papers from Gemini
     try {

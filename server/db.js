@@ -74,7 +74,6 @@ function initializeSchema() {
     `);
 
     // 5. User-specific digests cache table
-    db.run("DROP TABLE IF EXISTS cached_digests");
     db.run(`
       CREATE TABLE IF NOT EXISTS cached_digests (
         user_id INTEGER NOT NULL,
@@ -99,7 +98,6 @@ function initializeSchema() {
     `);
 
     // 7. Background digest generation queue table
-    db.run("DROP TABLE IF EXISTS generation_queue");
     db.run(`
       CREATE TABLE IF NOT EXISTS generation_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

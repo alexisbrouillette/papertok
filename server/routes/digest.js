@@ -41,6 +41,8 @@ router.get('/generate', requireAuth, async (req, res) => {
   const digestDate = d.toISOString().split('T')[0];
 
   // Set headers for Server-Sent Events (SSE)
+  req.setTimeout(600000);
+  res.setTimeout(600000);
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -52,10 +54,19 @@ router.get('/generate', requireAuth, async (req, res) => {
   // 1. Check SQLite Cache First (unless explicitly bypassing)
   if (bypassCache !== 'true') {
     try {
-      const cachedRow = await dbGet(
-        'SELECT papers_json FROM cached_digests WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ?',
-        [userId, cleanTopic, digestDate]
+      // Fetch all cached digests for this topic in chronological order
+      const historyRows = await dbAll(
+        'SELECT digest_date, papers_json FROM cached_digests WHERE user_id = ? AND LOWER(topic) = LOWER(?) ORDER BY digest_date ASC',
+        [userId, cleanTopic]
       );
+      
+      // Match by sequence index first (e.g. Node 0 maps to row index 0)
+      let cachedRow = historyRows[dayOffset];
+      if (!cachedRow) {
+        // Fall back to matching by date string for new digests
+        cachedRow = historyRows.find(row => row.digest_date === digestDate);
+      }
+
       if (cachedRow) {
         sendProgress(100, 'Loading cached digest from database...');
         res.write(`data: ${JSON.stringify({ done: true, papers: JSON.parse(cachedRow.papers_json) })}\n\n`);
@@ -122,6 +133,14 @@ router.get('/generate', requireAuth, async (req, res) => {
           return;
         }
         sendProgress(queueTask.progress || 0, queueTask.status_text || 'Waiting in queue...');
+      } else {
+        // Send keep-alive comment
+        res.write(`:\n\n`);
+      }
+
+      // Send periodic keep-alive comments every 15 seconds (10 attempts * 1500ms)
+      if (attempts % 10 === 0) {
+        res.write(`:\n\n`);
       }
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -236,21 +255,66 @@ ${conceptsStr}
  
 Use this context to answer any follow-up questions from the user. Be concise, academically rigorous, yet accessible. Answer the user's question directly. If you need to make reasonable academic inferences, do so but state them clearly. If the question is completely unrelated to this paper or its surrounding academic context, politely remind the user and steer them back.`;
 
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction: systemInstruction,
-    });
-
-    const responseText = await retryWithDelay(async () => {
-      const chat = model.startChat({ history: apiHistory });
-      const result = await chat.sendMessage(question);
-      return result.response.text();
-    });
+    let responseText;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        systemInstruction: systemInstruction,
+      });
+      responseText = await retryWithDelay(async () => {
+        const chat = model.startChat({ history: apiHistory });
+        const result = await chat.sendMessage(question);
+        return result.response.text();
+      }, 2, 2000);
+    } catch (err) {
+      const errMsg = err.message || '';
+      if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('Quota')) {
+        console.warn(`[Chat Fallback] gemini-2.5-flash failed on chat due to rate/quota limits. Falling back to gemini-1.5-flash...`);
+        const fallbackModel = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          systemInstruction: systemInstruction,
+        });
+        responseText = await retryWithDelay(async () => {
+          const chat = fallbackModel.startChat({ history: apiHistory });
+          const result = await chat.sendMessage(question);
+          return result.response.text();
+        }, 2, 2000);
+      } else {
+        throw err;
+      }
+    }
 
     res.json({ text: responseText });
   } catch (err) {
     console.error('Follow-up chat failed:', err);
     res.status(500).json({ error: 'Failed to chat with Gemini.' });
+  }
+});
+
+// Get all cached digests for a user and topic
+router.get('/history', requireAuth, async (req, res) => {
+  const { topic } = req.query;
+  const userId = req.userId;
+
+  if (!topic) {
+    return res.status(400).json({ error: 'Topic parameter is required.' });
+  }
+
+  try {
+    const rows = await dbAll(
+      'SELECT digest_date, papers_json FROM cached_digests WHERE user_id = ? AND LOWER(topic) = LOWER(?) ORDER BY digest_date ASC',
+      [userId, topic.trim()]
+    );
+    
+    const history = rows.map(r => ({
+      date: r.digest_date,
+      papers: JSON.parse(r.papers_json)
+    }));
+
+    res.json({ history });
+  } catch (err) {
+    console.error('Failed to fetch digest history:', err);
+    res.status(500).json({ error: 'Failed to retrieve digest history.' });
   }
 });
 

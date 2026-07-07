@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { KeyGate } from './components/KeyGate';
 import { SearchScreen } from './components/SearchScreen';
 import { Settings } from './components/Settings';
@@ -36,7 +36,7 @@ function App() {
     setCurrentScreen('login');
   };
 
-  const refreshStreak = async (savedToken: string) => {
+  const refreshStreak = useCallback(async (savedToken: string) => {
     try {
       const res = await fetch('/api/progress', {
         headers: { 'Authorization': `Bearer ${savedToken}` }
@@ -48,7 +48,7 @@ function App() {
     } catch (err) {
       console.error('Failed to refresh streak:', err);
     }
-  };
+  }, []);
 
   // Load configuration and history on startup
   const handleLoginSuccess = async (newToken: string, newUsername: string) => {
@@ -95,7 +95,7 @@ function App() {
     setCurrentScreen('search');
   };
 
-  const handleSearch = async (query: string, bypassCache = false, dayOffset = 0) => {
+  const handleSearch = useCallback(async (query: string, bypassCache = false, dayOffset = 0) => {
     if (!query || query.trim() === '') return;
     
     // If selecting the currently active topic and we already have papers, just return to the map instantly
@@ -203,7 +203,7 @@ function App() {
       const errMsg = err instanceof Error ? err.message : String(err);
       setError(errMsg || 'Failed to generate literature papers. Please verify your Gemini API key or search term and try again.');
     }
-  };
+  }, [activeTopic, papers, searchHistory, geminiApiKey]);
 
   // Load configuration and history on startup
   useEffect(() => {

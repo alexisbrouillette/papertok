@@ -1060,6 +1060,13 @@ export const DigestMap: React.FC<DigestMapProps> = ({
             <span className="sleeping-title">All Caught Up!</span>
             <span className="sleeping-timer">⏳ Next digest in {timeLeft || '...'}</span>
           </div>
+          <button
+            className="debug-fast-forward-btn"
+            onClick={handleDebugAdvanceDay}
+            title="[Debug] Skip to next day & generate new digest"
+          >
+            ⏭ Skip Day
+          </button>
         </div>
       )}
 
@@ -2657,11 +2664,12 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           left: 50%;
           transform: translateX(-50%);
           width: calc(100% - 32px);
-          max-width: 380px;
+          max-width: 420px;
           padding: 10px 16px;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
+          gap: 12px;
           border: 1px solid rgba(27, 73, 49, 0.15);
           background: rgba(251, 249, 244, 0.85);
           backdrop-filter: blur(12px);
@@ -2675,11 +2683,29 @@ export const DigestMap: React.FC<DigestMapProps> = ({
         .digest-completed-sleeping-card .sleeping-content {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          gap: 4px;
-          text-align: center;
-          width: 100%;
+          gap: 2px;
+          text-align: left;
+          flex: 1;
+          min-width: 0;
+        }
+        .debug-fast-forward-btn {
+          flex-shrink: 0;
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: 1px solid rgba(27, 73, 49, 0.25);
+          background: rgba(27, 73, 49, 0.08);
+          color: var(--color-primary);
+          font-size: 0.78rem;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all var(--transition-fast);
+        }
+        .debug-fast-forward-btn:hover {
+          background: rgba(27, 73, 49, 0.16);
+          border-color: rgba(27, 73, 49, 0.4);
         }
         .sleeping-timer span {
           font-variant-numeric: tabular-nums;

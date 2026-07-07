@@ -109,6 +109,17 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   const [activeTag, setActiveTag] = useState<{ term: string; blockId: string } | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
+  const explanation = React.useMemo(() => {
+    return paper.explanation || {
+      paperType: 'methodology',
+      coreIntuition: paper.coreIdea || '',
+      deconstructedParts: [],
+      synthesis: paper.achievements || ''
+    };
+  }, [paper.explanation, paper.coreIdea, paper.achievements]);
+
+  const paperType = explanation.paperType || 'methodology';
+
   React.useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -147,32 +158,32 @@ export const PaperCard: React.FC<PaperCardProps> = ({
       { id: 'purpose', text: paper.purpose },
       
       // Methodology
-      ...(paper.explanation?.deconstructedParts || []).map((part, idx) => ({
+      ...(explanation.deconstructedParts || []).map((part, idx) => ({
         id: `deconstructed-${idx}`,
         text: part.explanation,
       })),
-      { id: 'synthesis', text: paper.explanation?.synthesis },
+      { id: 'synthesis', text: explanation.synthesis },
 
       // Empirical Study
-      { id: 'researchQuestion', text: paper.explanation?.researchQuestion },
-      { id: 'studySetup', text: paper.explanation?.studySetup },
-      { id: 'keyFindings', text: paper.explanation?.keyFindings },
-      { id: 'interpretation', text: paper.explanation?.interpretation },
+      { id: 'researchQuestion', text: explanation.researchQuestion },
+      { id: 'studySetup', text: explanation.studySetup },
+      { id: 'keyFindings', text: explanation.keyFindings },
+      { id: 'interpretation', text: explanation.interpretation },
 
       // Theoretical
-      { id: 'coreTheorem', text: paper.explanation?.coreTheorem },
-      { id: 'assumptions', text: paper.explanation?.assumptions },
-      { id: 'proofStrategy', text: paper.explanation?.proofStrategy },
-      { id: 'theoreticalSignificance', text: paper.explanation?.theoreticalSignificance },
+      { id: 'coreTheorem', text: explanation.coreTheorem },
+      { id: 'assumptions', text: explanation.assumptions },
+      { id: 'proofStrategy', text: explanation.proofStrategy },
+      { id: 'theoreticalSignificance', text: explanation.theoreticalSignificance },
 
       // Review / Survey
-      { id: 'surveyScope', text: paper.explanation?.surveyScope },
-      { id: 'taxonomy', text: paper.explanation?.taxonomy },
-      { id: 'consensusAndTrends', text: paper.explanation?.consensusAndTrends },
-      { id: 'openChallenges', text: paper.explanation?.openChallenges },
+      { id: 'surveyScope', text: explanation.surveyScope },
+      { id: 'taxonomy', text: explanation.taxonomy },
+      { id: 'consensusAndTrends', text: explanation.consensusAndTrends },
+      { id: 'openChallenges', text: explanation.openChallenges },
 
-      { id: 'beforeState', text: paper.explanation?.beforeState },
-      { id: 'afterState', text: paper.explanation?.afterState },
+      { id: 'beforeState', text: explanation.beforeState },
+      { id: 'afterState', text: explanation.afterState },
       { id: 'achievements', text: paper.achievements },
       { id: 'limitations', text: paper.limitations },
     ];
@@ -303,12 +314,12 @@ export const PaperCard: React.FC<PaperCardProps> = ({
       {/* Index Counter */}
       {!hideHeader && (
         <div className="card-badge-header">
-          {paper.explanation?.paperType ? (
-            <span className={`paper-type-badge ${paper.explanation.paperType}`}>
-              {paper.explanation.paperType === 'methodology' && '⚙️ Methodology'}
-              {paper.explanation.paperType === 'empirical_study' && '📊 Empirical'}
-              {paper.explanation.paperType === 'theoretical' && '📐 Theoretical'}
-              {paper.explanation.paperType === 'review_survey' && '📚 Survey'}
+          {paperType ? (
+            <span className={`paper-type-badge ${paperType}`}>
+              {paperType === 'methodology' && '⚙️ Methodology'}
+              {paperType === 'empirical_study' && '📊 Empirical'}
+              {paperType === 'theoretical' && '📐 Theoretical'}
+              {paperType === 'review_survey' && '📚 Survey'}
             </span>
           ) : (
             <span className="paper-type-badge default">📄 Foundational</span>
@@ -350,11 +361,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         <div className="summary-block highlight">
           <div className="core-intuition-header">
             <h4 className="block-title">Core Intuition</h4>
-            {paper.explanation?.strategyUsed && (
-              <span className={`strategy-badge ${paper.explanation.strategyUsed}`}>
-                {paper.explanation.strategyUsed === 'metaphor' && '🔮 Metaphor'}
-                {paper.explanation.strategyUsed === 'analogy' && '💡 Analogy'}
-                {paper.explanation.strategyUsed === 'contrast' && '⚖️ Contrast'}
+            {explanation.strategyUsed && (
+              <span className={`strategy-badge ${explanation.strategyUsed}`}>
+                {explanation.strategyUsed === 'metaphor' && '🔮 Metaphor'}
+                {explanation.strategyUsed === 'analogy' && '💡 Analogy'}
+                {explanation.strategyUsed === 'contrast' && '⚖️ Contrast'}
               </span>
             )}
           </div>
@@ -386,7 +397,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         </div>
 
         {/* ── Collapsible "Under the Hood" Accordion ── */}
-        {paper.explanation?.paperType && (
+        {paperType && (
           <div className={`under-the-hood-accordion glass-panel ${underTheHoodOpen ? 'open' : ''}`}>
             <button
               className="under-the-hood-header-btn"
@@ -411,14 +422,14 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                   <div className="pipeline-steps-list">
                     
                     {/* methodology pipeline */}
-                    {paper.explanation.paperType === 'methodology' && (
+                    {paperType === 'methodology' && (
                       <>
                         <div className="pipeline-step">
                           <span className="pipeline-step-node">1</span>
                           <span className="pipeline-step-label">Core Intuition</span>
                           <p className="block-text">
                             <InteractiveText
-                              text={paper.explanation.coreIntuition}
+                              text={explanation.coreIntuition}
                               concepts={getConceptsForBlock('coreIntuition')}
                               blockId="coreIntuition"
                               activeTag={activeTag}
@@ -428,7 +439,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           {renderConceptCard('coreIntuition')}
                         </div>
 
-                        {paper.explanation.deconstructedParts && paper.explanation.deconstructedParts.map((part, pIdx) => {
+                        {explanation.deconstructedParts && explanation.deconstructedParts.map((part, pIdx) => {
                           const blockId = `deconstructed-${pIdx}`;
                           return (
                             <div key={pIdx} className="pipeline-step">
@@ -448,13 +459,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           );
                         })}
 
-                        {paper.explanation.synthesis && (
+                        {explanation.synthesis && (
                           <div className="pipeline-step">
-                            <span className="pipeline-step-node">{(paper.explanation.deconstructedParts?.length || 0) + 2}</span>
+                            <span className="pipeline-step-node">{(explanation.deconstructedParts?.length || 0) + 2}</span>
                             <span className="pipeline-step-label">How It Plugs Together</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.synthesis}
+                                text={explanation.synthesis}
                                 concepts={getConceptsForBlock('synthesis')}
                                 blockId="synthesis"
                                 activeTag={activeTag}
@@ -468,15 +479,15 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                     )}
 
                     {/* empirical_study pipeline */}
-                    {paper.explanation.paperType === 'empirical_study' && (
+                    {paperType === 'empirical_study' && (
                       <>
-                        {paper.explanation.researchQuestion && (
+                        {explanation.researchQuestion && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">1</span>
                             <span className="pipeline-step-label">Research Question</span>
                             <p className="block-text emphasis">
                               <InteractiveText
-                                text={paper.explanation.researchQuestion}
+                                text={explanation.researchQuestion}
                                 concepts={getConceptsForBlock('researchQuestion')}
                                 blockId="researchQuestion"
                                 activeTag={activeTag}
@@ -487,13 +498,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.studySetup && (
+                        {explanation.studySetup && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">2</span>
                             <span className="pipeline-step-label">Study Setup & Methodology</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.studySetup}
+                                text={explanation.studySetup}
                                 concepts={getConceptsForBlock('studySetup')}
                                 blockId="studySetup"
                                 activeTag={activeTag}
@@ -504,13 +515,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.keyFindings && (
+                        {explanation.keyFindings && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">3</span>
                             <span className="pipeline-step-label">Key Findings & Results</span>
                             <p className="block-text emphasis">
                               <InteractiveText
-                                text={paper.explanation.keyFindings}
+                                text={explanation.keyFindings}
                                 concepts={getConceptsForBlock('keyFindings')}
                                 blockId="keyFindings"
                                 activeTag={activeTag}
@@ -521,13 +532,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.interpretation && (
+                        {explanation.interpretation && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">4</span>
                             <span className="pipeline-step-label">Interpretation & Implications</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.interpretation}
+                                text={explanation.interpretation}
                                 concepts={getConceptsForBlock('interpretation')}
                                 blockId="interpretation"
                                 activeTag={activeTag}
@@ -541,15 +552,15 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                     )}
 
                     {/* theoretical pipeline */}
-                    {paper.explanation.paperType === 'theoretical' && (
+                    {paperType === 'theoretical' && (
                       <>
-                        {paper.explanation.assumptions && (
+                        {explanation.assumptions && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">1</span>
                             <span className="pipeline-step-label">Assumptions & Framework</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.assumptions}
+                                text={explanation.assumptions}
                                 concepts={getConceptsForBlock('assumptions')}
                                 blockId="assumptions"
                                 activeTag={activeTag}
@@ -560,13 +571,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.coreTheorem && (
+                        {explanation.coreTheorem && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">2</span>
                             <span className="pipeline-step-label">Core Theorem / Statement</span>
                             <p className="block-text emphasis math-style">
                               <InteractiveText
-                                text={paper.explanation.coreTheorem}
+                                text={explanation.coreTheorem}
                                 concepts={getConceptsForBlock('coreTheorem')}
                                 blockId="coreTheorem"
                                 activeTag={activeTag}
@@ -577,13 +588,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.proofStrategy && (
+                        {explanation.proofStrategy && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">3</span>
                             <span className="pipeline-step-label">Proof Strategy & Intuition</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.proofStrategy}
+                                text={explanation.proofStrategy}
                                 concepts={getConceptsForBlock('proofStrategy')}
                                 blockId="proofStrategy"
                                 activeTag={activeTag}
@@ -594,13 +605,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.theoreticalSignificance && (
+                        {explanation.theoreticalSignificance && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">4</span>
                             <span className="pipeline-step-label">Theoretical Significance</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.theoreticalSignificance}
+                                text={explanation.theoreticalSignificance}
                                 concepts={getConceptsForBlock('theoreticalSignificance')}
                                 blockId="theoreticalSignificance"
                                 activeTag={activeTag}
@@ -614,15 +625,15 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                     )}
 
                     {/* review_survey pipeline */}
-                    {paper.explanation.paperType === 'review_survey' && (
+                    {paperType === 'review_survey' && (
                       <>
-                        {paper.explanation.surveyScope && (
+                        {explanation.surveyScope && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">1</span>
                             <span className="pipeline-step-label">Survey Scope & Theme</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.surveyScope}
+                                text={explanation.surveyScope}
                                 concepts={getConceptsForBlock('surveyScope')}
                                 blockId="surveyScope"
                                 activeTag={activeTag}
@@ -633,13 +644,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.taxonomy && (
+                        {explanation.taxonomy && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">2</span>
                             <span className="pipeline-step-label">Taxonomy & Classifications</span>
                             <p className="block-text emphasis">
                               <InteractiveText
-                                text={paper.explanation.taxonomy}
+                                text={explanation.taxonomy}
                                 concepts={getConceptsForBlock('taxonomy')}
                                 blockId="taxonomy"
                                 activeTag={activeTag}
@@ -650,13 +661,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.consensusAndTrends && (
+                        {explanation.consensusAndTrends && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">3</span>
                             <span className="pipeline-step-label">Scientific Consensus & Trends</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.consensusAndTrends}
+                                text={explanation.consensusAndTrends}
                                 concepts={getConceptsForBlock('consensusAndTrends')}
                                 blockId="consensusAndTrends"
                                 activeTag={activeTag}
@@ -667,13 +678,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                           </div>
                         )}
 
-                        {paper.explanation.openChallenges && (
+                        {explanation.openChallenges && (
                           <div className="pipeline-step">
                             <span className="pipeline-step-node">4</span>
                             <span className="pipeline-step-label">Future Roadmap & Open Challenges</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={paper.explanation.openChallenges}
+                                text={explanation.openChallenges}
                                 concepts={getConceptsForBlock('openChallenges')}
                                 blockId="openChallenges"
                                 activeTag={activeTag}
@@ -694,7 +705,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         )}
 
         {/* Paradigm Shift: Vertical Timeline Block */}
-        {paper.explanation?.beforeState && paper.explanation?.afterState && (
+        {explanation.beforeState && explanation.afterState && (
           <div className="summary-block">
             <h4 className="block-title">Paradigm Shift</h4>
             <div className="paradigm-shift-card glass-panel">

@@ -209,19 +209,21 @@ function App() {
 
     // Resolve the progression offset based on completed digests in history
     let targetOffset = dayOffset;
-    try {
-      const token = localStorage.getItem('papertok_token');
-      const res = await fetch('/api/progress', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const readList = data.readPapers || [];
-        const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
-        targetOffset = Math.floor(papersForThisTopic.length / 5);
+    if (dayOffset === 0) {
+      try {
+        const token = localStorage.getItem('papertok_token');
+        const res = await fetch('/api/progress', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const readList = data.readPapers || [];
+          const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
+          targetOffset = Math.floor(papersForThisTopic.length / 5);
+        }
+      } catch (err) {
+        console.error('Failed to pre-fetch progress for day offset calculation:', err);
       }
-    } catch (err) {
-      console.error('Failed to pre-fetch progress for day offset calculation:', err);
     }
     setDebugDayOffset(targetOffset);
 
@@ -394,7 +396,6 @@ function App() {
               debugDayOffset={debugDayOffset}
               onAdvanceDay={async () => {
                 const nextOffset = debugDayOffset + 1;
-                setDebugDayOffset(nextOffset);
                 localStorage.removeItem('papertok_cached_papers'); // clear local client cache
                 await handleSearch(activeTopic, true, nextOffset); // request fresh papers bypassCache=true
               }}

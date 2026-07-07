@@ -1513,13 +1513,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         }
 
         .timeline-track-pulse {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 60px;
-          background: linear-gradient(to bottom, transparent, var(--color-primary), transparent);
-          animation: timelineGlowPulse 4s linear infinite;
+          display: none;
         }
 
         @keyframes timelineGlowPulse {
@@ -1557,13 +1551,19 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
         .timeline-item {
           position: relative;
-          padding-left: 12px;
+          padding: 6px 8px 6px 12px;
+          border-radius: var(--radius-sm);
+          transition: background-color var(--transition-fast);
+        }
+
+        .timeline-item:hover {
+          background: rgba(255, 255, 255, 0.03);
         }
 
         .timeline-item-dot {
           position: absolute;
           left: -20px; /* Aligns with timeline-track line */
-          top: 5px;
+          top: 11px;
           width: 10px;
           height: 10px;
           border-radius: 50%;
@@ -1746,13 +1746,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         }
 
         .under-the-hood-content .pipeline-track-pulse {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 40px;
-          background: linear-gradient(to bottom, transparent, var(--color-primary), transparent);
-          animation: timelineGlowPulse 3s linear infinite;
+          display: none;
         }
 
         .pipeline-steps-list {

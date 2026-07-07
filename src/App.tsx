@@ -51,74 +51,6 @@ function App() {
   };
 
   // Load configuration and history on startup
-  useEffect(() => {
-    const savedToken = localStorage.getItem('papertok_token') || '';
-    const savedUsername = localStorage.getItem('papertok_username') || '';
-    const savedHistory = localStorage.getItem('papertok_history');
-
-    if (savedHistory) {
-      try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSearchHistory(JSON.parse(savedHistory));
-      } catch (err) {
-        console.error('Failed to parse history:', err);
-      }
-    }
-
-    if (!savedToken) {
-      setCurrentScreen('login');
-      return;
-    }
-
-    setToken(savedToken);
-    setUsername(savedUsername);
-
-    const fetchUserData = async () => {
-      try {
-        const keysRes = await fetch('/api/auth/keys', {
-          headers: { 'Authorization': `Bearer ${savedToken}` }
-        });
-        if (!keysRes.ok) {
-          if (keysRes.status === 401) {
-            // Token is truly invalid/expired — clear it
-            handleSignOut();
-          } else {
-            // Transient error (server starting up, etc.) — just show login without wiping credentials
-            setCurrentScreen('login');
-          }
-          return;
-        }
-        const keysData = await keysRes.json();
-        setGeminiApiKey(keysData.geminiKey || '');
-        setS2ApiKey(keysData.s2Key || '');
-
-        await refreshStreak(savedToken);
-
-        if (!keysData.geminiKey && !keysData.hasSystemKey) {
-          setCurrentScreen('key-gate');
-        } else {
-          const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
-          const historyList = savedHistory ? JSON.parse(savedHistory) : [];
-          const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
-          const activeTopicToLoad = cachedTopic || fallbackTopic;
-
-          if (activeTopicToLoad) {
-            setActiveTopic(activeTopicToLoad);
-            handleSearch(activeTopicToLoad);
-            return;
-          }
-          setCurrentScreen('search');
-        }
-      } catch (err) {
-        console.error('Session validation failed on mount:', err);
-        // Only clear credentials if we know the token is invalid (not just a network hiccup)
-        setCurrentScreen('login');
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
   const handleLoginSuccess = async (newToken: string, newUsername: string) => {
     localStorage.setItem('papertok_token', newToken);
     localStorage.setItem('papertok_username', newUsername);
@@ -194,7 +126,7 @@ function App() {
         if (res.ok) {
           const data = await res.json();
           const readList = data.readPapers || [];
-          const papersForThisTopic = readList.filter((r: any) => r.topic.toLowerCase() === query.toLowerCase());
+        const papersForThisTopic = readList.filter((r: { topic: string }) => r.topic.toLowerCase() === query.toLowerCase());
           targetOffset = Math.floor(papersForThisTopic.length / 5);
         }
       } catch (err) {
@@ -272,6 +204,75 @@ function App() {
       setError(errMsg || 'Failed to generate literature papers. Please verify your Gemini API key or search term and try again.');
     }
   };
+
+  // Load configuration and history on startup
+  useEffect(() => {
+    const savedToken = localStorage.getItem('papertok_token') || '';
+    const savedUsername = localStorage.getItem('papertok_username') || '';
+    const savedHistory = localStorage.getItem('papertok_history');
+
+    if (savedHistory) {
+      try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSearchHistory(JSON.parse(savedHistory));
+      } catch (err) {
+        console.error('Failed to parse history:', err);
+      }
+    }
+
+    if (!savedToken) {
+      setCurrentScreen('login');
+      return;
+    }
+
+    setToken(savedToken);
+    setUsername(savedUsername);
+
+    const fetchUserData = async () => {
+      try {
+        const keysRes = await fetch('/api/auth/keys', {
+          headers: { 'Authorization': `Bearer ${savedToken}` }
+        });
+        if (!keysRes.ok) {
+          if (keysRes.status === 401) {
+            // Token is truly invalid/expired — clear it
+            handleSignOut();
+          } else {
+            // Transient error (server starting up, etc.) — just show login without wiping credentials
+            setCurrentScreen('login');
+          }
+          return;
+        }
+        const keysData = await keysRes.json();
+        setGeminiApiKey(keysData.geminiKey || '');
+        setS2ApiKey(keysData.s2Key || '');
+
+        await refreshStreak(savedToken);
+
+        if (!keysData.geminiKey && !keysData.hasSystemKey) {
+          setCurrentScreen('key-gate');
+        } else {
+          const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
+          const historyList = savedHistory ? JSON.parse(savedHistory) : [];
+          const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
+          const activeTopicToLoad = cachedTopic || fallbackTopic;
+
+          if (activeTopicToLoad) {
+            setActiveTopic(activeTopicToLoad);
+            handleSearch(activeTopicToLoad);
+            return;
+          }
+          setCurrentScreen('search');
+        }
+      } catch (err) {
+        console.error('Session validation failed on mount:', err);
+        // Only clear credentials if we know the token is invalid (not just a network hiccup)
+        setCurrentScreen('login');
+      }
+    };
+
+    fetchUserData();
+  }, [handleSearch, refreshStreak]);
 
   const handleUpdateTopic = async (newTopic: string) => {
     const historyList = Array.isArray(searchHistory) ? searchHistory : [];

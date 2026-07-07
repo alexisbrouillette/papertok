@@ -204,7 +204,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [openNodeId, setOpenNodeId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [drawerFullscreen, setDrawerFullscreen] = useState(false);
+  const drawerFullscreen = !!selectedCategory;
   const [particleNodeId, setParticleNodeId] = useState<string | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [activeScrollIdx, setActiveScrollIdx] = useState(0); // index of paper currently in view
@@ -221,7 +221,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   // Local progress ratings and AI follow-up chat state
   const [ratings, setRatings] = useState<Record<string, 'like' | 'dislike' | null>>({});
   const [chatPaper, setChatPaper] = useState<FoundationalPaper | null>(null);
-  const [chatMetadata, setChatMetadata] = useState<any>(null);
+  const [chatMetadata, setChatMetadata] = useState<{ citationCount?: number; venue?: string; pdfUrl?: string } | null>(null);
   const [timeLeft, setTimeLeft] = useState('');
 
   /* ─── SVG path geometry ─────────────────────────────── */
@@ -347,7 +347,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     }));
   };
 
-  const handleOpenChat = (paper: FoundationalPaper, metadata: any) => {
+  const handleOpenChat = (paper: FoundationalPaper, metadata: { citationCount?: number; venue?: string; pdfUrl?: string } | null) => {
     console.log('handleOpenChat called for:', paper.title);
     setChatPaper(paper);
     setChatMetadata(metadata);
@@ -468,15 +468,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     }
   }, [papers, topic, debugDayOffset]);
 
-  // Make drawer fullscreen when selectedCategory (paper mode) is active
-  useEffect(() => {
-    if (selectedCategory) {
-      setDrawerFullscreen(true);
-    } else {
-      setDrawerFullscreen(false);
-    }
-  }, [selectedCategory]);
-
   /* Open node drawer */
   const handleNodeClick = async (nodeId: string) => {
     setOpenNodeId(nodeId);
@@ -516,7 +507,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   /* Close drawer */
   const handleCloseDrawer = () => {
     setDrawerVisible(false);
-    setDrawerFullscreen(false);
     setTimeout(() => {
       setOpenNodeId(null);
       setSelectedCategory(null);
@@ -527,7 +517,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const handleBackToDeck = () => {
     setSelectedCategory(null);
     setActiveScrollIdx(0);
-    setDrawerFullscreen(false);
   };
 
   /* Mark a category as read imperatively */
@@ -704,7 +693,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     setSearchQuery(''); // clear query
     requestAnimationFrame(() => {
       setDrawerVisible(true);
-      setDrawerFullscreen(true);
     });
   };
 
@@ -717,9 +705,17 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     onAdvanceDay();
   };
 
-  if (typeof window !== 'undefined') {
-    (window as any).debugAdvanceDay = handleDebugAdvanceDay;
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as Window & { debugAdvanceDay?: () => void }).debugAdvanceDay = handleDebugAdvanceDay;
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        const win = window as Window & { debugAdvanceDay?: () => void };
+        delete win.debugAdvanceDay;
+      }
+    };
+  }, [handleDebugAdvanceDay]);
 
   return (
     <div className="digest-map-root">
@@ -775,11 +771,11 @@ export const DigestMap: React.FC<DigestMapProps> = ({
       </header>
 
       {streak > 0 && papers.length > 0 && (
-        <div className="map-streak-badge" title="Daily Reading Streak">
+        <div className="map-streak-badge" title="Learning Days">
           <Flame className="map-streak-flame" />
           <div className="map-streak-text">
             <span className="map-streak-val">{streak} Day{streak > 1 ? 's' : ''}</span>
-            <span className="map-streak-label">Streak</span>
+            <span className="map-streak-label">Learning Days</span>
           </div>
         </div>
       )}
@@ -1298,7 +1294,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
             {/* Streak pill */}
             <div className="completion-streak">
               <span>🔥</span>
-              <span>{streak}-day streak — keep it going!</span>
+              <span>{streak} learning days — keep it going!</span>
             </div>
 
             {/* Divider */}

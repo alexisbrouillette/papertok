@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Lock, Sparkles, AlertCircle, ArrowRight, UserPlus, LogIn } from 'lucide-react';
+import { User, Lock, Sparkles, AlertCircle, ArrowRight, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react';
 
 interface LoginScreenProps {
   onLoginSuccess: (token: string, username: string) => void;
@@ -12,6 +12,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,6 +72,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     setError(null);
     setPassword('');
     setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   return (
@@ -129,12 +133,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 id="password"
                 name="password"
                 autoComplete={activeTab === 'login' ? 'current-password' : 'new-password'}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="toggle-icon" /> : <Eye className="toggle-icon" />}
+              </button>
             </div>
           </div>
 
@@ -147,12 +159,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                   id="confirmPassword"
                   name="confirmPassword"
                   autoComplete="new-password"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="toggle-icon" /> : <Eye className="toggle-icon" />}
+                </button>
               </div>
             </div>
           )}
@@ -313,7 +333,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
         .input-wrapper input {
           width: 100%;
-          padding: 12px 14px 12px 40px;
+          padding: 12px 42px 12px 40px; /* Space for eye icon on the right */
           border-radius: var(--radius-md);
           background: rgba(9, 9, 11, 0.02);
           border: 1px solid var(--border-glass);
@@ -321,6 +341,29 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           font-size: 0.92rem;
           transition: var(--transition-fast);
           font-family: var(--font-mono);
+        }
+
+        .password-toggle-btn {
+          position: absolute;
+          right: 14px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          transition: color var(--transition-fast);
+        }
+
+        .password-toggle-btn:hover {
+          color: var(--text-primary);
+        }
+
+        .toggle-icon {
+          width: 18px;
+          height: 18px;
         }
 
         .input-wrapper input:focus {

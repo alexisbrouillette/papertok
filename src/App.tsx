@@ -98,23 +98,11 @@ function App() {
           setCurrentScreen('key-gate');
         } else {
           const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
-          const cachedPapersStr = localStorage.getItem('papertok_cached_papers') || '';
           const historyList = savedHistory ? JSON.parse(savedHistory) : [];
           const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
           const activeTopicToLoad = cachedTopic || fallbackTopic;
 
           if (activeTopicToLoad) {
-            if (cachedPapersStr && activeTopicToLoad === cachedTopic) {
-              try {
-                const cachedPapers = JSON.parse(cachedPapersStr);
-                setActiveTopic(activeTopicToLoad);
-                setPapers(cachedPapers);
-                setCurrentScreen('map');
-                return;
-              } catch (e) {
-                console.error('Failed to parse cached papers:', e);
-              }
-            }
             setActiveTopic(activeTopicToLoad);
             handleSearch(activeTopicToLoad);
             return;
@@ -151,24 +139,12 @@ function App() {
         setCurrentScreen('key-gate');
       } else {
         const cachedTopic = localStorage.getItem('papertok_cached_topic') || '';
-        const cachedPapersStr = localStorage.getItem('papertok_cached_papers') || '';
         const savedHistoryStr = localStorage.getItem('papertok_history');
         const historyList = savedHistoryStr ? JSON.parse(savedHistoryStr) : [];
         const fallbackTopic = Array.isArray(historyList) && historyList[0] ? historyList[0] : '';
         const activeTopicToLoad = cachedTopic || fallbackTopic;
 
         if (activeTopicToLoad) {
-          if (cachedPapersStr && activeTopicToLoad === cachedTopic) {
-            try {
-              const cachedPapers = JSON.parse(cachedPapersStr);
-              setActiveTopic(activeTopicToLoad);
-              setPapers(cachedPapers);
-              setCurrentScreen('map');
-              return;
-            } catch (e) {
-              console.error('Failed to parse cached papers:', e);
-            }
-          }
           setActiveTopic(activeTopicToLoad);
           handleSearch(activeTopicToLoad);
           return;

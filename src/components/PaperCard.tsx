@@ -105,7 +105,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 }) => {
   const [metadata, setMetadata] = useState<EnrichedMetadata>({ source: 'google-scholar' });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
-  const [underTheHoodOpen, setUnderTheHoodOpen] = useState(false);
+  const [underTheHoodOpen, setUnderTheHoodOpen] = useState(true);
   const [activeTag, setActiveTag] = useState<{ term: string; blockId: string } | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -119,6 +119,118 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   }, [paper.explanation, paper.coreIdea, paper.achievements]);
 
   const paperType = explanation.paperType || 'methodology';
+
+  const pipelineSteps = React.useMemo(() => {
+    const steps: { id: string; label: string; title: string; content: string }[] = [];
+
+    // Step 1: Core Intuition (Always present)
+    if (explanation.coreIntuition || paper.coreIdea) {
+      steps.push({
+        id: 'coreIntuition',
+        label: 'Core Intuition',
+        title: 'The fundamental intuition behind the concept',
+        content: explanation.coreIntuition || paper.coreIdea
+      });
+    }
+
+    // Step 2: Purpose & Question
+    const purposeText = explanation.researchQuestion || paper.purpose;
+    if (purposeText) {
+      steps.push({
+        id: explanation.researchQuestion ? 'researchQuestion' : 'purpose',
+        label: paperType === 'empirical_study' ? 'Research Question' : 'Purpose & Goal',
+        title: 'What this work set out to address',
+        content: purposeText
+      });
+    }
+
+    // Step 3: Methodology & Setup
+    if (paperType === 'methodology') {
+      if (explanation.deconstructedParts && explanation.deconstructedParts.length > 0) {
+        explanation.deconstructedParts.forEach((part, idx) => {
+          steps.push({
+            id: `deconstructed-${idx}`,
+            label: 'Methodology Component',
+            title: part.title,
+            content: part.explanation
+          });
+        });
+      }
+    } else if (paperType === 'empirical_study' && explanation.studySetup) {
+      steps.push({
+        id: 'studySetup',
+        label: 'Study Setup',
+        title: 'How the experiment/study was designed',
+        content: explanation.studySetup
+      });
+    } else if (paperType === 'theoretical') {
+      if (explanation.assumptions) {
+        steps.push({
+          id: 'assumptions',
+          label: 'Assumptions',
+          title: 'Boundary conditions & frameworks',
+          content: explanation.assumptions
+        });
+      }
+      if (explanation.coreTheorem) {
+        steps.push({
+          id: 'coreTheorem',
+          label: 'Core Theorem',
+          title: 'The mathematical statement proved',
+          content: explanation.coreTheorem
+        });
+      }
+      if (explanation.proofStrategy) {
+        steps.push({
+          id: 'proofStrategy',
+          label: 'Proof Strategy',
+          title: 'The roadmap used to prove the statement',
+          content: explanation.proofStrategy
+        });
+      }
+    } else if (paperType === 'review_survey') {
+      if (explanation.surveyScope) {
+        steps.push({
+          id: 'surveyScope',
+          label: 'Survey Scope',
+          title: 'The research area and themes covered',
+          content: explanation.surveyScope
+        });
+      }
+      if (explanation.taxonomy) {
+        steps.push({
+          id: 'taxonomy',
+          label: 'Taxonomy',
+          title: 'Categorization of literature',
+          content: explanation.taxonomy
+        });
+      }
+    }
+
+    // Step 4: Key Findings & Results
+    const resultsText = explanation.keyFindings || explanation.synthesis || explanation.consensusAndTrends || paper.achievements;
+    if (resultsText) {
+      steps.push({
+        id: explanation.keyFindings ? 'keyFindings' : (explanation.synthesis ? 'synthesis' : (explanation.consensusAndTrends ? 'consensusAndTrends' : 'achievements')),
+        label: paperType === 'empirical_study' ? 'Key Findings' : 'Achievements & Findings',
+        title: 'Main results and discoveries',
+        content: resultsText
+      });
+    }
+
+    // Step 5: Implications & Significance
+    const implicationsText = explanation.interpretation || explanation.theoreticalSignificance || explanation.openChallenges || paper.limitations;
+    if (implicationsText) {
+      steps.push({
+        id: explanation.interpretation ? 'interpretation' : (explanation.theoreticalSignificance ? 'theoreticalSignificance' : (explanation.openChallenges ? 'openChallenges' : 'limitations')),
+        label: paperType === 'review_survey' ? 'Open Challenges' : 'Significance & Limitations',
+        title: 'Future roadmap and impact constraints',
+        content: implicationsText
+      });
+    }
+
+    return steps;
+  }, [explanation, paper, paperType]);
 
   React.useEffect(() => {
     const el = scrollContainerRef.current;
@@ -420,283 +532,25 @@ export const PaperCard: React.FC<PaperCardProps> = ({
                   </div>
 
                   <div className="pipeline-steps-list">
-                    
-                    {/* methodology pipeline */}
-                    {paperType === 'methodology' && (
-                      <>
-                        <div className="pipeline-step">
-                          <span className="pipeline-step-node">1</span>
-                          <span className="pipeline-step-label">Core Intuition</span>
+                    {pipelineSteps.map((step, sIdx) => {
+                      return (
+                        <div key={sIdx} className="pipeline-step">
+                          <span className="pipeline-step-node">{sIdx + 1}</span>
+                          <span className="pipeline-step-label">{step.label}</span>
+                          <h5 className="pipeline-step-title" style={{ fontSize: '0.78rem', fontWeight: 700, margin: '2px 0 6px 0', color: 'var(--text-secondary)' }}>{step.title}</h5>
                           <p className="block-text">
                             <InteractiveText
-                              text={explanation.coreIntuition}
-                              concepts={getConceptsForBlock('coreIntuition')}
-                              blockId="coreIntuition"
+                              text={step.content}
+                              concepts={getConceptsForBlock(step.id)}
+                              blockId={step.id}
                               activeTag={activeTag}
                               onTagClick={handleTagClick}
                             />
                           </p>
-                          {renderConceptCard('coreIntuition')}
+                          {renderConceptCard(step.id)}
                         </div>
-
-                        {explanation.deconstructedParts && explanation.deconstructedParts.map((part, pIdx) => {
-                          const blockId = `deconstructed-${pIdx}`;
-                          return (
-                            <div key={pIdx} className="pipeline-step">
-                              <span className="pipeline-step-node">{pIdx + 2}</span>
-                              <span className="pipeline-step-label">{part.title}</span>
-                              <p className="block-text">
-                                <InteractiveText
-                                  text={part.explanation}
-                                  concepts={getConceptsForBlock(blockId)}
-                                  blockId={blockId}
-                                  activeTag={activeTag}
-                                  onTagClick={handleTagClick}
-                                />
-                              </p>
-                              {renderConceptCard(blockId)}
-                            </div>
-                          );
-                        })}
-
-                        {explanation.synthesis && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">{(explanation.deconstructedParts?.length || 0) + 2}</span>
-                            <span className="pipeline-step-label">How It Plugs Together</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.synthesis}
-                                concepts={getConceptsForBlock('synthesis')}
-                                blockId="synthesis"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('synthesis')}
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* empirical_study pipeline */}
-                    {paperType === 'empirical_study' && (
-                      <>
-                        {explanation.researchQuestion && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">1</span>
-                            <span className="pipeline-step-label">Research Question</span>
-                            <p className="block-text emphasis">
-                              <InteractiveText
-                                text={explanation.researchQuestion}
-                                concepts={getConceptsForBlock('researchQuestion')}
-                                blockId="researchQuestion"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('researchQuestion')}
-                          </div>
-                        )}
-
-                        {explanation.studySetup && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">2</span>
-                            <span className="pipeline-step-label">Study Setup & Methodology</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.studySetup}
-                                concepts={getConceptsForBlock('studySetup')}
-                                blockId="studySetup"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('studySetup')}
-                          </div>
-                        )}
-
-                        {explanation.keyFindings && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">3</span>
-                            <span className="pipeline-step-label">Key Findings & Results</span>
-                            <p className="block-text emphasis">
-                              <InteractiveText
-                                text={explanation.keyFindings}
-                                concepts={getConceptsForBlock('keyFindings')}
-                                blockId="keyFindings"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('keyFindings')}
-                          </div>
-                        )}
-
-                        {explanation.interpretation && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">4</span>
-                            <span className="pipeline-step-label">Interpretation & Implications</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.interpretation}
-                                concepts={getConceptsForBlock('interpretation')}
-                                blockId="interpretation"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('interpretation')}
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* theoretical pipeline */}
-                    {paperType === 'theoretical' && (
-                      <>
-                        {explanation.assumptions && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">1</span>
-                            <span className="pipeline-step-label">Assumptions & Framework</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.assumptions}
-                                concepts={getConceptsForBlock('assumptions')}
-                                blockId="assumptions"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('assumptions')}
-                          </div>
-                        )}
-
-                        {explanation.coreTheorem && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">2</span>
-                            <span className="pipeline-step-label">Core Theorem / Statement</span>
-                            <p className="block-text emphasis math-style">
-                              <InteractiveText
-                                text={explanation.coreTheorem}
-                                concepts={getConceptsForBlock('coreTheorem')}
-                                blockId="coreTheorem"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('coreTheorem')}
-                          </div>
-                        )}
-
-                        {explanation.proofStrategy && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">3</span>
-                            <span className="pipeline-step-label">Proof Strategy & Intuition</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.proofStrategy}
-                                concepts={getConceptsForBlock('proofStrategy')}
-                                blockId="proofStrategy"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('proofStrategy')}
-                          </div>
-                        )}
-
-                        {explanation.theoreticalSignificance && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">4</span>
-                            <span className="pipeline-step-label">Theoretical Significance</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.theoreticalSignificance}
-                                concepts={getConceptsForBlock('theoreticalSignificance')}
-                                blockId="theoreticalSignificance"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('theoreticalSignificance')}
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* review_survey pipeline */}
-                    {paperType === 'review_survey' && (
-                      <>
-                        {explanation.surveyScope && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">1</span>
-                            <span className="pipeline-step-label">Survey Scope & Theme</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.surveyScope}
-                                concepts={getConceptsForBlock('surveyScope')}
-                                blockId="surveyScope"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('surveyScope')}
-                          </div>
-                        )}
-
-                        {explanation.taxonomy && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">2</span>
-                            <span className="pipeline-step-label">Taxonomy & Classifications</span>
-                            <p className="block-text emphasis">
-                              <InteractiveText
-                                text={explanation.taxonomy}
-                                concepts={getConceptsForBlock('taxonomy')}
-                                blockId="taxonomy"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('taxonomy')}
-                          </div>
-                        )}
-
-                        {explanation.consensusAndTrends && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">3</span>
-                            <span className="pipeline-step-label">Scientific Consensus & Trends</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.consensusAndTrends}
-                                concepts={getConceptsForBlock('consensusAndTrends')}
-                                blockId="consensusAndTrends"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('consensusAndTrends')}
-                          </div>
-                        )}
-
-                        {explanation.openChallenges && (
-                          <div className="pipeline-step">
-                            <span className="pipeline-step-node">4</span>
-                            <span className="pipeline-step-label">Future Roadmap & Open Challenges</span>
-                            <p className="block-text">
-                              <InteractiveText
-                                text={explanation.openChallenges}
-                                concepts={getConceptsForBlock('openChallenges')}
-                                blockId="openChallenges"
-                                activeTag={activeTag}
-                                onTagClick={handleTagClick}
-                              />
-                            </p>
-                            {renderConceptCard('openChallenges')}
-                          </div>
-                        )}
-                      </>
-                    )}
-
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1795,17 +1649,26 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
         /* Under the Hood Accordion */
         .under-the-hood-accordion {
-          margin-top: 16px;
+          margin-top: 20px;
           border-radius: var(--radius-md);
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.03);
-          overflow: hidden;
-          transition: all var(--transition-normal);
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border-glass-bright);
+          display: block;
+          width: 100%;
+          flex-shrink: 0;
+          height: auto;
+          min-height: min-content;
+        }
+
+        .under-the-hood-accordion:hover {
+          background: rgba(255, 255, 255, 0.04);
+          border-color: rgba(255, 255, 255, 0.2);
         }
 
         .under-the-hood-accordion.open {
           background: rgba(255, 255, 255, 0.03);
-          border-color: rgba(255, 255, 255, 0.06);
+          border-color: var(--border-glass-bright);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
         .under-the-hood-header-btn {
@@ -1813,11 +1676,16 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 16px;
-          background: transparent;
+          padding: 14px 16px;
+          background: rgba(255, 255, 255, 0.01);
           border: none;
           cursor: pointer;
           outline: none;
+          transition: background var(--transition-fast);
+        }
+
+        .under-the-hood-header-btn:hover {
+          background: rgba(255, 255, 255, 0.03);
         }
 
         .under-the-hood-title-wrap {

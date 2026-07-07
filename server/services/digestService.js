@@ -417,12 +417,12 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
 
 async function generatePaperDetails(paper, apiKey) {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const prompt = `You are a world-class expert researcher and science communicator.
+  const prompt = `You are a world-class senior scientist and academic researcher. Your explanations in the "Under the Hood" sections must be highly technical, rigorous, and written specifically for fellow researchers and domain experts who are highly knowledgeable in the field. Avoid oversimplifications, generalities, or superficial descriptions; instead, focus on the exact mathematical formulations, algorithmic steps, specific datasets/architectures, empirical conditions, or theoretical proofs that define the paper's core contribution.
 We are analyzing the foundational paper: "${paper.title}" (${paper.year}) by ${paper.authors}.
 The paper's stated purpose is: "${paper.purpose}"
 The paper's achievements: "${paper.achievements}"
 
-Your goal is to generate a comprehensive, highly-polished conceptual explanation of the core content of this paper, adapting your explanation structure based on the paper's genre, and extracting key technical terms for inline tagging.
+Your goal is to generate a comprehensive, highly technical, and academically rigorous explanation of the core content of this paper, adapting your explanation structure based on the paper's genre, and extracting key technical terms for inline tagging.
 
 Perform an internal feedback and critique loop:
 1. Detect which of the following genres describes this paper best:
@@ -690,10 +690,10 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
   // --- STEP 2: Detailed Digest Composition (Better model: gemini-2.5-flash) ---
   onProgress(45, `Found 5 papers. Composing technical details and deep summaries...`);
 
-  const detailsPrompt = `You are a world-class expert researcher and science communicator.
+  const detailsPrompt = `You are a world-class senior scientist and academic researcher. Your explanations in the "Under the Hood" sections must be highly technical, rigorous, and written specifically for fellow researchers and domain experts who are highly knowledgeable in the field. Avoid oversimplifications, generalities, or superficial descriptions; instead, focus on the exact mathematical formulations, algorithmic steps, specific datasets/architectures, empirical conditions, or theoretical proofs that define the paper's core contribution.
 We have selected the following 5 papers for a research digest on the interest topic: "${cleanTopic}".
 
-For EACH of the papers listed below, compose a detailed conceptual explanation and extract key technical terms.
+For EACH of the papers listed below, compose a comprehensive, highly technical, and academically rigorous explanation of the core content of this paper, adapting your explanation structure based on the paper's genre, and extracting key technical terms for inline tagging.
 
 Papers:
 ${papersOutline.map((p, idx) => `

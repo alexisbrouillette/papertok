@@ -1,9 +1,18 @@
+export interface LineagePaper {
+  title: string;
+  url: string;
+  year?: number;
+  citationCount?: number;
+}
+
 export interface EnrichedMetadata {
   citationCount?: number;
   venue?: string;
   pdfUrl?: string;
   paperUrl?: string;
-  source: 'semantic-scholar' | 'fallback-apis' | 'google-scholar';
+  source: 'semantic-scholar' | 'fallback-apis' | 'google-scholar' | 'crossref';
+  citations?: LineagePaper[];
+  references?: LineagePaper[];
 }
 
 const METADATA_CACHE_KEY = 'papertok_metadata_cache';
@@ -15,9 +24,23 @@ export function getCachedMetadata(title: string): EnrichedMetadata | null {
   if (typeof window === 'undefined') return null;
   try {
     const cacheStr = localStorage.getItem(METADATA_CACHE_KEY);
-    if (!cacheStr) return null;
+    if (!cacheStr) {
+      console.log(`[Literature Cache] No cache found for paper: "${title}"`);
+      return null;
+    }
     const cache = JSON.parse(cacheStr);
-    return cache[title.toLowerCase()] || null;
+    const cached = cache[title.toLowerCase()];
+    if (
+      cached &&
+      cached.source === 'semantic-scholar' &&
+      cached.citations !== undefined &&
+      cached.references !== undefined
+    ) {
+      console.log(`[Literature Cache] Valid cache hit for paper: "${title}"`, cached);
+      return cached;
+    }
+    console.log(`[Literature Cache] Cache miss or invalid/old cache for paper: "${title}" (needs refetch)`);
+    return null;
   } catch (err) {
     console.error('Failed to parse metadata cache:', err);
     return null;

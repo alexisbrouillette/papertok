@@ -87,7 +87,7 @@ interface PaperCardProps {
   total: number;
   hideHeader?: boolean;
   children?: React.ReactNode;
-  onContentScroll?: (scrollTop: number) => void;
+  onContentScroll?: (scrollTop: number, isBottom: boolean) => void;
 }
 
 export const PaperCard: React.FC<PaperCardProps> = ({
@@ -105,8 +105,35 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 }) => {
   const [metadata, setMetadata] = useState<EnrichedMetadata>({ source: 'google-scholar' });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
-  const [expandedPartIndex, setExpandedPartIndex] = useState<number | null>(0);
+  const [underTheHoodOpen, setUnderTheHoodOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<{ term: string; blockId: string } | null>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const handleResizeOrMount = () => {
+      const isScrollable = el.scrollHeight > el.clientHeight;
+      if (!isScrollable) {
+        onContentScroll?.(0, true);
+      } else {
+        const isBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 15;
+        onContentScroll?.(el.scrollTop, isBottom);
+      }
+    };
+
+    handleResizeOrMount();
+
+    const ro = new ResizeObserver(() => {
+      handleResizeOrMount();
+    });
+    ro.observe(el);
+
+    return () => {
+      ro.disconnect();
+    };
+  }, [paper, onContentScroll]);
 
   // Map concept terms to the first block ID they appear in (case-insensitive boundary check)
   const conceptToBlockMap = React.useMemo(() => {
@@ -310,9 +337,12 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
       {/* Scrollable Paper Content */}
       <div
+        ref={scrollContainerRef}
         className="card-scroll-content"
         onScroll={(e) => {
-          onContentScroll?.(e.currentTarget.scrollTop);
+          const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+          const isBottom = scrollHeight - scrollTop - clientHeight < 15;
+          onContentScroll?.(scrollTop, isBottom);
         }}
       >
         {children}
@@ -355,281 +385,312 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           {renderConceptCard('purpose')}
         </div>
 
-        {/* Paper type-specific explanation layout blocks */}
-        {(!paper.explanation?.paperType || paper.explanation.paperType === 'methodology') && (
-          <>
-            {/* Deconstructed Sub-components Accordion */}
-            {paper.explanation?.deconstructedParts && paper.explanation.deconstructedParts.length > 0 && (
-              <div className="summary-block">
-                <h4 className="block-title">Deconstructed Parts</h4>
-                <div className="accordion-list">
-                  {paper.explanation.deconstructedParts.map((part, pIdx) => {
-                    const isOpen = expandedPartIndex === pIdx;
-                    const blockId = `deconstructed-${pIdx}`;
-                    return (
-                      <div key={pIdx} className={`accordion-item glass-panel ${isOpen ? 'open' : ''}`}>
-                        <button
-                          className="accordion-header-btn"
-                          onClick={() => setExpandedPartIndex(isOpen ? null : pIdx)}
-                          type="button"
-                        >
-                          <span className="accordion-part-title">{part.title}</span>
-                          <span className={`accordion-arrow ${isOpen ? 'rotated' : ''}`}>▼</span>
-                        </button>
-                        {isOpen && (
-                          <div className="accordion-body-content">
+        {/* ── Collapsible "Under the Hood" Accordion ── */}
+        {paper.explanation?.paperType && (
+          <div className={`under-the-hood-accordion glass-panel ${underTheHoodOpen ? 'open' : ''}`}>
+            <button
+              className="under-the-hood-header-btn"
+              onClick={() => setUnderTheHoodOpen(!underTheHoodOpen)}
+              type="button"
+            >
+              <span className="under-the-hood-title-wrap">
+                <span className="under-the-hood-icon">🔬</span>
+                <span className="under-the-hood-title">Under the Hood (Methodology & Details)</span>
+              </span>
+              <span className="under-the-hood-arrow">{underTheHoodOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {underTheHoodOpen && (
+              <div className="under-the-hood-content">
+                <div className="pipeline-layout">
+                  <div className="pipeline-track">
+                    <div className="pipeline-track-line" />
+                    <div className="pipeline-track-pulse" />
+                  </div>
+
+                  <div className="pipeline-steps-list">
+                    
+                    {/* methodology pipeline */}
+                    {paper.explanation.paperType === 'methodology' && (
+                      <>
+                        <div className="pipeline-step">
+                          <span className="pipeline-step-node">1</span>
+                          <span className="pipeline-step-label">Core Intuition</span>
+                          <p className="block-text">
+                            <InteractiveText
+                              text={paper.explanation.coreIntuition}
+                              concepts={getConceptsForBlock('coreIntuition')}
+                              blockId="coreIntuition"
+                              activeTag={activeTag}
+                              onTagClick={handleTagClick}
+                            />
+                          </p>
+                          {renderConceptCard('coreIntuition')}
+                        </div>
+
+                        {paper.explanation.deconstructedParts && paper.explanation.deconstructedParts.map((part, pIdx) => {
+                          const blockId = `deconstructed-${pIdx}`;
+                          return (
+                            <div key={pIdx} className="pipeline-step">
+                              <span className="pipeline-step-node">{pIdx + 2}</span>
+                              <span className="pipeline-step-label">{part.title}</span>
+                              <p className="block-text">
+                                <InteractiveText
+                                  text={part.explanation}
+                                  concepts={getConceptsForBlock(blockId)}
+                                  blockId={blockId}
+                                  activeTag={activeTag}
+                                  onTagClick={handleTagClick}
+                                />
+                              </p>
+                              {renderConceptCard(blockId)}
+                            </div>
+                          );
+                        })}
+
+                        {paper.explanation.synthesis && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">{(paper.explanation.deconstructedParts?.length || 0) + 2}</span>
+                            <span className="pipeline-step-label">How It Plugs Together</span>
                             <p className="block-text">
                               <InteractiveText
-                                text={part.explanation}
-                                concepts={getConceptsForBlock(blockId)}
-                                blockId={blockId}
+                                text={paper.explanation.synthesis}
+                                concepts={getConceptsForBlock('synthesis')}
+                                blockId="synthesis"
                                 activeTag={activeTag}
                                 onTagClick={handleTagClick}
                               />
                             </p>
-                            {renderConceptCard(blockId)}
+                            {renderConceptCard('synthesis')}
                           </div>
                         )}
-                      </div>
-                    );
-                  })}
+                      </>
+                    )}
+
+                    {/* empirical_study pipeline */}
+                    {paper.explanation.paperType === 'empirical_study' && (
+                      <>
+                        {paper.explanation.researchQuestion && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">1</span>
+                            <span className="pipeline-step-label">Research Question</span>
+                            <p className="block-text emphasis">
+                              <InteractiveText
+                                text={paper.explanation.researchQuestion}
+                                concepts={getConceptsForBlock('researchQuestion')}
+                                blockId="researchQuestion"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('researchQuestion')}
+                          </div>
+                        )}
+
+                        {paper.explanation.studySetup && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">2</span>
+                            <span className="pipeline-step-label">Study Setup & Methodology</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.studySetup}
+                                concepts={getConceptsForBlock('studySetup')}
+                                blockId="studySetup"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('studySetup')}
+                          </div>
+                        )}
+
+                        {paper.explanation.keyFindings && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">3</span>
+                            <span className="pipeline-step-label">Key Findings & Results</span>
+                            <p className="block-text emphasis">
+                              <InteractiveText
+                                text={paper.explanation.keyFindings}
+                                concepts={getConceptsForBlock('keyFindings')}
+                                blockId="keyFindings"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('keyFindings')}
+                          </div>
+                        )}
+
+                        {paper.explanation.interpretation && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">4</span>
+                            <span className="pipeline-step-label">Interpretation & Implications</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.interpretation}
+                                concepts={getConceptsForBlock('interpretation')}
+                                blockId="interpretation"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('interpretation')}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* theoretical pipeline */}
+                    {paper.explanation.paperType === 'theoretical' && (
+                      <>
+                        {paper.explanation.assumptions && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">1</span>
+                            <span className="pipeline-step-label">Assumptions & Framework</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.assumptions}
+                                concepts={getConceptsForBlock('assumptions')}
+                                blockId="assumptions"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('assumptions')}
+                          </div>
+                        )}
+
+                        {paper.explanation.coreTheorem && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">2</span>
+                            <span className="pipeline-step-label">Core Theorem / Statement</span>
+                            <p className="block-text emphasis math-style">
+                              <InteractiveText
+                                text={paper.explanation.coreTheorem}
+                                concepts={getConceptsForBlock('coreTheorem')}
+                                blockId="coreTheorem"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('coreTheorem')}
+                          </div>
+                        )}
+
+                        {paper.explanation.proofStrategy && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">3</span>
+                            <span className="pipeline-step-label">Proof Strategy & Intuition</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.proofStrategy}
+                                concepts={getConceptsForBlock('proofStrategy')}
+                                blockId="proofStrategy"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('proofStrategy')}
+                          </div>
+                        )}
+
+                        {paper.explanation.theoreticalSignificance && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">4</span>
+                            <span className="pipeline-step-label">Theoretical Significance</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.theoreticalSignificance}
+                                concepts={getConceptsForBlock('theoreticalSignificance')}
+                                blockId="theoreticalSignificance"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('theoreticalSignificance')}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* review_survey pipeline */}
+                    {paper.explanation.paperType === 'review_survey' && (
+                      <>
+                        {paper.explanation.surveyScope && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">1</span>
+                            <span className="pipeline-step-label">Survey Scope & Theme</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.surveyScope}
+                                concepts={getConceptsForBlock('surveyScope')}
+                                blockId="surveyScope"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('surveyScope')}
+                          </div>
+                        )}
+
+                        {paper.explanation.taxonomy && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">2</span>
+                            <span className="pipeline-step-label">Taxonomy & Classifications</span>
+                            <p className="block-text emphasis">
+                              <InteractiveText
+                                text={paper.explanation.taxonomy}
+                                concepts={getConceptsForBlock('taxonomy')}
+                                blockId="taxonomy"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('taxonomy')}
+                          </div>
+                        )}
+
+                        {paper.explanation.consensusAndTrends && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">3</span>
+                            <span className="pipeline-step-label">Scientific Consensus & Trends</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.consensusAndTrends}
+                                concepts={getConceptsForBlock('consensusAndTrends')}
+                                blockId="consensusAndTrends"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('consensusAndTrends')}
+                          </div>
+                        )}
+
+                        {paper.explanation.openChallenges && (
+                          <div className="pipeline-step">
+                            <span className="pipeline-step-node">4</span>
+                            <span className="pipeline-step-label">Future Roadmap & Open Challenges</span>
+                            <p className="block-text">
+                              <InteractiveText
+                                text={paper.explanation.openChallenges}
+                                concepts={getConceptsForBlock('openChallenges')}
+                                blockId="openChallenges"
+                                activeTag={activeTag}
+                                onTagClick={handleTagClick}
+                              />
+                            </p>
+                            {renderConceptCard('openChallenges')}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* Synthesis: How it plugs together */}
-            {paper.explanation?.synthesis && (
-              <div className="summary-block highlight-synthesis">
-                <h4 className="block-title">How It Plugs Together</h4>
-                <p className="block-text synthesis-text">
-                  <InteractiveText
-                    text={paper.explanation.synthesis}
-                    concepts={getConceptsForBlock('synthesis')}
-                    blockId="synthesis"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('synthesis')}
-              </div>
-            )}
-          </>
-        )}
-
-        {paper.explanation?.paperType === 'empirical_study' && (
-          <>
-            {/* Research Question */}
-            {paper.explanation.researchQuestion && (
-              <div className="summary-block">
-                <h4 className="block-title">Research Question</h4>
-                <p className="block-text emphasis">
-                  <InteractiveText
-                    text={paper.explanation.researchQuestion}
-                    concepts={getConceptsForBlock('researchQuestion')}
-                    blockId="researchQuestion"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('researchQuestion')}
-              </div>
-            )}
-
-            {/* Study Setup */}
-            {paper.explanation.studySetup && (
-              <div className="summary-block highlight-study-setup">
-                <h4 className="block-title">Study Setup & Methodology</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.studySetup}
-                    concepts={getConceptsForBlock('studySetup')}
-                    blockId="studySetup"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('studySetup')}
-              </div>
-            )}
-
-            {/* Key Findings */}
-            {paper.explanation.keyFindings && (
-              <div className="summary-block highlight-findings">
-                <h4 className="block-title">Key Findings & Results</h4>
-                <p className="block-text emphasis">
-                  <InteractiveText
-                    text={paper.explanation.keyFindings}
-                    concepts={getConceptsForBlock('keyFindings')}
-                    blockId="keyFindings"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('keyFindings')}
-              </div>
-            )}
-
-            {/* Interpretation */}
-            {paper.explanation.interpretation && (
-              <div className="summary-block">
-                <h4 className="block-title">Interpretation & Implications</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.interpretation}
-                    concepts={getConceptsForBlock('interpretation')}
-                    blockId="interpretation"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('interpretation')}
-              </div>
-            )}
-          </>
-        )}
-
-        {paper.explanation?.paperType === 'theoretical' && (
-          <>
-            {/* Core Theorem */}
-            {paper.explanation.coreTheorem && (
-              <div className="summary-block highlight-theorem">
-                <h4 className="block-title">Core Theorem / Statement</h4>
-                <p className="block-text emphasis math-style">
-                  <InteractiveText
-                    text={paper.explanation.coreTheorem}
-                    concepts={getConceptsForBlock('coreTheorem')}
-                    blockId="coreTheorem"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('coreTheorem')}
-              </div>
-            )}
-
-            {/* Assumptions & Framework */}
-            {paper.explanation.assumptions && (
-              <div className="summary-block">
-                <h4 className="block-title">Assumptions & Framework</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.assumptions}
-                    concepts={getConceptsForBlock('assumptions')}
-                    blockId="assumptions"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('assumptions')}
-              </div>
-            )}
-
-            {/* Proof Strategy */}
-            {paper.explanation.proofStrategy && (
-              <div className="summary-block highlight-proof">
-                <h4 className="block-title">Proof Strategy & Intuition</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.proofStrategy}
-                    concepts={getConceptsForBlock('proofStrategy')}
-                    blockId="proofStrategy"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('proofStrategy')}
-              </div>
-            )}
-
-            {/* Theoretical Significance */}
-            {paper.explanation.theoreticalSignificance && (
-              <div className="summary-block">
-                <h4 className="block-title">Theoretical Significance</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.theoreticalSignificance}
-                    concepts={getConceptsForBlock('theoreticalSignificance')}
-                    blockId="theoreticalSignificance"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('theoreticalSignificance')}
-              </div>
-            )}
-          </>
-        )}
-
-        {paper.explanation?.paperType === 'review_survey' && (
-          <>
-            {/* Survey Scope */}
-            {paper.explanation.surveyScope && (
-              <div className="summary-block">
-                <h4 className="block-title">Survey Scope & Theme</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.surveyScope}
-                    concepts={getConceptsForBlock('surveyScope')}
-                    blockId="surveyScope"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('surveyScope')}
-              </div>
-            )}
-
-            {/* Taxonomy & Categories */}
-            {paper.explanation.taxonomy && (
-              <div className="summary-block highlight-taxonomy">
-                <h4 className="block-title">Taxonomy & Classifications</h4>
-                <p className="block-text emphasis">
-                  <InteractiveText
-                    text={paper.explanation.taxonomy}
-                    concepts={getConceptsForBlock('taxonomy')}
-                    blockId="taxonomy"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('taxonomy')}
-              </div>
-            )}
-
-            {/* Consensus & Trends */}
-            {paper.explanation.consensusAndTrends && (
-              <div className="summary-block highlight-trends">
-                <h4 className="block-title">Scientific Consensus & Trends</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.consensusAndTrends}
-                    concepts={getConceptsForBlock('consensusAndTrends')}
-                    blockId="consensusAndTrends"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('consensusAndTrends')}
-              </div>
-            )}
-
-            {/* Open Challenges */}
-            {paper.explanation.openChallenges && (
-              <div className="summary-block">
-                <h4 className="block-title">Future Roadmap & Open Challenges</h4>
-                <p className="block-text">
-                  <InteractiveText
-                    text={paper.explanation.openChallenges}
-                    concepts={getConceptsForBlock('openChallenges')}
-                    blockId="openChallenges"
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                </p>
-                {renderConceptCard('openChallenges')}
-              </div>
-            )}
-          </>
+          </div>
         )}
 
         {/* Paradigm Shift: Vertical Timeline Block */}
@@ -707,6 +768,81 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           </p>
           {renderConceptCard('limitations')}
         </div>
+
+        {/* Paper Lineage (Built Upon & Influenced) */}
+        {!isLoadingMetadata && ((metadata.references && metadata.references.length > 0) || (metadata.citations && metadata.citations.length > 0)) && (
+          <div className="summary-block lineage-block">
+            <h4 className="block-title">Paper Lineage</h4>
+            
+            <div className="timeline-layout">
+              {/* Timeline Vertical Animated Track */}
+              <div className="timeline-track">
+                <div className="timeline-track-line" />
+                <div className="timeline-track-pulse" />
+              </div>
+
+              <div className="timeline-content-list">
+                {/* References (Built Upon) Group */}
+                {metadata.references && metadata.references.length > 0 && (
+                  <div className="timeline-section">
+                    <span className="timeline-section-title">🌱 Built Upon (Key References)</span>
+                    <div className="timeline-items">
+                      {metadata.references.map((ref, rIdx) => (
+                        <div key={`ref-${rIdx}`} className="timeline-item ref-item">
+                          <span className="timeline-item-dot ref-dot" />
+                          <a
+                            href={ref.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="timeline-item-link"
+                          >
+                            <span className="timeline-item-title">{ref.title}</span>
+                            <span className="timeline-item-meta">
+                              {ref.year && ` (${ref.year})`}
+                              {ref.citationCount !== undefined && ref.citationCount > 0 && ` • ⭐ ${ref.citationCount.toLocaleString()} citations`}
+                            </span>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Current Paper Node */}
+                <div className="timeline-current-divider">
+                  <div className="timeline-current-dot" />
+                  <span className="timeline-current-label">Current Paper</span>
+                </div>
+
+                {/* Citations (Influenced) Group */}
+                {metadata.citations && metadata.citations.length > 0 && (
+                  <div className="timeline-section">
+                    <span className="timeline-section-title">🔥 Influenced (Top Citations)</span>
+                    <div className="timeline-items">
+                      {metadata.citations.map((cit, cIdx) => (
+                        <div key={`cit-${cIdx}`} className="timeline-item cit-item">
+                          <span className="timeline-item-dot cit-dot" />
+                          <a
+                            href={cit.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="timeline-item-link"
+                          >
+                            <span className="timeline-item-title">{cit.title}</span>
+                            <span className="timeline-item-meta">
+                              {cit.year && ` (${cit.year})`}
+                              {cit.citationCount !== undefined && cit.citationCount > 0 && ` • ⭐ ${cit.citationCount.toLocaleString()} citations`}
+                            </span>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Metrics Section */}
@@ -760,11 +896,11 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             const url = metadata.pdfUrl || metadata.paperUrl || `https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title)}`;
             window.open(url, '_blank', 'noopener,noreferrer');
           }}
-          title="Read Paper PDF/Web"
+          title="Read Paper on Publisher Website"
           type="button"
         >
           <ExternalLink className="action-icon-small" />
-          <span>Read PDF</span>
+          <span>Read Paper</span>
         </button>
 
         <button
@@ -782,10 +918,10 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           width: 100%;
           max-width: var(--max-width-feed);
           border-radius: var(--radius-lg);
-          padding: 24px;
+          padding: 16px;
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 14px;
           transition: transform var(--transition-slow), opacity var(--transition-slow), border-color var(--transition-fast);
           position: relative;
           flex: 1;
@@ -1046,7 +1182,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         .metrics-grid {
           display: flex;
           gap: 10px;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
 
         .metric-badge {
@@ -1059,6 +1195,8 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           color: var(--text-secondary);
           font-weight: 500;
           font-family: var(--font-mono);
+          min-width: 0;
+          flex-shrink: 1;
         }
 
         .metric-icon {
@@ -1479,6 +1617,337 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         .concept-paper-link:hover {
           color: var(--color-primary);
           filter: brightness(1.2);
+        }
+
+        .lineage-block {
+          border-top: 1px dashed var(--border-glass);
+          padding-top: 16px;
+          margin-top: 12px;
+        }
+
+        .timeline-layout {
+          position: relative;
+          margin-top: 16px;
+          padding-left: 20px;
+        }
+
+        .timeline-track {
+          position: absolute;
+          top: 8px;
+          bottom: 8px;
+          left: 4px;
+          width: 2px;
+          pointer-events: none;
+        }
+
+        .timeline-track-line {
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.08);
+          border-radius: 1px;
+        }
+
+        .timeline-track-pulse {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 60px;
+          background: linear-gradient(to bottom, transparent, var(--color-primary), transparent);
+          animation: timelineGlowPulse 4s linear infinite;
+        }
+
+        @keyframes timelineGlowPulse {
+          0% { top: -10%; }
+          100% { top: 110%; }
+        }
+
+        .timeline-content-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .timeline-section {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .timeline-section-title {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-family: var(--font-mono);
+          margin-left: 4px;
+        }
+
+        .timeline-items {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .timeline-item {
+          position: relative;
+          padding-left: 12px;
+        }
+
+        .timeline-item-dot {
+          position: absolute;
+          left: -20px; /* Aligns with timeline-track line */
+          top: 5px;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--bg-darkest);
+          border: 2px solid var(--border-glass-bright);
+          transition: all var(--transition-fast);
+          z-index: 2;
+        }
+
+        .ref-item .timeline-item-dot {
+          border-color: #10b981;
+          box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+
+        .cit-item .timeline-item-dot {
+          border-color: #fb923c;
+          box-shadow: 0 0 6px rgba(251, 146, 96, 0.4);
+        }
+
+        .timeline-item:hover .timeline-item-dot {
+          transform: scale(1.25);
+          box-shadow: 0 0 10px currentColor;
+          background: currentColor;
+        }
+
+        .timeline-item-link {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          text-decoration: none;
+          text-align: left;
+        }
+
+        .timeline-item-title {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          line-height: 1.35;
+          transition: color var(--transition-fast);
+        }
+
+        .timeline-item-link:hover .timeline-item-title {
+          color: var(--text-primary);
+          text-decoration: underline;
+        }
+
+        .timeline-item-meta {
+          font-size: 0.72rem;
+          color: var(--text-muted);
+          font-family: var(--font-mono);
+        }
+
+        .timeline-current-divider {
+          position: relative;
+          padding-left: 12px;
+          display: flex;
+          align-items: center;
+          margin: 4px 0;
+        }
+
+        .timeline-current-dot {
+          position: absolute;
+          left: -21px; /* Align precisely center with track line */
+          top: 50%;
+          transform: translateY(-50%);
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: var(--bg-darkest);
+          border: 3px solid var(--color-primary);
+          box-shadow: 0 0 8px var(--color-primary-glow);
+          z-index: 3;
+        }
+
+        .timeline-current-label {
+          font-size: 0.7rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--color-primary);
+          font-family: var(--font-mono);
+        }
+
+        /* Under the Hood Accordion */
+        .under-the-hood-accordion {
+          margin-top: 16px;
+          border-radius: var(--radius-md);
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(255, 255, 255, 0.03);
+          overflow: hidden;
+          transition: all var(--transition-normal);
+        }
+
+        .under-the-hood-accordion.open {
+          background: rgba(255, 255, 255, 0.03);
+          border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .under-the-hood-header-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          outline: none;
+        }
+
+        .under-the-hood-title-wrap {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .under-the-hood-icon {
+          font-size: 1.1rem;
+        }
+
+        .under-the-hood-title {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: var(--color-primary);
+          letter-spacing: 0.02em;
+        }
+
+        .under-the-hood-arrow {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          transition: transform var(--transition-normal);
+        }
+
+        .under-the-hood-content {
+          padding: 8px 16px 20px 16px;
+          border-top: 1px dashed rgba(255, 255, 255, 0.04);
+          animation: accordionExpand 0.3s ease both;
+        }
+
+        @keyframes accordionExpand {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pipeline Steps Layout */
+        .under-the-hood-content .pipeline-layout {
+          position: relative;
+          padding-left: 24px;
+          margin-top: 8px;
+        }
+
+        .under-the-hood-content .pipeline-track {
+          position: absolute;
+          top: 10px;
+          bottom: 10px;
+          left: 8px;
+          width: 2px;
+          pointer-events: none;
+        }
+
+        .under-the-hood-content .pipeline-track-line {
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.06);
+          border-radius: 1px;
+        }
+
+        .under-the-hood-content .pipeline-track-pulse {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 40px;
+          background: linear-gradient(to bottom, transparent, var(--color-primary), transparent);
+          animation: timelineGlowPulse 3s linear infinite;
+        }
+
+        .pipeline-steps-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .pipeline-step {
+          position: relative;
+          text-align: left;
+        }
+
+        .pipeline-step-node {
+          position: absolute;
+          left: -25px; /* Align precisely center with pipeline track line */
+          top: 1px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: var(--bg-darkest);
+          border: 1.5px solid var(--color-primary);
+          box-shadow: 0 0 6px var(--color-primary-glow);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.65rem;
+          font-family: var(--font-mono);
+          font-weight: 700;
+          color: var(--color-primary);
+          z-index: 2;
+        }
+
+        .pipeline-step-label {
+          display: block;
+          font-size: 0.68rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-muted);
+          font-family: var(--font-mono);
+          margin-bottom: 4px;
+        }
+
+        @media (max-width: 480px) {
+          .card-footer {
+            gap: 6px;
+          }
+          .action-circle-btn {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+          }
+          .action-pill-btn {
+            height: 40px;
+            padding: 0 6px;
+            font-size: 0.72rem;
+            gap: 4px;
+            white-space: nowrap;
+          }
+          .action-pill-btn span {
+            font-size: 0.72rem;
+          }
+          .metrics-grid {
+            gap: 6px;
+          }
+          .metric-badge {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            gap: 4px;
+          }
+          .metric-value-long {
+            max-width: 100px;
+          }
         }
       `}</style>
     </div>

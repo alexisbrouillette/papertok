@@ -214,6 +214,8 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const completionFiredRef = useRef(false); // prevent double-fire
   const [loadingPastNode, setLoadingPastNode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastPaperScrolledToBottom, setLastPaperScrolledToBottom] = useState(false);
+  const [sentinelIntersected, setSentinelIntersected] = useState(false);
 
 
   // Local progress ratings and AI follow-up chat state
@@ -466,11 +468,22 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     }
   }, [papers, topic, debugDayOffset]);
 
+  // Make drawer fullscreen when selectedCategory (paper mode) is active
+  useEffect(() => {
+    if (selectedCategory) {
+      setDrawerFullscreen(true);
+    } else {
+      setDrawerFullscreen(false);
+    }
+  }, [selectedCategory]);
+
   /* Open node drawer */
   const handleNodeClick = async (nodeId: string) => {
     setOpenNodeId(nodeId);
     setSelectedCategory(null);
     completionFiredRef.current = false;
+    setLastPaperScrolledToBottom(false);
+    setSentinelIntersected(false);
     requestAnimationFrame(() => setDrawerVisible(true));
 
     const nodeIdx = parseInt(nodeId.replace('node-', ''), 10);
@@ -612,22 +625,13 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     const readObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const key = entry.target.getAttribute('data-paper-key') as CategoryKey;
           if (entry.isIntersecting) {
-            const key = entry.target.getAttribute('data-paper-key') as CategoryKey;
             markCategoryRead(openNodeId, key);
-
-            const isLast = key === availableKeys[availableKeys.length - 1];
-            if (isLast && !completionFiredRef.current) {
-              completionFiredRef.current = true;
-              setTimeout(() => {
-                setDrawerVisible(false);
-                setTimeout(() => {
-                  setOpenNodeId(null);
-                  setSelectedCategory(null);
-                  setShowCompletion(true);
-                }, 400);
-              }, 900);
-            }
+          }
+          const isLast = key === availableKeys[availableKeys.length - 1];
+          if (isLast) {
+            setSentinelIntersected(entry.isIntersecting);
           }
         });
       },
@@ -647,6 +651,23 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, openNodeId]);
+
+  // Trigger digest completion when both last paper is fully scrolled and sentinel is visible
+  useEffect(() => {
+    if (sentinelIntersected && lastPaperScrolledToBottom && !completionFiredRef.current) {
+      completionFiredRef.current = true;
+      const timer1 = setTimeout(() => {
+        setDrawerVisible(false);
+        const timer2 = setTimeout(() => {
+          setOpenNodeId(null);
+          setSelectedCategory(null);
+          setShowCompletion(true);
+        }, 400);
+        return () => clearTimeout(timer2);
+      }, 900);
+      return () => clearTimeout(timer1);
+    }
+  }, [sentinelIntersected, lastPaperScrolledToBottom]);
 
   const openNode = nodes.find((n) => n.id === openNodeId);
 
@@ -695,6 +716,10 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     onStreakUpdated?.(streak + 1);
     onAdvanceDay();
   };
+
+  if (typeof window !== 'undefined') {
+    (window as any).debugAdvanceDay = handleDebugAdvanceDay;
+  }
 
   return (
     <div className="digest-map-root">
@@ -941,7 +966,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
               const leftPx = pos.x;
               const topPx = pos.y - minY;
 
-              const nextNodePos = nodePositions[nodeIndex + 1];
 
               // Extract populated papers from the node to preview on the opposite side
               const paperNames = (Object.keys(node.papers) as CategoryKey[])
@@ -1021,35 +1045,22 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                     </div>
                     {isActive && <div className="digest-node-pulse" />}
                   </button>
-
-                  {isNodeComplete && nextNodePos && nodeIndex === nodes.length - 1 && (
-                    <div
-                      className="digest-completed-sleeping-card glass-panel anim-slide-up"
-                      style={{
-                        position: 'absolute',
-                        left: `${nextNodePos.x}px`,
-                        top: `${nextNodePos.y - minY - 10}px`,
-                        transform: 'translate(-50%, -100%)',
-                        width: 260,
-                      }}
-                    >
-                      <div className="sleeping-content">
-                        <h3 className="sleeping-title">All Caught Up!</h3>
-                        <div className="sleeping-timer">
-                          <span>⏳ Next digest in {timeLeft || '...'}</span>
-                        </div>
-                        <button className="debug-advance-btn" onClick={handleDebugAdvanceDay}>
-                          <RefreshCw size={12} /> Fast Forward
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </React.Fragment>
               );
             })}
           </div>
         </div>
       </div>
+      )}
+
+      {/* ── Fixed Bottom Sleeping Banner ── */}
+      {nodes.length > 0 && nodes[nodes.length - 1].readCategories.length === CATEGORIES.length && (
+        <div className="digest-completed-sleeping-card glass-panel anim-slide-up">
+          <div className="sleeping-content">
+            <span className="sleeping-title">All Caught Up!</span>
+            <span className="sleeping-timer">⏳ Next digest in {timeLeft || '...'}</span>
+          </div>
+        </div>
       )}
 
       {/* ── Slide-Up Drawer ── */}
@@ -1118,14 +1129,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                 <div
                   className="paper-stack-scroll"
                   ref={drawerRef}
-                  onScroll={(e) => {
-                    const scrollTop = e.currentTarget.scrollTop;
-                    if (scrollTop > 10) {
-                      setDrawerFullscreen(true);
-                    } else {
-                      setDrawerFullscreen(false);
-                    }
-                  }}
                 >
                   {CATEGORIES.map((cat, idx) => {
                     const paper = openNode.papers[cat.key];
@@ -1164,13 +1167,11 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                             index={idx}
                             total={total}
                             hideHeader={true}
-                            onContentScroll={(scrollTop) => {
-                              if (scrollTop > 10) {
-                                setDrawerFullscreen(true);
-                              } else {
-                                setDrawerFullscreen(false);
-                              }
-                            }}
+                              onContentScroll={(_, isBottom) => {
+                               if (isLast && isBottom) {
+                                 setLastPaperScrolledToBottom(true);
+                               }
+                             }}
                           >
                             <div className="paper-stack-title-header">
                               <div className="card-badge-header">
@@ -1480,6 +1481,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           flex: 1;
           min-height: 0;
           overflow-y: auto;
+          overflow-x: hidden;
           scrollbar-width: none; /* Firefox */
           display: flex;
           flex-direction: column;
@@ -1821,7 +1823,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           overflow-y: auto;
           overflow-x: hidden;
           overscroll-behavior: contain;
-          scroll-snap-type: y mandatory;
+          scroll-snap-type: y proximity;
           scroll-behavior: smooth;
         }
 
@@ -1830,7 +1832,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           display: flex;
           flex-direction: column;
           scroll-snap-align: start;
-          scroll-snap-stop: normal;
+          scroll-snap-stop: always;
           height: 100%;
           min-height: 100%;
           position: relative;
@@ -1890,7 +1892,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           background: transparent;
           border: 1px solid transparent;
           box-shadow: none;
-          padding: 16px 20px 24px;
+          padding: 10px 16px 16px;
           border-radius: var(--radius-lg);
           transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-normal);
         }
@@ -1955,7 +1957,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
+          padding: 8px 20px;
           gap: 8px;
           color: var(--text-muted);
           font-size: 0.75rem;
@@ -1979,7 +1981,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 32px 20px 48px;
+          padding: 16px 20px 24px;
           color: var(--text-muted);
           font-size: 0.85rem;
           font-weight: 600;
@@ -2650,33 +2652,41 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
         /* Sleeping card styles */
         .digest-completed-sleeping-card {
-          margin-top: 32px;
-          padding: 20px 24px;
-          width: 100%;
-          max-width: 320px;
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: calc(100% - 32px);
+          max-width: 380px;
+          padding: 10px 16px;
           display: flex;
           align-items: center;
-          gap: 16px;
+          justify-content: center;
           border: 1px solid rgba(27, 73, 49, 0.15);
-          background: rgba(251, 249, 244, 0.7);
+          background: rgba(251, 249, 244, 0.85);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          box-shadow: 0 8px 32px rgba(27, 73, 49, 0.08);
-          border-radius: var(--radius-lg);
-          animation: sleepingPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-          z-index: 5;
+          box-shadow: 0 8px 32px rgba(27, 73, 49, 0.12);
+          border-radius: var(--radius-md);
+          animation: sleepingPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+          z-index: 999;
           pointer-events: auto;
         }
         .digest-completed-sleeping-card .sleeping-content {
+          display: flex;
+          flex-direction: column;
           align-items: center;
+          justify-content: center;
+          gap: 4px;
           text-align: center;
+          width: 100%;
         }
         .sleeping-timer span {
           font-variant-numeric: tabular-nums;
         }
         @keyframes sleepingPopIn {
-          from { opacity: 0; transform: scale(0.9) translateY(12px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
+          from { opacity: 0; transform: translate(-50%, 20px) scale(0.95); }
+          to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
         .sleeping-avatar-container {
           position: relative;
@@ -2727,6 +2737,8 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           background: rgba(9,9,11,0.1);
           color: var(--text-primary);
         }
+
+
 
         /* ── Map Streak Badge ── */
         .map-streak-badge {

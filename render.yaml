@@ -3,19 +3,17 @@ services:
     name: papertok
     env: node
     plan: free
-    buildCommand: npm install && npm rebuild sqlite3 --build-from-source && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
-    disk:
-      name: papertok-db-disk
-      mountPath: /opt/render/project/src/database
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 20
-      - key: DATABASE_PATH
-        value: /opt/render/project/src/database/papertok.db
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: JWT_SECRET

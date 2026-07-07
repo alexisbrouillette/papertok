@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
     // Create user streak entry
     await dbRun('INSERT INTO user_streaks (user_id) VALUES (?)', [userId]);
 
-    const token = jwt.sign({ userId, username: username.trim() }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId, username: username.trim() }, JWT_SECRET, { expiresIn: '30d' });
     res.status(201).json({ token, username: username.trim() });
   } catch (err) {
     console.error('Registration failed:', err);
@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid username or password.' });
     }
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, username: user.username });
   } catch (err) {
     console.error('Login failed:', err);

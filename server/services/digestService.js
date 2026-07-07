@@ -59,9 +59,28 @@ async function generateContentWithFallback(genAI, primaryModelName, prompt, conf
 
 // --- LITERATURE METADATA FETCH HELPERS ---
 
+let lastS2RequestTime = 0;
+let s2RequestQueue = Promise.resolve();
+
 async function fetchFromSemanticScholar(query, apiKey) {
+  const resultPromise = s2RequestQueue.then(async () => {
+    const now = Date.now();
+    const timeSinceLast = now - lastS2RequestTime;
+    if (timeSinceLast < 1100) {
+      const waitTime = 1100 - timeSinceLast;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    lastS2RequestTime = Date.now();
+    return fetchFromSemanticScholarDirect(query, apiKey);
+  });
+
+  s2RequestQueue = resultPromise.catch(() => {}).then(() => new Promise(resolve => setTimeout(resolve, 100)));
+  return resultPromise;
+}
+
+async function fetchFromSemanticScholarDirect(query, apiKey) {
   const cleanQuery = encodeURIComponent(query);
-  const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${cleanQuery}&limit=1&fields=title,citationCount,venue,url,openAccessPdf`;
+  const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${cleanQuery}&limit=1&fields=paperId,title,citationCount,venue,url,openAccessPdf,externalIds`;
   
   const headers = {};
   if (apiKey && apiKey.trim() !== '') {
@@ -103,6 +122,67 @@ async function fetchFromSemanticScholar(query, apiKey) {
     }
   }
   throw new Error('Failed to query Semantic Scholar: maximum retries reached.');
+}
+
+async function fetchSemanticScholarDetailsDirect(paperId, apiKey) {
+  const url = `https://api.semanticscholar.org/graph/v1/paper/${paperId}?fields=citations.title,citations.url,citations.year,citations.citationCount,references.title,references.url,references.year,references.citationCount`;
+  
+  const headers = {};
+  if (apiKey && apiKey.trim() !== '') {
+    headers['x-api-key'] = apiKey.trim();
+  }
+
+  let attempts = 0;
+  const maxAttempts = 3;
+  let retryDelay = 2000;
+
+  while (attempts < maxAttempts) {
+    try {
+      const response = await fetch(url, { headers });
+      
+      if (response.status === 429) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw new Error('Semantic Scholar response not OK: 429 (exceeded maximum retries)');
+        }
+        console.warn(`[Semantic Scholar Rate Limit] 429. Retrying in ${retryDelay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        retryDelay *= 2.5;
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Semantic Scholar response not OK: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (err) {
+      if (attempts >= maxAttempts - 1) {
+        throw err;
+      }
+      attempts++;
+      console.warn(`[Semantic Scholar Query Error] ${err.message}. Retrying in ${retryDelay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      retryDelay *= 2.5;
+    }
+  }
+  throw new Error('Failed to query Semantic Scholar details: maximum retries reached.');
+}
+
+async function fetchSemanticScholarDetails(paperId, apiKey) {
+  const resultPromise = s2RequestQueue.then(async () => {
+    const now = Date.now();
+    const timeSinceLast = now - lastS2RequestTime;
+    if (timeSinceLast < 1100) {
+      const waitTime = 1100 - timeSinceLast;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    lastS2RequestTime = Date.now();
+    return fetchSemanticScholarDetailsDirect(paperId, apiKey);
+  });
+
+  s2RequestQueue = resultPromise.catch(() => {}).then(() => new Promise(resolve => setTimeout(resolve, 100)));
+  return resultPromise;
 }
 
 async function fetchFromEuropePMC(title) {
@@ -151,24 +231,146 @@ async function fetchFromArXiv(title) {
   }
 }
 
-export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
+async function fetchFromCrossRef(title) {
   try {
-    const searchResult = await fetchFromSemanticScholar(searchKeywords || title, s2ApiKey);
+    const cleanTitle = encodeURIComponent(title);
+    const url = `https://api.crossref.org/works?query.title=${cleanTitle}&rows=1`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    const item = data.message?.items?.[0];
+    if (!item) return null;
+    return {
+      citationCount: undefined,
+      venue: item['container-title']?.[0] || item.publisher || undefined,
+      pdfUrl: undefined,
+      paperUrl: item.DOI ? `https://doi.org/${item.DOI}` : item.URL || undefined,
+      source: 'crossref',
+      citations: [],
+      references: []
+    };
+  } catch (error) {
+    console.error('CrossRef fallback failed:', error);
+    return null;
+  }
+}
+
+export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
+  // Helper to sanitise arXiv PDF URLs to abstract page URLs to avoid 403 / Rate limit errors
+  const sanitiseArxivUrl = (url) => {
+    if (url && url.includes('arxiv.org/pdf/')) {
+      return url.replace('/pdf/', '/abs/').replace(/\.pdf$/, '').replace(/v\d+$/, '');
+    }
+    return url;
+  };
+
+  // 1. Try Semantic Scholar with exact title
+  try {
+    const searchResult = await fetchFromSemanticScholar(title, s2ApiKey);
     const paper = searchResult.data?.[0];
-    
     if (paper) {
+      const doi = paper.externalIds?.DOI;
+      let rawCitations = [];
+      let rawReferences = [];
+      if (paper.paperId) {
+        try {
+          console.log(`[Semantic Scholar] Fetching details for paperId: ${paper.paperId}`);
+          const details = await fetchSemanticScholarDetails(paper.paperId, s2ApiKey);
+          rawCitations = details.citations || [];
+          rawReferences = details.references || [];
+        } catch (detailErr) {
+          console.warn(`[Semantic Scholar] Failed to fetch nested details for ${paper.paperId}:`, detailErr.message);
+        }
+      }
+
+      const topReferences = rawReferences
+        .filter(r => r && r.title)
+        .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
+        .slice(0, 3)
+        .map(r => ({
+          title: r.title,
+          url: r.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(r.title)}`,
+          year: r.year || undefined
+        }));
+      const topCitations = rawCitations
+        .filter(c => c && c.title)
+        .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
+        .slice(0, 3)
+        .map(c => ({
+          title: c.title,
+          url: c.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(c.title)}`,
+          year: c.year || undefined
+        }));
+
       return {
         citationCount: paper.citationCount ?? undefined,
         venue: paper.venue || undefined,
-        pdfUrl: paper.openAccessPdf?.url || undefined,
-        paperUrl: paper.url || undefined,
-        source: 'semantic-scholar'
+        pdfUrl: sanitiseArxivUrl(paper.openAccessPdf?.url || undefined),
+        paperUrl: doi ? `https://doi.org/${doi}` : paper.url || undefined,
+        source: 'semantic-scholar',
+        citations: topCitations,
+        references: topReferences
       };
     }
   } catch (error) {
-    console.warn('Semantic Scholar query failed, attempting fallbacks...', error.message);
+    console.warn('Semantic Scholar exact title query failed, trying searchKeywords...', error.message);
   }
 
+  // 2. Try Semantic Scholar with searchKeywords
+  if (searchKeywords && searchKeywords !== title) {
+    try {
+      const searchResult = await fetchFromSemanticScholar(searchKeywords, s2ApiKey);
+      const paper = searchResult.data?.[0];
+      if (paper) {
+        const doi = paper.externalIds?.DOI;
+        let rawCitations = [];
+        let rawReferences = [];
+        if (paper.paperId) {
+          try {
+            console.log(`[Semantic Scholar] Fetching details for paperId: ${paper.paperId}`);
+            const details = await fetchSemanticScholarDetails(paper.paperId, s2ApiKey);
+            rawCitations = details.citations || [];
+            rawReferences = details.references || [];
+          } catch (detailErr) {
+            console.warn(`[Semantic Scholar] Failed to fetch nested details for ${paper.paperId}:`, detailErr.message);
+          }
+        }
+
+        const topReferences = rawReferences
+          .filter(r => r && r.title)
+          .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
+          .slice(0, 3)
+          .map(r => ({
+            title: r.title,
+            url: r.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(r.title)}`,
+            year: r.year || undefined
+          }));
+        const topCitations = rawCitations
+          .filter(c => c && c.title)
+          .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
+          .slice(0, 3)
+          .map(c => ({
+            title: c.title,
+            url: c.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(c.title)}`,
+            year: c.year || undefined
+          }));
+
+        return {
+          citationCount: paper.citationCount ?? undefined,
+          venue: paper.venue || undefined,
+          pdfUrl: sanitiseArxivUrl(paper.openAccessPdf?.url || undefined),
+          paperUrl: doi ? `https://doi.org/${doi}` : paper.url || undefined,
+          source: 'semantic-scholar',
+          citations: topCitations,
+          references: topReferences
+        };
+      }
+    } catch (error) {
+      console.warn('Semantic Scholar keywords query failed, attempting fallbacks...', error.message);
+    }
+  }
+
+  // 3. Try Europe PMC & arXiv fallbacks
   try {
     const [pmcResult, arxivResult] = await Promise.all([
       fetchFromEuropePMC(title),
@@ -176,21 +378,38 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
     ]);
 
     if (pmcResult || arxivResult) {
+      const doiUrl = pmcResult?.paperUrl; // DOI or PMC URL
+      const arxivPaperUrl = arxivResult?.paperUrl; // arXiv Abstract URL
       return {
         citationCount: pmcResult?.citationCount ?? undefined,
         venue: pmcResult?.venue ?? (arxivResult ? 'arXiv Preprint' : undefined),
-        pdfUrl: arxivResult?.pdfUrl ?? undefined,
-        paperUrl: arxivResult?.paperUrl ?? pmcResult?.paperUrl ?? undefined,
-        source: 'fallback-apis'
+        pdfUrl: sanitiseArxivUrl(arxivResult?.pdfUrl || undefined),
+        paperUrl: doiUrl || arxivPaperUrl || undefined,
+        source: 'fallback-apis',
+        citations: [],
+        references: []
       };
     }
   } catch (error) {
-    console.error('Fallback APIs failed:', error);
+    console.error('Fallback APIs (Europe PMC/arXiv) failed:', error);
   }
 
+  // 4. Try CrossRef fallback by exact title
+  try {
+    const crossRefResult = await fetchFromCrossRef(title);
+    if (crossRefResult) {
+      return crossRefResult;
+    }
+  } catch (error) {
+    console.error('CrossRef fallback failed:', error);
+  }
+
+  // 5. Google Scholar fallback search page
   return {
     paperUrl: `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`,
-    source: 'google-scholar'
+    source: 'google-scholar',
+    citations: [],
+    references: []
   };
 }
 
@@ -355,21 +574,44 @@ export async function generateAndCacheDigest(topic, digestDate, geminiApiKey, on
   const cleanTopic = topic.trim();
   const genAI = new GoogleGenerativeAI(geminiApiKey);
 
-  // Fetch papers the user has already read
+  // Fetch all papers previously suggested to the user (read OR just shown in any past digest)
   let excludedPapersList = [];
   if (userId) {
+    // 1. Papers the user has opened/read
     try {
-      const rows = await dbAll('SELECT DISTINCT paper_title FROM reading_progress WHERE user_id = ?', [userId]);
-      excludedPapersList = rows.map(r => r.paper_title);
+      const readRows = await dbAll('SELECT DISTINCT paper_title FROM reading_progress WHERE user_id = ?', [userId]);
+      for (const r of readRows) excludedPapersList.push(r.paper_title);
     } catch (dbErr) {
       console.error('[DigestService] Failed to fetch user read history for exclusion:', dbErr);
     }
+
+    // 2. Papers that appeared in any previously generated digest (even if never opened)
+    try {
+      const digestRows = await dbAll('SELECT papers_json FROM cached_digests WHERE user_id = ?', [userId]);
+      for (const row of digestRows) {
+        try {
+          const papers = JSON.parse(row.papers_json);
+          if (Array.isArray(papers)) {
+            for (const p of papers) {
+              if (p.title) excludedPapersList.push(p.title);
+            }
+          }
+        } catch (_) {
+          // Ignore malformed cache rows
+        }
+      }
+    } catch (dbErr) {
+      console.error('[DigestService] Failed to fetch past digests for exclusion:', dbErr);
+    }
+
+    // Deduplicate
+    excludedPapersList = [...new Set(excludedPapersList)];
   }
 
   let exclusionPromptPart = '';
   if (excludedPapersList.length > 0) {
     exclusionPromptPart = `
-CRITICAL: DO NOT SELECT any of the following papers under any circumstances because the user has already read/seen them in their history:
+CRITICAL: DO NOT SELECT any of the following papers under any circumstances because the user has already seen them suggested before:
 ${excludedPapersList.map(title => `- "${title}"`).join('\n')}
 
 Ensure that the 5 landmark papers you select are completely different from this list, even if they are closely related or from the same authors. Use other landmark publications.`;

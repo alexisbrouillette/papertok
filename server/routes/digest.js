@@ -167,7 +167,9 @@ router.get('/details', requireAuth, async (req, res) => {
 
   try {
     const userKeys = await dbGet('SELECT s2_key FROM user_keys WHERE user_id = ?', [userId]);
-    const s2ApiKey = userKeys?.s2_key || '';
+    const s2ApiKey = (userKeys?.s2_key && userKeys.s2_key.trim() !== '')
+      ? userKeys.s2_key.trim()
+      : (process.env.SEMANTIC_SCHOLAR_API_KEY || '');
 
     const metadata = await enrichPaperMetadata(title, searchKeywords, s2ApiKey);
     res.json(metadata);

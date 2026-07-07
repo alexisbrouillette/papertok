@@ -1,36 +1,28 @@
-import sqlite3 from 'sqlite3';
+import { createClient } from '@libsql/client';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = process.env.DATABASE_PATH || join(__dirname, 'papertok.db');
-const dbDir = dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
+// In dev (no TURSO_DATABASE_URL), use a local SQLite file via libSQL's file: protocol.
+// In production (Render + Turso), use the cloud URL + auth token.
+const url = process.env.TURSO_DATABASE_URL || `file:${join(__dirname, 'papertok.db')}`;
+const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
+
+export const client = createClient({ url, authToken });
 
 let resolveDbReady;
 export const dbReady = new Promise((resolve) => {
   resolveDbReady = resolve;
 });
 
-export const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Failed to connect to SQLite database:', err);
-    resolveDbReady(); // Resolve to avoid hanging server
-  } else {
-    console.log('Connected to SQLite database at:', dbPath);
-    initializeSchema();
-  }
-});
+async function initializeSchema() {
+  try {
+    console.log(`[DB] Connecting to: ${url.startsWith('file:') ? url : url.replace(/\/\/.*@/, '//<credentials>@')}`);
 
-function initializeSchema() {
-  db.serialize(() => {
     // 1. Users table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
@@ -40,7 +32,7 @@ function initializeSchema() {
     `);
 
     // 2. User API keys table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS user_keys (
         user_id INTEGER PRIMARY KEY,
         gemini_key TEXT,
@@ -50,7 +42,7 @@ function initializeSchema() {
     `);
 
     // 3. Reading progress table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS reading_progress (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -64,7 +56,7 @@ function initializeSchema() {
     `);
 
     // 4. User streaks table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS user_streaks (
         user_id INTEGER PRIMARY KEY,
         current_streak INTEGER DEFAULT 0,
@@ -74,7 +66,7 @@ function initializeSchema() {
     `);
 
     // 5. User-specific digests cache table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS cached_digests (
         user_id INTEGER NOT NULL,
         topic TEXT NOT NULL,
@@ -87,7 +79,7 @@ function initializeSchema() {
     `);
 
     // 6. Push notifications subscription table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS push_subscriptions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -98,7 +90,7 @@ function initializeSchema() {
     `);
 
     // 7. Background digest generation queue table
-    db.run(`
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS generation_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -113,47 +105,60 @@ function initializeSchema() {
       )
     `);
 
-    // Safely add columns if table already exists
-    db.run(`ALTER TABLE generation_queue ADD COLUMN priority INTEGER DEFAULT 0`, () => {});
-    db.run(`ALTER TABLE generation_queue ADD COLUMN progress INTEGER DEFAULT 0`, () => {});
-    db.run(`ALTER TABLE generation_queue ADD COLUMN status_text TEXT`, () => {});
+    // Safely add columns that may not exist yet (ignore errors if column already exists)
+    const safeAlters = [
+      `ALTER TABLE generation_queue ADD COLUMN priority INTEGER DEFAULT 0`,
+      `ALTER TABLE generation_queue ADD COLUMN progress INTEGER DEFAULT 0`,
+      `ALTER TABLE generation_queue ADD COLUMN status_text TEXT`,
+      `ALTER TABLE user_streaks ADD COLUMN last_unlock_alert_sent_at DATETIME`,
+      `ALTER TABLE user_streaks ADD COLUMN last_reminder_sent_date TEXT`,
+    ];
+    for (const stmt of safeAlters) {
+      try {
+        await client.execute(stmt);
+      } catch (_) {
+        // Column already exists — ignore
+      }
+    }
 
-    // Safely add notification tracking columns to user_streaks
-    db.run(`ALTER TABLE user_streaks ADD COLUMN last_unlock_alert_sent_at DATETIME`, () => {});
-    db.run(`ALTER TABLE user_streaks ADD COLUMN last_reminder_sent_date TEXT`, () => {});
-
-    db.run("SELECT 1", (err) => {
-      if (err) console.error('Failed to complete DB initialization:', err);
-      else console.log('SQLite database schemas initialized.');
-      resolveDbReady();
-    });
-  });
+    console.log('[DB] Database schemas initialized.');
+  } catch (err) {
+    console.error('[DB] Failed to initialize schema:', err);
+  } finally {
+    resolveDbReady();
+  }
 }
 
-// Promise-based query wrappers for async/await usage
-export function dbRun(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve({ lastID: this.lastID, changes: this.changes });
-    });
-  });
+initializeSchema();
+
+// ── Promise-based query helpers (same API surface as before) ─────────────────
+
+/**
+ * Execute a write statement (INSERT, UPDATE, DELETE, CREATE, etc.)
+ * Returns { lastID, changes } to match the old sqlite3 API.
+ */
+export async function dbRun(sql, params = []) {
+  const result = await client.execute({ sql, args: params });
+  return { lastID: Number(result.lastInsertRowid ?? 0), changes: result.rowsAffected ?? 0 };
 }
 
-export function dbGet(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
+/**
+ * Fetch a single row. Returns a plain object or undefined.
+ */
+export async function dbGet(sql, params = []) {
+  const result = await client.execute({ sql, args: params });
+  const row = result.rows[0];
+  if (!row) return undefined;
+  // Convert libSQL Row (array-like + named props) to a plain JS object
+  return Object.fromEntries(result.columns.map((col, i) => [col, row[i]]));
 }
 
-export function dbAll(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+/**
+ * Fetch all matching rows. Returns an array of plain objects.
+ */
+export async function dbAll(sql, params = []) {
+  const result = await client.execute({ sql, args: params });
+  return result.rows.map(row =>
+    Object.fromEntries(result.columns.map((col, i) => [col, row[i]]))
+  );
 }

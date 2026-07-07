@@ -79,7 +79,14 @@ function App() {
           headers: { 'Authorization': `Bearer ${savedToken}` }
         });
         if (!keysRes.ok) {
-          throw new Error('Session expired or invalid.');
+          if (keysRes.status === 401) {
+            // Token is truly invalid/expired — clear it
+            handleSignOut();
+          } else {
+            // Transient error (server starting up, etc.) — just show login without wiping credentials
+            setCurrentScreen('login');
+          }
+          return;
         }
         const keysData = await keysRes.json();
         setGeminiApiKey(keysData.geminiKey || '');
@@ -116,7 +123,8 @@ function App() {
         }
       } catch (err) {
         console.error('Session validation failed on mount:', err);
-        handleSignOut();
+        // Only clear credentials if we know the token is invalid (not just a network hiccup)
+        setCurrentScreen('login');
       }
     };
 

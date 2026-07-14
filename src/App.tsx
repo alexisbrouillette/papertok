@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { KeyGate } from './components/KeyGate';
 import { SearchScreen } from './components/SearchScreen';
 import { Settings } from './components/Settings';
@@ -36,7 +36,7 @@ function App() {
     setCurrentScreen('login');
   };
 
-  const refreshStreak = useCallback(async (savedToken: string) => {
+  const refreshStreak = async (savedToken: string) => {
     try {
       const res = await fetch('/api/progress', {
         headers: { 'Authorization': `Bearer ${savedToken}` }
@@ -48,7 +48,7 @@ function App() {
     } catch (err) {
       console.error('Failed to refresh streak:', err);
     }
-  }, []);
+  };
 
   // Load configuration and history on startup
   const handleLoginSuccess = async (newToken: string, newUsername: string) => {
@@ -95,7 +95,7 @@ function App() {
     setCurrentScreen('search');
   };
 
-  const handleSearch = useCallback(async (query: string, bypassCache = false, dayOffset = 0) => {
+  const handleSearch = async (query: string, bypassCache = false, dayOffset = 0) => {
     if (!query || query.trim() === '') return;
     
     // If selecting the currently active topic and we already have papers, just return to the map instantly
@@ -120,17 +120,24 @@ function App() {
     if (dayOffset === 0) {
       try {
         const token = localStorage.getItem('papertok_token');
-        const res = await fetch('/api/progress', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const readList = data.readPapers || [];
-        const papersForThisTopic = readList.filter((r: { topic: string }) => r.topic.toLowerCase() === query.toLowerCase());
-          targetOffset = Math.floor(papersForThisTopic.length / 5);
+        const [progressRes, historyRes] = await Promise.all([
+          fetch('/api/progress', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`/api/digest/history?topic=${encodeURIComponent(query)}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        if (progressRes.ok && historyRes.ok) {
+          const progressData = await progressRes.json();
+          const historyData = await historyRes.json();
+          const readList = progressData.readPapers || [];
+          const historyList = historyData.history || [];
+          const papersForThisTopic = readList.filter((r: { topic: string }) => r.topic.toLowerCase() === query.toLowerCase());
+          const completedDays = Math.floor(papersForThisTopic.length / 5);
+          
+          // Clamp targetOffset to the maximum generated day in history
+          targetOffset = Math.min(completedDays, Math.max(0, historyList.length - 1));
         }
       } catch (err) {
-        console.error('Failed to pre-fetch progress for day offset calculation:', err);
+        console.error('Failed to pre-fetch progress and history for day offset calculation:', err);
       }
     }
     setDebugDayOffset(targetOffset);
@@ -203,7 +210,7 @@ function App() {
       const errMsg = err instanceof Error ? err.message : String(err);
       setError(errMsg || 'Failed to generate literature papers. Please verify your Gemini API key or search term and try again.');
     }
-  }, [activeTopic, papers, searchHistory, geminiApiKey]);
+  };
 
   // Load configuration and history on startup
   useEffect(() => {
@@ -272,7 +279,8 @@ function App() {
     };
 
     fetchUserData();
-  }, [handleSearch, refreshStreak]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUpdateTopic = async (newTopic: string) => {
     const historyList = Array.isArray(searchHistory) ? searchHistory : [];

@@ -213,14 +213,17 @@ async function fetchFromArXiv(title) {
     const response = await fetch(url);
     if (!response.ok) return null;
     const xmlText = await response.text();
+    const entryMatch = xmlText.match(/<entry>([\s\S]*?)<\/entry>/);
+    if (!entryMatch) return null;
+    const entryXml = entryMatch[1];
 
-    const pdfMatch = xmlText.match(/<link[^>]*title="pdf"[^>]*href="([^"]+)"/);
+    const pdfMatch = entryXml.match(/<link[^>]*title="pdf"[^>]*href="([^"]+)"/);
     const pdfUrl = pdfMatch ? pdfMatch[1] : undefined;
 
-    const htmlMatch = xmlText.match(/<link[^>]*type="text\/html"[^>]*href="([^"]+)"/);
+    const htmlMatch = entryXml.match(/<link[^>]*type="text\/html"[^>]*href="([^"]+)"/);
     let paperUrl = htmlMatch ? htmlMatch[1] : undefined;
     if (!paperUrl) {
-      const idMatch = xmlText.match(/<id>([^<]+)<\/id>/);
+      const idMatch = entryXml.match(/<id>([^<]+)<\/id>/);
       paperUrl = idMatch ? idMatch[1].trim() : undefined;
     }
 
@@ -254,7 +257,6 @@ async function fetchFromCrossRef(title) {
     return null;
   }
 }
-
 export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
   // Helper to sanitise arXiv PDF URLs to abstract page URLs to avoid 403 / Rate limit errors
   const sanitiseArxivUrl = (url) => {
@@ -264,78 +266,30 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
     return url;
   };
 
-  // 1. Try Semantic Scholar with exact title
-  try {
-    const searchResult = await fetchFromSemanticScholar(title, s2ApiKey);
-    const paper = searchResult.data?.[0];
-    if (paper) {
-      const doi = paper.externalIds?.DOI;
-      let rawCitations = [];
-      let rawReferences = [];
-      if (paper.paperId) {
-        try {
-          console.log(`[Semantic Scholar] Fetching details for paperId: ${paper.paperId}`);
-          const details = await fetchSemanticScholarDetails(paper.paperId, s2ApiKey);
-          rawCitations = details.citations || [];
-          rawReferences = details.references || [];
-        } catch (detailErr) {
-          console.warn(`[Semantic Scholar] Failed to fetch nested details for ${paper.paperId}:`, detailErr.message);
-        }
-      }
+  // Helper to compare title similarity to prevent mixing up papers
+  const isTitleMatch = (t1, t2) => {
+    const clean = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim().split(/\s+/).filter(Boolean);
+    const words1 = clean(t1);
+    const words2 = clean(t2);
+    if (words1.length === 0 || words2.length === 0) return false;
+    
+    // Check intersection size
+    const set2 = new Set(words2);
+    const intersection = words1.filter(w => set2.has(w));
+    const similarity = intersection.length / Math.max(words1.length, words2.length);
+    return similarity >= 0.85; // Require at least 85% of words to match exactly
+  };
 
-      const topReferences = rawReferences
-        .filter(r => r && r.title)
-        .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
-        .slice(0, 3)
-        .map(r => ({
-          title: r.title,
-          url: r.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(r.title)}`,
-          year: r.year || undefined
-        }));
-      const topCitations = rawCitations
-        .filter(c => c && c.title)
-        .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
-        .slice(0, 3)
-        .map(c => ({
-          title: c.title,
-          url: c.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(c.title)}`,
-          year: c.year || undefined
-        }));
-
-      return {
-        citationCount: paper.citationCount ?? undefined,
-        venue: paper.venue || undefined,
-        pdfUrl: sanitiseArxivUrl(paper.openAccessPdf?.url || undefined),
-        paperUrl: doi ? `https://doi.org/${doi}` : paper.url || undefined,
-        source: 'semantic-scholar',
-        citations: topCitations,
-        references: topReferences
-      };
-    }
-  } catch (error) {
-    console.warn('Semantic Scholar exact title query failed, trying searchKeywords...', error.message);
-  }
-
-  // 2. Try Semantic Scholar with searchKeywords
-  if (searchKeywords && searchKeywords !== title) {
+  const fetchLineageFromSemanticScholar = async (paperTitle) => {
     try {
-      const searchResult = await fetchFromSemanticScholar(searchKeywords, s2ApiKey);
+      const searchResult = await fetchFromSemanticScholar(paperTitle, s2ApiKey);
       const paper = searchResult.data?.[0];
-      if (paper) {
-        const doi = paper.externalIds?.DOI;
-        let rawCitations = [];
-        let rawReferences = [];
-        if (paper.paperId) {
-          try {
-            console.log(`[Semantic Scholar] Fetching details for paperId: ${paper.paperId}`);
-            const details = await fetchSemanticScholarDetails(paper.paperId, s2ApiKey);
-            rawCitations = details.citations || [];
-            rawReferences = details.references || [];
-          } catch (detailErr) {
-            console.warn(`[Semantic Scholar] Failed to fetch nested details for ${paper.paperId}:`, detailErr.message);
-          }
-        }
-
+      if (paper && paper.paperId && isTitleMatch(paperTitle, paper.title)) {
+        console.log(`[Semantic Scholar] Fetching details for lineage: ${paper.paperId}`);
+        const details = await fetchSemanticScholarDetails(paper.paperId, s2ApiKey);
+        const rawCitations = details.citations || [];
+        const rawReferences = details.references || [];
+        
         const topReferences = rawReferences
           .filter(r => r && r.title)
           .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
@@ -345,6 +299,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
             url: r.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(r.title)}`,
             year: r.year || undefined
           }));
+          
         const topCitations = rawCitations
           .filter(c => c && c.title)
           .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
@@ -354,20 +309,44 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
             url: c.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(c.title)}`,
             year: c.year || undefined
           }));
+          
+        return { citations: topCitations, references: topReferences, s2Paper: paper };
+      }
+    } catch (err) {
+      console.warn(`[Semantic Scholar] Failed to fetch lineage for "${paperTitle}":`, err.message);
+    }
+    return { citations: [], references: [] };
+  };
 
+  const { execSync } = await import('child_process');
+  const { join } = await import('path');
+  const { fileURLToPath } = await import('url');
+  const __dirname = join(fileURLToPath(import.meta.url), '..');
+
+  // 1. Try Google Scholar Scraper first
+  try {
+    const scriptPath = join(__dirname, '../scripts/google_scholar_search.py');
+    const stdout = execSync(`python3 "${scriptPath}" "${title.replace(/"/g, '\\"')}"`, { encoding: 'utf8', timeout: 15000 });
+    const results = JSON.parse(stdout);
+    
+    if (Array.isArray(results) && results.length > 0) {
+      const topResult = results[0];
+      if (topResult.title && topResult.url && isTitleMatch(title, topResult.title)) {
+        console.log(`[Google Scholar Scraper] Validated paper link: "${topResult.title}"`);
+        const lineage = await fetchLineageFromSemanticScholar(title);
         return {
-          citationCount: paper.citationCount ?? undefined,
-          venue: paper.venue || undefined,
-          pdfUrl: sanitiseArxivUrl(paper.openAccessPdf?.url || undefined),
-          paperUrl: doi ? `https://doi.org/${doi}` : paper.url || undefined,
-          source: 'semantic-scholar',
-          citations: topCitations,
-          references: topReferences
+          citationCount: topResult.citationCount || lineage.s2Paper?.citationCount || undefined,
+          venue: topResult.venue || lineage.s2Paper?.venue || undefined,
+          pdfUrl: sanitiseArxivUrl(topResult.url),
+          paperUrl: topResult.url,
+          source: 'google-scholar-scrape',
+          citations: lineage.citations,
+          references: lineage.references
         };
       }
-    } catch (error) {
-      console.warn('Semantic Scholar keywords query failed, attempting fallbacks...', error.message);
     }
+  } catch (err) {
+    console.warn(`[Google Scholar Scraper] Failed to fetch metadata for "${title}":`, err.message);
   }
 
   // 3. Try Europe PMC & arXiv fallbacks
@@ -380,14 +359,15 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
     if (pmcResult || arxivResult) {
       const doiUrl = pmcResult?.paperUrl; // DOI or PMC URL
       const arxivPaperUrl = arxivResult?.paperUrl; // arXiv Abstract URL
+      const lineage = await fetchLineageFromSemanticScholar(title);
       return {
-        citationCount: pmcResult?.citationCount ?? undefined,
-        venue: pmcResult?.venue ?? (arxivResult ? 'arXiv Preprint' : undefined),
+        citationCount: pmcResult?.citationCount ?? lineage.s2Paper?.citationCount ?? undefined,
+        venue: pmcResult?.venue ?? (arxivResult ? 'arXiv Preprint' : undefined) ?? lineage.s2Paper?.venue,
         pdfUrl: sanitiseArxivUrl(arxivResult?.pdfUrl || undefined),
         paperUrl: doiUrl || arxivPaperUrl || undefined,
         source: 'fallback-apis',
-        citations: [],
-        references: []
+        citations: lineage.citations,
+        references: lineage.references
       };
     }
   } catch (error) {
@@ -398,18 +378,24 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
   try {
     const crossRefResult = await fetchFromCrossRef(title);
     if (crossRefResult) {
-      return crossRefResult;
+      const lineage = await fetchLineageFromSemanticScholar(title);
+      return {
+        ...crossRefResult,
+        citations: lineage.citations,
+        references: lineage.references
+      };
     }
   } catch (error) {
     console.error('CrossRef fallback failed:', error);
   }
 
   // 5. Google Scholar fallback search page
+  const lineage = await fetchLineageFromSemanticScholar(title);
   return {
     paperUrl: `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`,
     source: 'google-scholar',
-    citations: [],
-    references: []
+    citations: lineage.citations,
+    references: lineage.references
   };
 }
 
@@ -631,11 +617,18 @@ Generate exactly 5 highly-targeted search queries to discover real papers on Goo
 4. 'surprise': A landmark paper from a completely different scientific discipline that uses similar mathematical, algorithmic, or structural principles (e.g., matching graph theory in social networks to molecular chemistry).
 5. 'wildcard': A niche, interesting, or lesser-known application or study related to their interest.
 
+For each category, you must also provide a real-world, actual landmark/representative paper that you know exists in the scientific literature as a fallback. Do not make up a dummy paper; it must be a real, verifiable publication.
+
 Format your response as a JSON array containing exactly 5 objects, ordered precisely in the sequence above (foundation, crossfield, novel, surprise, wildcard). Each object must match this schema:
 {
   "category": "foundation" | "crossfield" | "novel" | "surprise" | "wildcard",
   "searchQuery": "string - the optimal, specific Google Scholar search query",
-  "rationale": "string - why this query matches the category and how it connects to the user's topic"
+  "rationale": "string - why this query matches the category and how it connects to the user's topic",
+  "fallbackPaperTitle": "string - the exact title of a real, well-known paper matching this category",
+  "fallbackAuthors": "string - the actual authors of this real paper",
+  "fallbackYear": "integer - the actual publication year",
+  "fallbackVenue": "string - the actual publication journal/conference/venue",
+  "fallbackAbstract": "string - a brief 2-3 sentence summary of the paper's core contribution"
 }`;
 
   const queryConfig = {
@@ -650,9 +643,23 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
             enum: ["foundation", "surprise", "crossfield", "novel", "wildcard"]
           },
           searchQuery: { type: "STRING" },
-          rationale: { type: "STRING" }
+          rationale: { type: "STRING" },
+          fallbackPaperTitle: { type: "STRING" },
+          fallbackAuthors: { type: "STRING" },
+          fallbackYear: { type: "INTEGER" },
+          fallbackVenue: { type: "STRING" },
+          fallbackAbstract: { type: "STRING" }
         },
-        required: ["category", "searchQuery", "rationale"]
+        required: [
+          "category",
+          "searchQuery",
+          "rationale",
+          "fallbackPaperTitle",
+          "fallbackAuthors",
+          "fallbackYear",
+          "fallbackVenue",
+          "fallbackAbstract"
+        ]
       }
     }
   };
@@ -683,16 +690,14 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
     console.log(`[DigestService] Running search for category "${item.category}": "${item.searchQuery}"`);
     let paper = null;
 
-    // 1. Try Google Scholar Scraper
+    // 1. Try Google Scholar Scraper with main search query
     try {
       const scriptPath = join(__dirname, '../scripts/google_scholar_search.py');
       const stdout = execSync(`python3 "${scriptPath}" "${item.searchQuery.replace(/"/g, '\\"')}"`, { encoding: 'utf8', timeout: 15000 });
       const results = JSON.parse(stdout);
       
       if (Array.isArray(results) && results.length > 0) {
-        // Grab the first result
         const topResult = results[0];
-        // Only accept if we have a title and URL
         if (topResult.title && topResult.url) {
           paper = {
             category: item.category,
@@ -712,9 +717,9 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
       console.warn(`[DigestService] Google Scholar scrape failed for query "${item.searchQuery}":`, err.message);
     }
 
-    // 2. Fallback to Semantic Scholar API search if scraper failed
+    // 2. Fallback to Semantic Scholar API search for search query
     if (!paper) {
-      console.log(`[DigestService] Falling back to Semantic Scholar for: "${item.searchQuery}"`);
+      console.log(`[DigestService] Falling back to Semantic Scholar for query: "${item.searchQuery}"`);
       try {
         const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
         const searchResult = await fetchFromSemanticScholar(item.searchQuery, s2ApiKey);
@@ -739,17 +744,75 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
       }
     }
 
-    // 3. Absolute fallback: Create a dummy entry if both failed to ensure the pipeline doesn't break
+    // 3. Fallback: Try searching specifically for the real fallback paper title suggested by Gemini
+    if (!paper && item.fallbackPaperTitle) {
+      console.log(`[DigestService] Attempting specific search for fallback paper: "${item.fallbackPaperTitle}"`);
+      // A. Try Google Scholar Scraper for specific title
+      try {
+        const scriptPath = join(__dirname, '../scripts/google_scholar_search.py');
+        const stdout = execSync(`python3 "${scriptPath}" "${item.fallbackPaperTitle.replace(/"/g, '\\"')}"`, { encoding: 'utf8', timeout: 15000 });
+        const results = JSON.parse(stdout);
+        
+        if (Array.isArray(results) && results.length > 0) {
+          const topResult = results[0];
+          // Use looser match verification for fallback specific title
+          if (topResult.title && topResult.url) {
+            paper = {
+              category: item.category,
+              title: topResult.title,
+              url: topResult.url,
+              authors: topResult.authors || item.fallbackAuthors,
+              year: topResult.year || item.fallbackYear,
+              venue: topResult.venue || item.fallbackVenue,
+              citationCount: topResult.citationCount || 0,
+              abstract: topResult.abstract || item.fallbackAbstract,
+              rationale: item.rationale
+            };
+            console.log(`[DigestService] Google Scholar specific match for fallback: "${paper.title}"`);
+          }
+        }
+      } catch (err) {
+        console.warn(`[DigestService] Google Scholar specific fallback search failed:`, err.message);
+      }
+
+      // B. Try Semantic Scholar API for specific title
+      if (!paper) {
+        try {
+          const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
+          const searchResult = await fetchFromSemanticScholar(item.fallbackPaperTitle, s2ApiKey);
+          const topResult = searchResult.data?.[0];
+          if (topResult) {
+            paper = {
+              category: item.category,
+              title: topResult.title,
+              url: topResult.url || `https://scholar.google.com/scholar?q=${encodeURIComponent(topResult.title)}`,
+              authors: (topResult.authors || []).map(a => a.name).join(', ') || item.fallbackAuthors,
+              year: topResult.year || item.fallbackYear,
+              venue: topResult.venue || item.fallbackVenue,
+              citationCount: topResult.citationCount || 0,
+              abstract: topResult.abstract || item.fallbackAbstract,
+              rationale: item.rationale
+            };
+            console.log(`[DigestService] Semantic Scholar specific match for fallback: "${paper.title}"`);
+          }
+        } catch (err) {
+          console.error(`[DigestService] Semantic Scholar specific fallback search failed:`, err.message);
+        }
+      }
+    }
+
+    // 4. Absolute fallback: If all searches fail, use the real paper details provided by Gemini
     if (!paper) {
+      console.log(`[DigestService] Fallback to Gemini-suggested real paper metadata for: "${item.fallbackPaperTitle}"`);
       paper = {
         category: item.category,
-        title: ` Landmark study in ${item.category} classification`,
-        url: `https://scholar.google.com/scholar?q=${encodeURIComponent(item.searchQuery)}`,
-        authors: 'Various Researchers',
-        year: new Date().getFullYear() - 2,
-        venue: 'Specialized Scientific Forum',
-        citationCount: 15,
-        abstract: `This paper addresses key elements of the query: ${item.searchQuery}. It outlines foundational methodologies and results.`,
+        title: item.fallbackPaperTitle,
+        url: `https://scholar.google.com/scholar?q=${encodeURIComponent(item.fallbackPaperTitle)}`,
+        authors: item.fallbackAuthors || 'Various Researchers',
+        year: item.fallbackYear || new Date().getFullYear() - 2,
+        venue: item.fallbackVenue || 'Specialized Scientific Forum',
+        citationCount: 0,
+        abstract: item.fallbackAbstract || `This paper explores concepts related to ${item.searchQuery}.`,
         rationale: item.rationale
       };
     }
@@ -786,10 +849,11 @@ For EACH paper, generate:
    - 'theoretical': If it is a math-heavy paper proving theorems or complexity limits.
    - 'review_survey': If it is a review article surveying a large body of literature.
 2. Under "explanation", adapt style accordingly:
-   - For methodology/theoretical, specify strategyUsed ('metaphor', 'analogy', or 'contrast') and write a spot-on coreIntuition explanation.
-   - For empirical study, explain researchQuestion, studySetup, keyFindings, and interpretation.
-   - For review/survey, explain surveyScope, taxonomy, consensusAndTrends, and openChallenges.
+    - For methodology/theoretical, specify strategyUsed ('metaphor', 'analogy', or 'contrast') and write a spot-on coreIntuition explanation. If the genre is 'methodology', provide a comprehensive list of at least 3 distinct, granular sub-components or algorithmic/implementation steps in the 'deconstructedParts' array.
+    - For empirical study, explain researchQuestion, studySetup, keyFindings, and interpretation.
+    - For review/survey, explain surveyScope, taxonomy, consensusAndTrends, and openChallenges.
 3. Identify technical terms, acronyms, prior methods, or baseline models mentioned in your explanations and extract them under "taggedConcepts" (excluding the paper itself).
+4. Extract "achievements" (Key achievements and results of the paper, 2-3 sentences) and "limitations" (Shortcomings, gaps, or assumptions, 2-3 sentences) as root-level fields for the paper.
 
 Format your response as a JSON array containing exactly 5 objects matching the order of the inputs above.`;
 
@@ -800,6 +864,8 @@ Format your response as a JSON array containing exactly 5 objects matching the o
       items: {
         type: "OBJECT",
         properties: {
+          achievements: { type: "STRING" },
+          limitations: { type: "STRING" },
           explanation: {
             type: "OBJECT",
             properties: {
@@ -860,7 +926,7 @@ Format your response as a JSON array containing exactly 5 objects matching the o
             }
           }
         },
-        required: ["explanation", "taggedConcepts"]
+        required: ["explanation", "taggedConcepts", "achievements", "limitations"]
       }
     }
   };
@@ -881,14 +947,16 @@ Format your response as a JSON array containing exactly 5 objects matching the o
 
   const enrichedPapers = papersOutline.map((paper, index) => {
     const details = detailsArray[index] || {
+      achievements: 'No key achievements details.',
+      limitations: 'No shortcomings details.',
       explanation: {
         paperType: 'methodology',
         strategyUsed: 'contrast',
         coreIntuition: 'No detailed intuition generated.',
         deconstructedParts: [],
         synthesis: 'No synthesis available.',
-        beforeState: paper.historicalPlace || 'No prior state details.',
-        afterState: paper.achievements || 'No achievement details.',
+        beforeState: 'No prior state details.',
+        afterState: 'No achievement details.',
       },
       taggedConcepts: []
     };
@@ -896,7 +964,9 @@ Format your response as a JSON array containing exactly 5 objects matching the o
       ...paper,
       explanation: details.explanation,
       taggedConcepts: details.taggedConcepts,
-      coreIdea: details.explanation?.coreIntuition || 'No detailed intuition generated.'
+      coreIdea: details.explanation?.coreIntuition || 'No detailed intuition generated.',
+      achievements: details.achievements || 'No key achievements details.',
+      limitations: details.limitations || 'No shortcomings details.'
     };
   });
 

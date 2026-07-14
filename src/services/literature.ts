@@ -10,7 +10,7 @@ export interface EnrichedMetadata {
   venue?: string;
   pdfUrl?: string;
   paperUrl?: string;
-  source: 'semantic-scholar' | 'fallback-apis' | 'google-scholar' | 'crossref';
+  source: 'semantic-scholar' | 'fallback-apis' | 'google-scholar' | 'crossref' | 'google-scholar-scrape';
   citations?: LineagePaper[];
   references?: LineagePaper[];
 }
@@ -30,12 +30,7 @@ export function getCachedMetadata(title: string): EnrichedMetadata | null {
     }
     const cache = JSON.parse(cacheStr);
     const cached = cache[title.toLowerCase()];
-    if (
-      cached &&
-      cached.source === 'semantic-scholar' &&
-      cached.citations !== undefined &&
-      cached.references !== undefined
-    ) {
+    if (cached && cached.source) {
       console.log(`[Literature Cache] Valid cache hit for paper: "${title}"`, cached);
       return cached;
     }

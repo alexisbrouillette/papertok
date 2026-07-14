@@ -1050,7 +1050,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
       )}
 
       {/* ── Fixed Bottom Sleeping Banner ── */}
-      {nodes.length > 0 && nodes[nodes.length - 1].readCategories.length === CATEGORIES.length && (
+      {nodes.length > 0 && nodes[debugDayOffset] && nodes[debugDayOffset].readCategories.length === CATEGORIES.length && (
         <div className="digest-completed-sleeping-card glass-panel anim-slide-up">
           <div className="sleeping-content">
             <span className="sleeping-title">All Caught Up!</span>

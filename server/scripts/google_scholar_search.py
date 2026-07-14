@@ -48,19 +48,29 @@ def parse_scholar_search(query):
         year = None
         
         if meta_text:
+            # Find year anywhere in meta_text
+            year_match = re.search(r'\b(19\d{2}|20\d{2})\b', meta_text)
+            if year_match:
+                year = int(year_match.group(1))
+            
             parts = [p.strip() for p in meta_text.split(' - ')]
             if len(parts) >= 1:
                 authors = parts[0]
-            if len(parts) >= 2:
-                venue_part = parts[1]
-                # Look for a 4-digit year
-                year_match = re.search(r'\b(19\d{2}|20\d{2})\b', venue_part)
-                if year_match:
-                    year = int(year_match.group(1))
-                    # Remove the year and trailing commas/hyphens from the venue name
-                    venue = re.sub(r',\s*\b(19\d{2}|20\d{2})\b', '', venue_part).strip()
-                else:
-                    venue = venue_part
+            
+            venue_parts = parts[1:]
+            clean_venue_parts = []
+            for vp in venue_parts:
+                # Remove the year from this part
+                vp_clean = re.sub(r'\b(19\d{2}|20\d{2})\b', '', vp)
+                # Clean up punctuation like leading/trailing commas, hyphens, and whitespace
+                vp_clean = re.sub(r'^[,;\-\s]+|[,;\-\s]+$', '', vp_clean).strip()
+                if vp_clean:
+                    clean_venue_parts.append(vp_clean)
+            
+            if clean_venue_parts:
+                venue = " - ".join(clean_venue_parts)
+            else:
+                venue = "Academic Journal"
                     
         # 3. Citations Count (Scan all gs_fl classes since there can be multiple)
         citations = 0

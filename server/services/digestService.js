@@ -756,7 +756,7 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
         if (Array.isArray(results) && results.length > 0) {
           const topResult = results[0];
           // Use looser match verification for fallback specific title
-          if (topResult.title && topResult.url) {
+          if (topResult.title && topResult.url && isTitleMatch(item.fallbackPaperTitle, topResult.title)) {
             paper = {
               category: item.category,
               title: topResult.title,
@@ -781,7 +781,7 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
           const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
           const searchResult = await fetchFromSemanticScholar(item.fallbackPaperTitle, s2ApiKey);
           const topResult = searchResult.data?.[0];
-          if (topResult) {
+          if (topResult && isTitleMatch(item.fallbackPaperTitle, topResult.title)) {
             paper = {
               category: item.category,
               title: topResult.title,

@@ -80,7 +80,7 @@ async function fetchFromSemanticScholar(query, apiKey) {
 
 async function fetchFromSemanticScholarDirect(query, apiKey) {
   const cleanQuery = encodeURIComponent(query);
-  const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${cleanQuery}&limit=1&fields=paperId,title,citationCount,venue,url,openAccessPdf,externalIds`;
+  const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${cleanQuery}&limit=1&fields=paperId,title,citationCount,venue,url,openAccessPdf,externalIds,authors`;
   
   const headers = {};
   if (apiKey && apiKey.trim() !== '') {
@@ -257,6 +257,20 @@ async function fetchFromCrossRef(title) {
     return null;
   }
 }
+// Helper to compare title similarity to prevent mixing up papers
+const isTitleMatch = (t1, t2) => {
+  const clean = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  const words1 = clean(t1);
+  const words2 = clean(t2);
+  if (words1.length === 0 || words2.length === 0) return false;
+  
+  // Check intersection size
+  const set2 = new Set(words2);
+  const intersection = words1.filter(w => set2.has(w));
+  const similarity = intersection.length / Math.max(words1.length, words2.length);
+  return similarity >= 0.85; // Require at least 85% of words to match exactly
+};
+
 export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
   // Helper to sanitise arXiv PDF URLs to abstract page URLs to avoid 403 / Rate limit errors
   const sanitiseArxivUrl = (url) => {
@@ -264,20 +278,6 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
       return url.replace('/pdf/', '/abs/').replace(/\.pdf$/, '').replace(/v\d+$/, '');
     }
     return url;
-  };
-
-  // Helper to compare title similarity to prevent mixing up papers
-  const isTitleMatch = (t1, t2) => {
-    const clean = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim().split(/\s+/).filter(Boolean);
-    const words1 = clean(t1);
-    const words2 = clean(t2);
-    if (words1.length === 0 || words2.length === 0) return false;
-    
-    // Check intersection size
-    const set2 = new Set(words2);
-    const intersection = words1.filter(w => set2.has(w));
-    const similarity = intersection.length / Math.max(words1.length, words2.length);
-    return similarity >= 0.85; // Require at least 85% of words to match exactly
   };
 
   const fetchLineageFromSemanticScholar = async (paperTitle) => {
@@ -318,6 +318,22 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
     return { citations: [], references: [] };
   };
 
+  const resolveOaPdf = async (s2Paper) => {
+    if (!s2Paper) return undefined;
+    if (s2Paper.openAccessPdf?.url) return s2Paper.openAccessPdf.url;
+    const doi = s2Paper.externalIds?.DOI;
+    if (doi) {
+      try {
+        const response = await fetch(`https://api.unpaywall.org/v2/${encodeURIComponent(doi)}?email=alexis@papertok.com`, { timeout: 4000 });
+        if (response.ok) {
+          const data = await response.json();
+          return data.best_oa_location?.url_for_pdf || data.best_oa_location?.url || undefined;
+        }
+      } catch (_) {}
+    }
+    return undefined;
+  };
+
   const { execSync } = await import('child_process');
   const { join } = await import('path');
   const { fileURLToPath } = await import('url');
@@ -337,7 +353,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
         return {
           citationCount: topResult.citationCount || lineage.s2Paper?.citationCount || undefined,
           venue: topResult.venue || lineage.s2Paper?.venue || undefined,
-          pdfUrl: sanitiseArxivUrl(topResult.url),
+          pdfUrl: sanitiseArxivUrl(topResult.url) || await resolveOaPdf(lineage.s2Paper),
           paperUrl: topResult.url,
           source: 'google-scholar-scrape',
           citations: lineage.citations,
@@ -363,7 +379,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
       return {
         citationCount: pmcResult?.citationCount ?? lineage.s2Paper?.citationCount ?? undefined,
         venue: pmcResult?.venue ?? (arxivResult ? 'arXiv Preprint' : undefined) ?? lineage.s2Paper?.venue,
-        pdfUrl: sanitiseArxivUrl(arxivResult?.pdfUrl || undefined),
+        pdfUrl: sanitiseArxivUrl(arxivResult?.pdfUrl || undefined) || await resolveOaPdf(lineage.s2Paper),
         paperUrl: doiUrl || arxivPaperUrl || undefined,
         source: 'fallback-apis',
         citations: lineage.citations,
@@ -381,6 +397,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
       const lineage = await fetchLineageFromSemanticScholar(title);
       return {
         ...crossRefResult,
+        pdfUrl: await resolveOaPdf(lineage.s2Paper),
         citations: lineage.citations,
         references: lineage.references
       };
@@ -393,6 +410,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
   const lineage = await fetchLineageFromSemanticScholar(title);
   return {
     paperUrl: `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`,
+    pdfUrl: await resolveOaPdf(lineage.s2Paper),
     source: 'google-scholar',
     citations: lineage.citations,
     references: lineage.references
@@ -551,6 +569,93 @@ Do not wrap response in markdown blocks - return the raw JSON object.`;
   });
 
   return JSON.parse(textResponse);
+}
+
+async function resolvePdfAndTextForPaper(paper, s2ApiKey) {
+  const { execSync } = await import('child_process');
+  const { join } = await import('path');
+  const { fileURLToPath } = await import('url');
+  const __dirname = join(fileURLToPath(import.meta.url), '..');
+  const scriptPath = join(__dirname, '../scripts/browser_pdf_fetcher.py');
+
+  let candidateUrl = null;
+  let doi = null;
+
+  // 1. Try to get direct PDF URL from Semantic Scholar openAccessPdf
+  try {
+    const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(paper.title)}&limit=1&fields=paperId,title,openAccessPdf,externalIds`;
+    const headers = {};
+    if (s2ApiKey && s2ApiKey.trim() !== '') {
+      headers['x-api-key'] = s2ApiKey.trim();
+    }
+    const response = await fetch(url, { headers, timeout: 6000 });
+    if (response.ok) {
+      const result = await response.json();
+      const s2Paper = result.data?.[0];
+      if (s2Paper) {
+        if (s2Paper.openAccessPdf?.url) {
+          candidateUrl = s2Paper.openAccessPdf.url;
+        }
+        if (s2Paper.externalIds?.DOI) {
+          doi = s2Paper.externalIds.DOI;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[PDF Resolution] Semantic Scholar lookup failed for "${paper.title}":`, err.message);
+  }
+
+  // 2. Try Unpaywall if DOI is found and no candidate URL
+  if (!candidateUrl && doi) {
+    console.log(`[PDF Resolution] Querying Unpaywall for DOI: ${doi}`);
+    try {
+      const unpaywallUrl = `https://api.unpaywall.org/v2/${encodeURIComponent(doi)}?email=alexis@papertok.com`;
+      const upResponse = await fetch(unpaywallUrl, { timeout: 8000 });
+      if (upResponse.ok) {
+        const upData = await upResponse.json();
+        candidateUrl = upData.best_oa_location?.url_for_pdf || upData.best_oa_location?.url || null;
+        if (candidateUrl) {
+          console.log(`[PDF Resolution] Unpaywall resolved PDF: ${candidateUrl}`);
+        }
+      }
+    } catch (err) {
+      console.warn(`[PDF Resolution] Unpaywall lookup failed:`, err.message);
+    }
+  }
+
+  // 3. Fallback: if paper has a direct PDF url or arxiv url, use it as candidate
+  if (!candidateUrl && paper.url) {
+    if (paper.url.toLowerCase().endsWith('.pdf') || paper.url.includes('/pdf/') || paper.url.includes('/bitstream/')) {
+      candidateUrl = paper.url;
+    }
+  }
+
+  // 4. Run browser_pdf_fetcher.py
+  let cmd = `python3 "${scriptPath}"`;
+  if (candidateUrl) {
+    cmd += ` --url "${candidateUrl.replace(/"/g, '\\"')}"`;
+  } else {
+    cmd += ` --query "${paper.title.replace(/"/g, '\\"')}"`;
+  }
+
+  console.log(`[PDF Fetcher] Launching Playwright fetcher for paper: "${paper.title}"`);
+  try {
+    const stdout = execSync(cmd, { encoding: 'utf8', timeout: 50000 });
+    const result = JSON.parse(stdout);
+    if (result.success) {
+      console.log(`[PDF Fetcher] Successfully retrieved PDF text content for "${paper.title}"`);
+      return {
+        pdfUrl: result.pdf_url,
+        pdfText: result.text
+      };
+    } else {
+      console.warn(`[PDF Fetcher] Fetcher returned error for "${paper.title}":`, result.error);
+    }
+  } catch (err) {
+    console.error(`[PDF Fetcher] Child process error for "${paper.title}":`, err.message);
+  }
+
+  return { pdfUrl: null, pdfText: null };
 }
 
 /**
@@ -820,6 +925,28 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
     papersOutline.push(paper);
   }
 
+  // --- STEP 2.5: Retrieve and Parse PDFs for Grounding Context ---
+  onProgress(35, 'Retrieving and parsing paper PDFs for grounding context...');
+  const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
+  for (let i = 0; i < papersOutline.length; i++) {
+    const paper = papersOutline[i];
+    console.log(`[DigestService] Grounding paper ${i + 1}/5: "${paper.title}"`);
+    try {
+      const pdfResult = await resolvePdfAndTextForPaper(paper, s2ApiKey);
+      if (pdfResult.pdfUrl) {
+        paper.pdfUrl = pdfResult.pdfUrl;
+      }
+      if (pdfResult.pdfText) {
+        paper.pdfContext = pdfResult.pdfText;
+        console.log(`[DigestService] Successfully grounded "${paper.title}" with PDF context.`);
+      } else {
+        console.log(`[DigestService] Grounding unavailable for "${paper.title}". Relying on abstract.`);
+      }
+    } catch (err) {
+      console.warn(`[DigestService] Grounding process failed for "${paper.title}":`, err.message);
+    }
+  }
+
   // --- STEP 3: Detailed Digest Composition (Better model: gemini-2.5-flash) ---
   onProgress(45, `Found 5 real papers. Composing technical details and deep summaries...`);
 
@@ -839,6 +966,7 @@ Authors: ${p.authors}
 Venue: ${p.venue}
 Citations: ${p.citationCount}
 Abstract/Context: "${p.abstract}"
+PDF Text Context (Grounding Source): "${p.pdfContext || 'Not available - rely on paper abstract and your internal knowledge base.'}"
 Rationale: ${p.rationale}
 `).join('\n')}
 

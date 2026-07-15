@@ -207,6 +207,5 @@ input, textarea {
 
 .connection-pulse {
   stroke-dasharray: 12 36;
-  animation: path-pulse 3s linear infinite;
-  filter: drop-shadow(0 0 4px var(--color-primary));
+  /* Removed heavy animation & drop-shadow filter to resolve computer slowness */
 }

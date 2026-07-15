@@ -74,13 +74,6 @@ router.post('/read', requireAuth, async (req, res) => {
         SET current_streak = ?, last_read_date = ?
         WHERE user_id = ?
       `, [newStreak, today, userId]);
-
-      // Queue a job to pre-generate the next day's digests for this user's topics.
-      const userTopics = await dbAll('SELECT DISTINCT topic FROM reading_progress WHERE user_id = ?', [userId]);
-      if (userTopics.length > 0) {
-        console.log(`[User ${userId}] Finished daily reading. Queuing ${userTopics.length} digest refreshes.`);
-        userTopics.forEach(row => enqueueDigestGeneration(userId, row.topic));
-      }
     }
 
     res.json({

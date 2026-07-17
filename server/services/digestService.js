@@ -3,6 +3,14 @@ import { dbGet, dbRun, dbAll } from '../db.js';
 import fs from 'fs';
 import path from 'path';
 
+// Double-escapes single backslashes in specific LaTeX math keys (rawFormula, symbol, term, inequalityUsed, promise)
+function escapeJsonLatexBackslashes(str) {
+  return str.replace(/"(rawFormula|symbol|term|inequalityUsed|promise)":\s*"([^"]*)"/g, (match, key, val) => {
+    const cleanVal = val.replace(/\\/g, '\\\\').replace(/\\\\\\\\/g, '\\\\');
+    return `"${key}": "${cleanVal}"`;
+  });
+}
+
 // Helper function to retry a function with exponential backoff.
 async function retryWithDelay(fn, retries = 5, delay = 5000, factor = 2) {
   try {
@@ -1450,7 +1458,8 @@ Format your response as a single JSON object.`;
         detailsPrompt,
         detailsConfig
       );
-      details = JSON.parse(detailsResponse);
+      const sanitizedResponse = escapeJsonLatexBackslashes(detailsResponse);
+      details = JSON.parse(sanitizedResponse);
     } catch (err) {
       console.error(`Failed to generate details for paper ${i+1}:`, err);
       details = {

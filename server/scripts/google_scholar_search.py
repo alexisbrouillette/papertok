@@ -1,110 +1,107 @@
-import urllib.request
-import urllib.parse
-import json
-import re
 import sys
-from bs4 import BeautifulSoup
+import json
+import asyncio
+import re
+import urllib.parse
+from playwright.async_api import async_playwright
 
-def parse_scholar_search(query):
-    # Format query and headers to look like a standard browser request
-    url = f"https://scholar.google.com/scholar?hl=en&q={urllib.parse.quote(query)}"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5,fr;q=0.3'
-    }
-    
-    req = urllib.request.Request(url, headers=headers)
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            html = response.read()
-    except Exception as e:
-        print(f"Error fetching Google Scholar: {e}", file=sys.stderr)
-        return []
+async def search_google_scholar_fallback(title):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=True,
+            args=["--disable-blink-features=AutomationControlled"]
+        )
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 800}
+        )
+        page = await context.new_page()
         
-    soup = BeautifulSoup(html, 'html.parser')
-    results = []
-    
-    for div in soup.find_all('div', class_='gs_r gs_or gs_scl'):
-        # 1. Title & URL
-        title_el = div.find('h3', class_='gs_rt')
-        if not title_el:
-            continue
+        # Search on standard Google.com
+        search_url = f"https://www.google.com/search?q={urllib.parse.quote(title)}"
+        await page.goto(search_url, wait_until="domcontentloaded", timeout=25000)
+        await page.wait_for_timeout(1500)
         
-        a_tag = title_el.find('a')
-        title = a_tag.text if a_tag else title_el.text
-        url = a_tag['href'] if a_tag else None
-        
-        # Strip prefixes like [PDF], [HTML], [CITATION], etc.
-        title = re.sub(r'^\[[A-Z\s]+\]\s*', '', title).strip()
-        
-        # 2. Authors, Journal/Venue, and Year from the gs_a div
-        meta_el = div.find('div', class_='gs_a')
-        meta_text = meta_el.text if meta_el else ""
-        
-        authors = ""
-        venue = ""
-        year = None
-        
-        if meta_text:
-            # Find year anywhere in meta_text
-            year_match = re.search(r'\b(19\d{2}|20\d{2})\b', meta_text)
-            if year_match:
-                year = int(year_match.group(1))
-            
-            parts = [p.strip() for p in meta_text.split(' - ')]
-            if len(parts) >= 1:
-                authors = parts[0]
-            
-            venue_parts = parts[1:]
-            clean_venue_parts = []
-            for vp in venue_parts:
-                # Remove the year from this part
-                vp_clean = re.sub(r'\b(19\d{2}|20\d{2})\b', '', vp)
-                # Clean up punctuation like leading/trailing commas, hyphens, and whitespace
-                vp_clean = re.sub(r'^[,;\-\s]+|[,;\-\s]+$', '', vp_clean).strip()
-                if vp_clean:
-                    clean_venue_parts.append(vp_clean)
-            
-            if clean_venue_parts:
-                venue = " - ".join(clean_venue_parts)
-            else:
-                venue = "Academic Journal"
-                    
-        # 3. Citations Count (Scan all gs_fl classes since there can be multiple)
+        # 1. Extract citation count from the entire body text
+        body_text = await page.eval_on_selector("body", "el => el.innerText")
+        cite_re = re.compile(r'(?:cited\s+by|cité\s+par|citado\s+por|citato\s+da)\s+([\d,]+|\d+)', re.IGNORECASE)
         citations = 0
-        for fl_el in div.find_all('div', class_='gs_fl'):
-            for link in fl_el.find_all('a'):
-                text = link.text.lower()
-                # Match "Cited by X", "Cité par X", "Citado por X"
-                if 'cited by' in text or 'cité par' in text or 'citado por' in text:
-                    cit_match = re.search(r'(?:by|par|por)\s+([\d,]+)', text)
-                    if cit_match:
-                        citations = int(cit_match.group(1).replace(',', ''))
-                        break
-            if citations > 0:
-                break
-                        
-        # 4. Snippet / Abstract Description
-        snippet_el = div.find('div', class_='gs_rs')
-        snippet = snippet_el.text if snippet_el else ""
+        matches = cite_re.findall(body_text)
+        if matches:
+            citations = int(matches[0].replace(",", ""))
+            
+        # 2. Extract organic links and details
+        # Let's extract search result links (typically within h3 tags inside organic results)
+        results = await page.eval_on_selector_all("div.g", """elements => {
+            return elements.map(el => {
+                const a = el.querySelector('a');
+                const h3 = el.querySelector('h3');
+                const snippet = el.querySelector('div[style*="webkit-line-clamp"]');
+                return {
+                    title: h3 ? h3.innerText : '',
+                    url: a ? a.href : '',
+                    snippet: snippet ? snippet.innerText : ''
+                };
+            });
+        }""")
         
-        results.append({
-            'title': title,
-            'url': url,
-            'authors': authors,
-            'venue': venue,
-            'year': year,
-            'citationCount': citations,
-            'abstract': snippet
-        })
+        await browser.close()
         
-    return results
+        # Clean URLs and find the best match
+        clean_results = []
+        for r in results:
+            url = r.get('url', '')
+            if not url or not url.startswith("http"):
+                continue
+            url_lower = url.lower()
+            if "google.com" in url_lower or "googleusercontent.com" in url_lower or "youtube.com" in url_lower:
+                continue
+                
+            # Guess venue from URL
+            venue = "Academic Journal"
+            if "arxiv.org" in url_lower:
+                venue = "arXiv Preprint"
+            elif "nature.com" in url_lower:
+                venue = "Nature"
+            elif "springer.com" in url_lower:
+                venue = "Springer"
+            elif "ieee.org" in url_lower:
+                venue = "IEEE"
+            elif "sciencedirect.com" in url_lower:
+                venue = "ScienceDirect"
+            elif "researchgate.net" in url_lower:
+                venue = "ResearchGate"
+                
+            clean_results.append({
+                'title': r.get('title') or title,
+                'url': url,
+                'authors': "Unknown Authors",
+                'venue': venue,
+                'year': None,
+                'citationCount': citations,
+                'abstract': r.get('snippet', '')
+            })
+            
+        if not clean_results:
+            # Fallback if no organic links found (e.g. captcha)
+            clean_results.append({
+                'title': title,
+                'url': f"https://scholar.google.com/scholar?q={urllib.parse.quote(title)}",
+                'authors': "Unknown Authors",
+                'venue': "Google Scholar",
+                'year': None,
+                'citationCount': citations,
+                'abstract': ""
+            })
+            
+        return clean_results[:1]
 
 if __name__ == '__main__':
     query = "ImageNet Classification with Deep Convolutional Neural Networks"
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:])
-    results = parse_scholar_search(query)
-    print(json.dumps(results, indent=2))
+    try:
+        results = asyncio.run(search_google_scholar_fallback(query))
+        print(json.dumps(results))
+    except Exception as e:
+        print(json.dumps([]))

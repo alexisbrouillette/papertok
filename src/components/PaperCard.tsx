@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, Calendar, Users, Award } from 'lucide-react';
 import type { FoundationalPaper } from '../services/gemini';
 import { enrichPaperMetadata, getCachedMetadata, type EnrichedMetadata } from '../services/literature';
+import { SemanticZoomPanel } from './SemanticZoomPanel';
 
 interface InteractiveTextProps {
   text: string;
@@ -105,7 +106,8 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 }) => {
   const [metadata, setMetadata] = useState<EnrichedMetadata>({ source: 'google-scholar' });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
-  const [underTheHoodOpen, setUnderTheHoodOpen] = useState(true);
+  const [underTheHoodOpen, setUnderTheHoodOpen] = useState(false);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<{ term: string; blockId: string } | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -491,6 +493,42 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             />
           </p>
           {renderConceptCard('coreIntuition')}
+
+          {paper.zoomData && (
+            <div className={`interactive-deconstruction-accordion glass-panel ${zoomOpen ? 'open' : ''}`}>
+              <button
+                className="deconstruction-header-btn"
+                onClick={() => setZoomOpen(!zoomOpen)}
+                type="button"
+              >
+                <span className="deconstruction-title-wrap">
+                  <span className="deconstruction-icon">
+                    {paperType === 'methodology' && '📐'}
+                    {paperType === 'empirical_study' && '📊'}
+                    {paperType === 'theoretical' && '📐'}
+                    {paperType === 'review_survey' && '📚'}
+                  </span>
+                  <span className="deconstruction-title">
+                    {paperType === 'methodology' && 'Mathematical Equation (Level 2)'}
+                    {paperType === 'empirical_study' && 'Empirical Trends & Findings (Level 2)'}
+                    {paperType === 'theoretical' && 'Mathematical Proof Steps (Level 2)'}
+                    {paperType === 'review_survey' && 'Taxonomy & Gaps (Level 2)'}
+                  </span>
+                </span>
+                <span className="deconstruction-arrow">{zoomOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {zoomOpen && (
+                <div className="deconstruction-content">
+                  <SemanticZoomPanel 
+                    paperType={paperType as any}
+                    title={paper.title}
+                    data={paper.zoomData}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Scientific Purpose */}

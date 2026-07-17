@@ -3,6 +3,7 @@ import { ArrowLeft, X, Sparkles, BookOpen, Globe, Rocket, Shuffle, CheckCircle, 
 import type { FoundationalPaper, ChatMessage } from '../services/gemini';
 import { askPaperQuestion, generateFoundationalPapers } from '../services/gemini';
 import { PaperCard } from './PaperCard';
+import { getCachedMetadata } from '../services/literature';
 
 /* ─── Types ─────────────────────────────────────────────────── */
 type CategoryKey = 'foundation' | 'surprise' | 'crossfield' | 'novel' | 'wildcard';
@@ -761,6 +762,15 @@ export const DigestMap: React.FC<DigestMapProps> = ({
               {nodes.reduce((sum, n) => sum + n.readCategories.length, 0)}/{nodes.length * 5} read
             </div>
           )}
+          <button 
+            type="button" 
+            className="debug-fast-forward-btn-top glass-panel" 
+            onClick={handleDebugAdvanceDay} 
+            title="[Debug] Skip Day & Generate Next"
+            style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid var(--border-glass)', cursor: 'pointer' }}
+          >
+            ⏭
+          </button>
           <button type="button" className="settings-btn glass-panel" onClick={onOpenSettings} title="Settings" style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid var(--border-glass)' }}>
             <Settings className="settings-icon" style={{ width: '14px', height: '14px', color: 'var(--text-secondary)' }} />
           </button>
@@ -1170,11 +1180,11 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                             index={idx}
                             total={total}
                             hideHeader={true}
-                              onContentScroll={(_, isBottom) => {
-                               if (isLast && isBottom) {
-                                 setLastPaperScrolledToBottom(true);
-                               }
-                             }}
+                            onContentScroll={(_, isBottom) => {
+                             if (isLast && isBottom) {
+                               setLastPaperScrolledToBottom(true);
+                             }
+                            }}
                           >
                             <div className="paper-stack-title-header">
                               <div className="card-badge-header">
@@ -1235,6 +1245,8 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                     const paper = openNode.papers[cat.key];
                     const isRead = openNode.readCategories.includes(cat.key);
                     if (!paper) return null;
+                    const cachedMeta = getCachedMetadata(paper.title);
+                    const citations = paper.citationCount ?? cachedMeta?.citationCount;
                     return (
                       <button
                         key={cat.key}
@@ -1253,6 +1265,11 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                           <div className="digest-cat-header-row">
                             <span className="digest-cat-label">{cat.label}</span>
                             {isRead && <CheckCircle size={14} className="digest-cat-check" />}
+                            {citations !== undefined && citations > 0 && (
+                              <span className="digest-cat-citations-badge">
+                                ⭐ {citations.toLocaleString()}
+                              </span>
+                            )}
                           </div>
                           <p className="digest-cat-subtitle">{cat.subtitle}</p>
                           <p className="digest-cat-paper-title">{paper.nickname || paper.title}</p>
@@ -1709,7 +1726,18 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           color: var(--cat-text, var(--text-primary));
           font-family: var(--font-display);
         }
-        .digest-cat-check { color: var(--color-primary); flex-shrink: 0; }
+         .digest-cat-check { color: var(--color-primary); flex-shrink: 0; }
+        .digest-cat-citations-badge {
+          margin-left: auto;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: var(--color-warning);
+          font-family: var(--font-mono);
+          background: rgba(245, 158, 11, 0.08);
+          border: 1px solid rgba(245, 158, 11, 0.15);
+          padding: 1px 6px;
+          border-radius: 99px;
+        }
         .digest-cat-subtitle {
           margin: 0 0 8px;
           font-size: 0.72rem;

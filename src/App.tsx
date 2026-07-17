@@ -4,10 +4,12 @@ import { SearchScreen } from './components/SearchScreen';
 import { Settings } from './components/Settings';
 import { DigestMap } from './components/DigestMap';
 import { LoginScreen } from './components/LoginScreen';
+import { DemoScreen } from './components/DemoScreen';
+import { SemanticZoomDrawer } from './components/SemanticZoomDrawer';
 import { type FoundationalPaper, generateFoundationalPapers } from './services/gemini';
 import { AlertCircle } from 'lucide-react';
 
-type Screen = 'login' | 'key-gate' | 'search' | 'map';
+type Screen = 'login' | 'key-gate' | 'search' | 'map' | 'demo';
 
 function App() {
   const [token, setToken] = useState<string>('');
@@ -24,6 +26,8 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [loadingStatus, setLoadingStatus] = useState<string>('');
   const [debugDayOffset, setDebugDayOffset] = useState<number>(0);
+  const [activeZoomPaper, setActiveZoomPaper] = useState<any | null>(null);
+  const [isZoomOpen, setIsZoomOpen] = useState<boolean>(false);
 
   const handleSignOut = () => {
     localStorage.removeItem('papertok_token');
@@ -389,6 +393,10 @@ function App() {
         </>
       )}
 
+      {currentScreen === 'demo' && (
+        <DemoScreen onBack={() => setCurrentScreen('search')} />
+      )}
+
       {/* Global Settings Modal */}
       {showSettings && (
         <Settings
@@ -398,10 +406,55 @@ function App() {
         />
       )}
 
+      {currentScreen !== 'demo' && (
+        <button
+          className="floating-demo-trigger"
+          onClick={() => setCurrentScreen('demo')}
+          type="button"
+        >
+          ✨ UI Demo Mode
+        </button>
+      )}
+
+      {/* Global Semantic Zoom Drawer Overlay */}
+      {activeZoomPaper && (
+        <SemanticZoomDrawer
+          isOpen={isZoomOpen}
+          onClose={() => {
+            setIsZoomOpen(false);
+            setActiveZoomPaper(null);
+          }}
+          data={activeZoomPaper.zoomData}
+          title={activeZoomPaper.title}
+          paperType={activeZoomPaper.explanation?.paperType || 'methodology'}
+        />
+      )}
+
       <style>{`
         .app-container {
           min-height: 100vh;
           width: 100%;
+        }
+
+        .floating-demo-trigger {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          background: linear-gradient(135deg, #a855f7, #6366f1);
+          color: white;
+          padding: 10px 18px;
+          border-radius: 99px;
+          font-weight: 700;
+          font-size: 0.8rem;
+          box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+          z-index: 999;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all var(--transition-fast);
+        }
+
+        .floating-demo-trigger:hover {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 24px rgba(168, 85, 247, 0.6);
         }
 
         .error-screen-container {

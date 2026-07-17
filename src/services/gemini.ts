@@ -50,6 +50,7 @@ export interface FoundationalPaper {
   nickname?: string;
   authors: string;
   year: number;
+  citationCount?: number;
   purpose: string;
   historicalPlace: string;
   coreIdea: string;
@@ -59,6 +60,7 @@ export interface FoundationalPaper {
   taggedConcepts?: TaggedConcept[];
   searchKeywords: string;
   references?: string[];
+  zoomData?: any;
 }
 
 export interface ChatMessage {

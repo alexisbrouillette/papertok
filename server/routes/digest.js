@@ -320,4 +320,20 @@ router.get('/history', requireAuth, async (req, res) => {
   }
 });
 
+// Get list of all cached topics for a user
+router.get('/topics', requireAuth, async (req, res) => {
+  const userId = req.userId;
+  try {
+    const rows = await dbAll(
+      'SELECT DISTINCT topic FROM cached_digests WHERE user_id = ?',
+      [userId]
+    );
+    const topics = rows.map(r => r.topic);
+    res.json({ topics });
+  } catch (err) {
+    console.error('Failed to query cached topics:', err);
+    res.status(500).json({ error: 'Failed to retrieve cached topics.' });
+  }
+});
+
 export default router;

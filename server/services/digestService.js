@@ -1162,7 +1162,7 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
           chosenPaper = {
             ...candidate,
             pdfUrl: pdfResult.pdfUrl || candidate.url,
-            pdfContext: pdfResult.pdfText.slice(0, 12000)
+            pdfContext: pdfResult.pdfText.slice(0, 80000)
           };
           console.log(`[DigestService] Successfully resolved and grounded PDF for candidate: "${candidate.title}"`);
           break;

@@ -5,6 +5,50 @@ import { askPaperQuestion, generateFoundationalPapers } from '../services/gemini
 import { PaperCard } from './PaperCard';
 import { getCachedMetadata } from '../services/literature';
 
+/* ─── Countdown Timer Component (Isolated Rerendering) ─────── */
+interface CountdownTimerProps {
+  prefix: string;
+  fallback?: string;
+  className?: string;
+  as?: 'span' | 'p';
+}
+
+const CountdownTimer: React.FC<CountdownTimerProps> = ({
+  prefix,
+  fallback = '...',
+  className,
+  as = 'span'
+}) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const target = new Date(now);
+      target.setHours(7, 0, 0, 0);
+      
+      if (now.getHours() >= 7) {
+        target.setDate(target.getDate() + 1);
+      }
+      
+      const diffMs = target.getTime() - now.getTime();
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      
+      const pad = (num: number) => String(num).padStart(2, '0');
+      setTimeLeft(`${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`);
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const Component = as;
+  return <Component className={className}>{prefix}{timeLeft || fallback}</Component>;
+};
+
 /* ─── Types ─────────────────────────────────────────────────── */
 type CategoryKey = 'foundation' | 'surprise' | 'crossfield' | 'novel' | 'wildcard';
 
@@ -223,7 +267,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [ratings, setRatings] = useState<Record<string, 'like' | 'dislike' | null>>({});
   const [chatPaper, setChatPaper] = useState<FoundationalPaper | null>(null);
   const [chatMetadata, setChatMetadata] = useState<{ citationCount?: number; venue?: string; pdfUrl?: string } | null>(null);
-  const [timeLeft, setTimeLeft] = useState('');
 
   /* ─── SVG path geometry ─────────────────────────────── */
   const svgWidth = 320;
@@ -294,32 +337,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
     });
   }, [debugDayOffset, containerHeight, activeY, minY, papers.length]);
 
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const target = new Date(now);
-      target.setHours(7, 0, 0, 0);
-      
-      // If past 7:00 AM today, next digest unlocks 7:00 AM tomorrow
-      if (now.getHours() >= 7) {
-        target.setDate(target.getDate() + 1);
-      }
-      
-      const diffMs = target.getTime() - now.getTime();
-      
-      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-      
-      const pad = (num: number) => String(num).padStart(2, '0');
-
-      setTimeLeft(`${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`);
-    };
-
-    calculateTimeLeft();
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
-  }, []);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -1064,7 +1081,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
         <div className="digest-completed-sleeping-card glass-panel anim-slide-up">
           <div className="sleeping-content">
             <span className="sleeping-title">All Caught Up!</span>
-            <span className="sleeping-timer">⏳ Next digest in {timeLeft || '...'}</span>
+            <CountdownTimer prefix="⏳ Next digest in " className="sleeping-timer" />
           </div>
           <button
             className="debug-fast-forward-btn"
@@ -1211,15 +1228,6 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                           </PaperCard>
                         </div>
 
-                        {isLast ? (
-                          <div className="paper-stack-end">
-                            <span>🎉 You've reached the end of this digest!</span>
-                          </div>
-                        ) : (
-                          <div className="paper-stack-divider">
-                            <span>↓ Scroll down to continue</span>
-                          </div>
-                        )}
                         {/* Sentinel at the bottom of the stack item */}
                         <div className="paper-read-sentinel" data-paper-key={cat.key} />
                       </div>
@@ -1319,7 +1327,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
 
             {/* Next landmark teaser */}
             <div className="completion-next">
-              <p className="completion-next-label">🔒 Next landmark unlocks in {timeLeft || 'tomorrow'}</p>
+              <CountdownTimer prefix="🔒 Next landmark unlocks in " fallback="tomorrow" className="completion-next-label" as="p" />
               <div className="completion-next-card">
                 <div className="completion-next-icon">📡</div>
                 <div className="completion-next-body">
@@ -1923,7 +1931,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           background: transparent;
           border: 1px solid transparent;
           box-shadow: none;
-          padding: 10px 16px 16px;
+          padding: 10px 16px 0;
           border-radius: var(--radius-lg);
           transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-normal);
         }

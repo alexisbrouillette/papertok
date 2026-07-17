@@ -1,0 +1,535 @@
+{
+  "userId": 3,
+  "topic": "tensile strenght usage of spider web like materials futur",
+  "digestDate": "2026-07-16",
+  "papers": [
+    {
+      "category": "foundation",
+      "title": "Fibronectin promotes elastin deposition, elasticity and mechanical strength in cellularised collagen-based scaffolds.",
+      "url": "https://www.semanticscholar.org/paper/144521fec1b3c3eb218d24364d8b6bb7f81f6e39",
+      "authors": "D. Pezzoli, J. Di Paolo, H. Kumra, G. Fois, G. Candiani, D. Reinhardt, D. Mantovani",
+      "year": 2018,
+      "venue": "Biomaterials",
+      "citationCount": 60,
+      "abstract": "",
+      "rationale": "To understand the tensile strength of spider silk-like materials, one must understand the fundamental biophysics of protein fibers and hierarchical structural mechanics before engineering synthetic analogs.",
+      "pdfUrl": "https://re.public.polimi.it/bitstream/11311/1061042/4/11311-1061042_Candiani.pdf",
+      "pdfContext": "--- PAGE 1 ---\nFibronectin promotes elastin deposition, elasticity and mechanical\nstrength in cellularised collagen-based scaffolds\nDaniele Pezzoli a, Joseph Di Paolo b, Heena Kumra b, Giulia Fois a, c, Gabriele Candiani c,\nDieter P. Reinhardt b, **, 1, Diego Mantovani a, *, 1\na Laboratory for Biomaterials and Bioengineering, Canada Research Chair I in Biomaterials and Bioengineering for the Innovation in Surgery, Department of Min-Met-Materials \nEngineering, Research Center of CHU de Quebec, Division of Regenerative Medicine, Laval University, Quebec City, QC G1V 0A6, Canada b Canada Research Chair I in Cell-Matrix \nBiology, Faculty of Medicine, Department of Anatomy and Cell Biology, and Faculty of Dentistry McGill University, Montreal, QC H3A 0C7, Canada\nc Department of Chemistry, Materials and Chemical Engineering “Giulio Natta”, Politecnico  di Milano, Milan, 20131, Italy\nKeywords:\nCollagen gel\nFibronectin\nVascular tissue engineering \nElastic ﬁbers\nSmooth muscle cells \nMechanical properties\nOne of the tightest bottlenecks in vascular tissue engineering (vTE) is the lack of strength and elasticity of engineered vascular wall models caused by \nlimited elastic ﬁber deposition. In this study, ﬂat and tubular collagen gel-based scaffolds were cellularised with vascular smooth muscle cells (SMCs) and \nsupple-mented with human plasma ﬁbronectin (FN), a known master organizer of several extracellular matrix (ECM) ﬁber systems. The consequences of \nFN on construct maturation was investigated in terms of geometrical contraction, viscoelastic mechanical properties and deposition of core elastic ﬁber \nproteins. FN was retained in the constructs and promoted deposition of elastin by SMCs as well as of several proteins required for elastogenesis such as \nﬁbrillin-1, lysyl oxidase, ﬁbulin-4 and latent TGF-b binding protein-4. Notably, gel contraction, tensile equilibrium elastic modulus and elasticity were \nstrongly improved in tubular engineered tissues, approaching the behaviour of native arteries. In conclusion, this study demonstrates that FN exerts \npivotal roles in directing SMC-mediated remodeling of scaffolds toward the production of a physiological-like, elastin-containing ECM with excellent \nmechanical properties. The developed FN-supplemented systems are promising for tissue engineering applications where the generation of mature \nelastic tissue is desired and represent valuable advanced in vitro models to investigate elastogenesis.\n1. Introduction\nVascular diseases, in particular coronary artery diseases (CAD) \nare one of the leading causes of death in the Western society. An \nestimated 15.5 million Americans above the age of 20 suffer from \nCAD [1], and this number is predicted to strongly increase owing to \nthe rapid growth of the elderly demographic of the population [2]. \nOne of the most pressing clinical problems is the need for small \ndiameter vascular grafts for coronary artery bypass surgery [3]. \nTissue engineered blood vessels (TEBVs) are promising biological \narterial substitutes that can serve as alternatives to autologous\ngrafts such as internal mammary artery and saphenous vein grafts. \nHowever, many approaches did not yet translate into clinical ap-\nplications. Vascular tissue engineering (vTE) approaches can be \nimmediately impactful for the development of viable in vitro \nvascular wall models alternative to in vivo tests, to study the \nphysiology and pathology of vascular tissue and for drug develop-\nment [4,5].\nThe use of collagen type I gels (hereinafter called collagen gels) \nas scaffolds for vTE has a number of beneﬁts: i) collagen type I is \none of the main components of the extracellular matrix (ECM) of \nnative vascular tissues; ii) it is abundantly available and can be \nreadily puriﬁed from various species [6]; iii) it is non-antigenic and \nbiocompatible; iv) collagen gels can be directly and uniformly \nseeded with cells during the fabrication process; and v) the \ncollagen network can be actively remodeled by vascular smooth \nmuscle cells (vSMCs) [7]. Since the ﬁrst attempt to generate TEBVs \nusing bovine aortic vSMCs and collagen gels as scaffolds [8], several\n* Corresponding author.\n** Corresponding author.\nE-mail addresses: dieter.reinhardt@mcgill.ca (D.P. Reinhardt), \ndiego.mantovani@\ngmn.ulaval.ca (D. Mantovani).\n1 co-last and co-corresponding authors.\n©2018. This manuscript version is made available under the CC-BY-NC-ND 4.0 license http://creativecommons.org/licenses/by-nc-nd/4.0/\nPublished Journal Article available at: https://doi.org/10.1016/j.biomaterials.2018.07.013\n\n--- PAGE 2 ---\ncollagen-based tissue models and bioreactor systems to promote \ntheir dynamic maturation have been developed [9e15], and the \ncollagen gel formulation and processing have been optimized in \norder to obtain enhanced mechanical properties [16e19]. However, \ntwo major challenges impede the development of physiologically \nrelevant in vitro vascular wall models: (i) the relatively weak me-\nchanical properties, and (ii) the need for the deposition and orga-\nnization of an ECM that closely resembles the in vivo situation, \nespecially with respect to the presence of elastic ﬁbers and their \ncritical physiological functions.\nElastic ﬁbers and elastic lamellae are protein supra-structures \ndeposited in blood vessel walls and other elastic tissues during \ndevelopment and early postnatal life [20]. They confer elasticity to \nthe tissue and play key biological roles in the physiology of arteries \n[21]. Elastic ﬁbers and lamellae are principally composed of a cross-\nlinked elastin core surrounded by a mantle of ﬁbrillin (FBN)-1-rich \nmicroﬁbrils required for the initial deposition and processing of \ntropoelastin (TE), the precursor of elastin [22]. The assembly of \nelastic ﬁbers and lamellae is a highly hierarchical molecular process \nstarting with the assembly of ﬁbronectin (FN) which is deposited \nearly in tissues and dependent on cell surface integrins receptors \n[23]. Assembled FN ﬁbers are essential for the formation of FBN-1-\ncontaining beaded microﬁbrils [24,25], as well as for other ECM \nﬁber systems including collagen I and III [26]. TE is deposited onto \nmicroﬁbrils with the help of several accessory proteins including \nﬁbulin (FBLN)-4 and FBLN-5, as well as latent TGF-b binding protein \n(LTBP)-4 [27,28]. Lysyl oxidase (LOX) and LOX-like 1 enzymes pro-\nmote cross-linking of the nascent elastic ﬁbers critical for me-\nchanical stability and proper function [29,30]. While this ﬁne-\ntuned hierarchical process of elastogenesis is required for the \nproper generation and function of TEBVs, it is difﬁcult to be \nreproduced in vitro and is typically reduced in engineered tissues \n[31]. Furthermore, several of these elastogenic molecules regulate \nSMC phenotypes and function. For example, FN can strongly \ninﬂuence the behaviour of SMCs within 3D matrices [32], especially \npro-moting the SMC synthetic phenotype [33]. On the other hand, \nelastin regulates proliferation and organization of vSMCs [34].\nThe appropriate incorporation of elastin and elastic ﬁbers in the \nscaffold material would effectively address several of the biological \nand mechanical issues in the development of viable TEBVs. How-\never, low production of the elastic ﬁber precursor TE by essentially \nall cell types used, its delicately orchestrated assembly process, and \nthe large size and insolubility of mature elastic ﬁbers make mature \nelastin incorporation challenging and often incompatible with \nmany material processing techniques [35]. Several attempts have \nbeen made to promote elastogenesis in engineered tissues by \nmeans of both biochemical and mechanical stimuli, but with rela-\ntively unsatisfactory results, especially in short term approaches \n(up to one week of culture). In 2003, Long and Tranquillo demon-\nstrated the deposition of FBN-1 and TE by neonatal rat aortic SMCs \nafter 4 weeks of culture in ﬁbrin gels, but not in collagen gels [36]. \nMore recently, Venkataraman et al. have shown that cyclic strain \ncombined with elastogenic factors improved deposition of elastin \ncompared to static controls after long term (3 weeks) culture in \ntubular collagen gels cellularised with adult human aortic SMCs \n[37]. Similar results were obtained by Lee and colleagues using a \npoly (glycerol sebacate) scaffold with adult baboon carotid artery \nSMCs [38]. Elastogenesis has also been demonstrated by Hinderer \net al. in short term cultures (6 days) in an electrospun ﬁbrous 3D \npolymer scaffold upon dynamic maturation in a ﬂuid-ﬂow biore-\nactor [39]. However, a systematic up-scaling of that system is \nnecessary to obtain tissues of clinically relevant size, with the \nassociated challenge of uniform cell seeding and colonization of a \nthick electrospun scaffold [39].\nThe main hypothesis of this work is that the addition of soluble\nFN to cellularised collagen gels promotes their maturation into \nvascular wall models. Speciﬁcally, this research aimed at eluci-\ndating the inﬂuence of FN on the response of SMCs within the \ncollagen gels, focusing on the mechanical properties and elastic \nﬁber synthesis and deposition. Results demonstrate that the com-\nbination of collagen type I and FN, by providing an optimal 3D \nmicroenvironment with appropriate biochemical behaviour, stim-\nulates SMCs activity for the production of engineered tissues with \nan in vivo-like elastic ECM and enhanced mechanical properties. \nThese results highlight the key role of exogenous FN in the rapid \nmaturation of cellularised collagen gel-based constructs.\n2. Materials and methods\n2.1. Cell isolation and culture\nPrimary porcine aortic SMCs (PAoSMCs) were derived from the \ntunica media of healthy, ﬁbrous plaque-free porcine arteries. \nPAoSMCs were isolated from 1 cm wide aortic rings obtained from \nsegments of the aorta of adult pigs [40]. Aortic segments were \ncollected in phosphate-buffered saline (PBS), placed in Dulbecco's \nModiﬁed Eagle's Medium (DMEM, Life Technologies) supple-\nmented with 1% penicillin/streptomycin solution (100 U/mL peni-\ncillin, 0.1 mg/mL streptomycin; Sigma) and then dissected. The \nadventitial tissue and the ﬁrst outer third portion of the tunica \nmedia were carefully removed and the resulting rings were cut into \nsmall pieces of approximately 1 /C2 5 mm, and placed in a petri dish \ncontaining DMEM supplemented with 10% fetal bovine serum (FBS; \nLife Technologies) and 1% penicillin/streptomycin solution (here-\nafter referred to as complete medium) that was changed every 2e3 \ndays. Once a sufﬁcient amount of SMCs migrated onto the surface \nof the petri dish, the explants were removed. The protocol for the \nisolation of PAoSMCs was approved by the Ethics Committee of \nCHU de Qu/C19ebec Research Centre. For all the experiments cells were \nused at a passage between 6 and 10.\n2.2. Preparation of cellularised collagen gels\nType I collagen was extracted from rat tail tendons, solubilized \nin 0.02 N acetic acid at a concentration of 4 mg/mL and sterilized by \nmultiple cycles of dialysis in 1% chloroform and 0.02 N acetic acid \nas previously described [6]. Cellularised collagen gels were \nprepared as previously described [41]. Brieﬂy, 2 parts of sterile \ncollagen so-lution were mixed with 1 part of buffer solution (3.5-\nfold concen-trated DMEM supplemented with 60 mM NaOH and 10 \nmM HEPES) and 1 part of cell suspension (2 /C2 106 cells/mL in \ncomplete me-dium) to obtain a ﬁnal cell density of 5 /C2 105 cells/mL, \na collagen concentration of 2 g/L and a pH of 7.2. Then, an aqueous \nsolution containing different concentrations (5, 2.5, 1.25 and 0.625 \ng/L) of human plasma FN (Advanced Biomatrix) was added to gels \n(1:50 vol ratio) to obtain FN-loaded gels.\nFor the preparation of disk-shaped samples, the collagen-cell \nsuspension was immediately poured into 24-well plates (0.5 mL/\nwell) and incubated for 1 h at room temperature (r.t.) to allow \nsample gelation. Each gel was gently detached from the wall and \nthe bottom  of th",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "Fibronectin acts as a molecular orchestrator in collagen-based scaffolds, providing the essential biochemical cues to drive smooth muscle cell (SMC) synthetic phenotype maturation, thereby bridging the gap between passive collagen hydrogels and mature, elastin-rich vascular tissue.",
+        "beforeState": "Collagen type I hydrogels seeded with smooth muscle cells failed to produce significant quantities of functional elastic fibers, resulting in vascular wall models with low tensile strength and inadequate elasticity compared to native arterial tissues.",
+        "afterState": "Fibronectin-supplemented collagen scaffolds enabled efficient cell-mediated remodeling, inducing the assembly of mature elastic fibers (elastin, fibrillin-1, fibulin-4), leading to significantly improved viscoelastic properties and tensile equilibrium elastic moduli comparable to native arterial tissues.",
+        "researchQuestion": "Does the exogenous supplementation of human plasma fibronectin (FN) to cellularised collagen-based scaffolds promote the assembly of an elastin-rich extracellular matrix and enhance the mechanical properties of tissue-engineered vascular grafts?",
+        "studySetup": "Flat and tubular collagen type I gels (2 g/L) were seeded with primary porcine aortic smooth muscle cells (5x10^5 cells/mL) and supplemented with human plasma fibronectin at varying concentrations (0.625–5 g/L). Samples were cultured and analyzed for gel contraction, viscoelastic mechanical properties, and the expression/deposition of elastogenic markers (elastin, FBN-1, LOX, FBLN-4, LTBP-4).",
+        "theoreticalSignificance": "The study validates the role of fibronectin in the hierarchical assembly of elastic fibers in a 3D collagen environment, confirming that the extracellular environment's biochemical composition, rather than mechanical stimuli alone, is a primary driver for vascular wall maturation in vitro."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The addition of fibronectin to cellularised collagen scaffolds significantly promotes SMC-mediated elastin deposition and enhances the mechanical elasticity and tensile strength of the resulting engineered vascular tissues.",
+        "metrics": [
+          {
+            "category": "Mechanical Properties",
+            "label": "Tensile Equilibrium Elastic Modulus",
+            "rawValue": "Significant increase compared to control",
+            "explanation": "Assessment of the tissue's stiffness and resistance to deformation."
+          },
+          {
+            "category": "Protein Expression",
+            "label": "Elastogenic Marker Deposition",
+            "rawValue": "Upregulation of elastin, fibrillin-1, LOX, FBLN-4, and LTBP-4",
+            "explanation": "Quantification of key proteins required for the hierarchical assembly of elastic fibers."
+          },
+          {
+            "category": "Morphological Change",
+            "label": "Geometrical Contraction",
+            "rawValue": "Enhanced scaffold compaction",
+            "explanation": "Indicator of SMC-mediated remodeling and matrix organization activity."
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": ""
+      },
+      "taggedConcepts": [
+        {
+          "term": "Vascular Tissue Engineering",
+          "nickname": "vTE",
+          "definition": "The field of regenerative medicine focused on developing functional blood vessel substitutes.",
+          "origin": "General field term",
+          "relatedTerms": [
+            "Tissue Engineered Blood Vessels",
+            "Scaffold-based tissue engineering"
+          ]
+        },
+        {
+          "term": "Elastogenesis",
+          "nickname": "Elastic fiber formation",
+          "definition": "The biological process of synthesizing and assembling elastin and associated microfibrillar proteins into functional elastic fibers.",
+          "origin": "Developmental biology",
+          "relatedTerms": [
+            "Tropoelastin",
+            "Fibrillin-1",
+            "Lysyl oxidase"
+          ]
+        },
+        {
+          "term": "Extracellular Matrix",
+          "nickname": "ECM",
+          "definition": "The non-cellular component of tissues providing structural and biochemical support to surrounding cells.",
+          "origin": "Cell biology",
+          "relatedTerms": [
+            "Collagen type I",
+            "Fibronectin",
+            "Integrin receptors"
+          ]
+        }
+      ],
+      "coreIdea": "Fibronectin acts as a molecular orchestrator in collagen-based scaffolds, providing the essential biochemical cues to drive smooth muscle cell (SMC) synthetic phenotype maturation, thereby bridging the gap between passive collagen hydrogels and mature, elastin-rich vascular tissue.",
+      "achievements": "Demonstrated that exogenous fibronectin is a critical additive for driving SMCs to synthesize a physiological-like elastic ECM in collagen scaffolds. The resulting constructs showed significant improvements in mechanical strength and elasticity, effectively addressing a major hurdle in creating functional vascular wall models.",
+      "limitations": "The study utilized primary porcine SMCs in a static culture model, which may not fully replicate the dynamic, pulsatile pressure environments of native arterial physiological conditions. Further optimization is required for large-scale production of constructs suitable for long-term clinical implantation."
+    },
+    {
+      "category": "crossfield",
+      "title": "Ultrastrong eutectogels engineered via integrated mechanical training in molecular and structural engineering",
+      "url": "https://www.semanticscholar.org/paper/3386e98b6ba19efe12db33045e48105c3e28f1c3",
+      "authors": "Chenggong Xu, Yi Chen, Siyang Zhao, Deke Li, Xing Tang, Haili Zhang, Jinxia Huang, Zhiguang Guo, Weimin Liu",
+      "year": 2025,
+      "venue": "Chemical Reviews",
+      "citationCount": 112,
+      "abstract": "",
+      "rationale": "This connects the biological understanding of spider silk to the material science field of biomimetic synthetic polymer production, which is essential for scaling the material's usage.",
+      "pdfUrl": "https://www.nature.com/articles/s41467-025-57800-y.pdf",
+      "pdfContext": "--- PAGE 1 ---\nArticle https://doi.org/10.1038/s41467-025-57800-y\nUltrastrong eutectogels engineered via\nintegrated mechanical training in molecular\nand structural engineering\nChenggong Xu 1,2,A oX i e1,2, Haiyuan Hu1, Zhengde Wang1,2,Y a n g eF e n g1 ,\nDaoai Wang 1,3 &W e i m i nL i u1,3\nUltrastrong gels possess generally ultrahigh modulus and strength yet exhibit\nlimited stretchability owing to hardening and embrittlement accompanied by\nreinforcement. This dilemma is overcome here by using hyperhysteresis-\nmediated mechanical training that hyperhysteresis allows structural retarda-\ntion to prevent the structural recovery of network after training, resulting in\nsimply single pre-stretching training. This training strategy introduces deep\neutectic solvent into polyvinyl alcohol hydrogels to achieve hyperhysteresis\nvia hydrogen bonding nanocrystals on molecular engineering, performs single\npre-stretching training to produce hierarchical nanoﬁbrils on structural engi-\nneering, and fabricates chemically cross-linked second network to enable\nstretchability. The resultant eutectogels display exceptional mechanical per-\nformances with enormous fracture strength (85.2 MPa), Young’sm o d u l u s\n(98 MPa) and work of rupture (130.6 MJ m\n−3), which compare favorably to\nthose of previous gels. The presented strategy is generalizable to other sol-\nvents and polymer for engineering ultrastrong organogels, and further\ninspires advanced fabrication technologies for force-induced self-reinforce-\nment materials.\nOne pursuit in the development of soft materials is to engineer fasci-\nnating mechanical performances with seamless combination of\nmutually incompatible mechanical properties, including ultrahigh\nmodulus, ultrahigh strength, superior toughness, and ultrafast\nresilience\n1–3. Over the past two decades, extensive pioneering\nadvancements were devoted to engineer mechanically strong and\ntough synthetic elastomers and gels. Recently, we demonstrated that\nsynergistic methodology for mechanical regulation of polymer gels is\nto incorporate dynamic interactions into the molecular design (i.e.,\nhydrogen bonding domains and metal coordination bonds) and to\nintroduce high-order structure into the structural design (i.e., phase\nseparation and hierarchical structure)\n4.S p e c iﬁcally, this elaborated\nincorporation of molecular and structural design endows energy dis-\nsipation multimechanisms from molecular to mesoscopic scales,\ncontributing to the improved mechanical properties\n5,6. By combining\nthe molecular and structural engineering of synergistic methodology,\nultrarobust polymer gels can be fabricated for excellently high-bear-\ning, or high impact-resistance engineering soft materials in extreme\nenvironmental conditions.\nMechanical training, as structural engineering strategy, is inspired\nby hypertrophying and strengthening of muscle and tendon through\nrepeated physical exercise like walking, running and lifting heavy\nloads. This training/force-induced toughening strategy contributes to\nphysical rearrangement and higher crystallinity of chains, or chemical\nreconstruction and mechanochemical reactions of moieties during the\nloading, resulting in aligned nano ﬁbrillar network architectures of\npolymer network\n7–10. Mechanical training is performed under the\nloading of mechanical forces, which typically cause bond scission in\nReceived: 10 October 2024\nAccepted: 4 March 2025\nCheck for updates\n1State Key Laboratory of Solid Lubrication, Lanzhou Institute of Chemical Physics, Chinese Academy of Sciences, Lanzhou, China.2Center of Materials Science\nand Optoelectronics Engineering, University of Chinese Academy of Sciences, Beijing, China.3Shandong Laboratory of Yantai Advanced Materials and Green\nManufacturing, Yantai, China. e-mail: fengyange@licp.cas.cn; wangda@licp.cas.cn; wmliu@licp.cas.cn\nNature Communications|         (2025) 16:2589 1\n1234567890():,;\n1234567890():,;\n\n--- PAGE 2 ---\npolymer network, resulting in catastrophic failure. Particularly,\nmechanical forces produce mechanical reinforcement of synthetic\npolymer via strain-induced crystallization and highly aligned nano ﬁ-\nbrillar structures. For the former, force-induced failure polymers, i.e.,\nhigh-molecular-weight polyethylene (PE) and thermoplastic poly-\nurethane (PU), fail to perform mechanical training for enhancing\nmechanical properties. Whereas for the latter, force-induced self-\nreinforcement polymers, i.e., tetra-arm poly(ethylene glycol) (PEG)\n11,12,\npoly(ethylene oxide) (PEO) 13,14 and polyvinyl alcohol (PVA) 7,15,a r e\ncapable of remolding to strengthen itself upon cyclic pre-stretching\nwithin appropriate tensile stress, substantially strengthening and\ntoughening these soft materials. Gong, Zhao and co-workers revealed\nthat mechanical force-induced hierarchical structure is dif ﬁcult to\nmaintain the orientation of polymer chains after single pre-stretching,\nrequiring substantially repetiti ve pre-stretching in the absence of\nchemically cross-linked network to permanently ﬁxt h ep h y s i c a l\nrearrangement\n7,16, or requiring additional fabrication procedures, i.e.,\ndried in air under conﬁned conditions, annealed at high temperature\nand re-swelled in water 17. As representative example, mechanically\ntrained PVA hydrogel produces oriented nanoﬁbrillar architecture and\nnanocrystalline domains, which, however, requires external aquatic\nenvironment and repetitive training, resulting in limited mechanical\nstretchability, albeit with improved strength and modulus. Another\nmajor challenge is challenging to control recon ﬁgurable intrachain/\ninterchain noncovalent interactions for mechanical force-induced\ncrystallization in terms of molecular engineering\n18. Clearly, the struc-\ntural advantages of mechanical training are not effectively incorpo-\nrated with molecular engineering, simply to create hierarchical\nstructures.\nDeep eutectic solvents (DES), as hydrogen-bonding supramole-\ncular complexes, manipulate the interaction, conformation, and\nstructure of polymer networks, giving mechanical properties such as\nself-healing\n19, strong and tough, as well as other physical properties\nsuch as high temperature-resistance20 (Supplementary Table 1). In this\nwork, of particular interest to us is to advance high-ef ﬁciency\nmechanical training strategy to engineer mechanically ultrastrong\nand tough gels, with DES as hyperhysteretic intermediate to form\nmechanical hyperhysteresis, resulting in high-efﬁciency hyperhyster-\nesis-mediated mechanical training with only single pre-stretch. DES, as\nsubstituting solvent, incorporates three attributes to perform\nmechanical training ef ﬁciently and enhance mechanical properties\nsubstantially: (i) reforming and re ﬁning nanocrystals by inducing\nremodeling hydrogen bonds between PVA chains during solvent sub-\nstituting to enable hyperhystersis; (ii) producing intrinsically higher\nstrong hydrogen bonds density for suf ﬁciently hyperhysteresis and\ndissipative energy to perform mechanical training; and (iii) providing\nstructural retardation to maintain the conformations of chains after\ntraining, and to build chemically cross-linked second network. Mole-\ncularly, hyperhysteresis-mediated mechanical training arranges the\nhighly-ordered, reﬁned nanocrystalline domains, with nanocrystalline\ndimension of about 1.2 nm and adjustable intercrystal spacing of about\n12–9 nm. Structurally, hyperhysteresis-mediated mechanical training\nengineers hierarchically-aligned nanoﬁbrillar microstructures. With-\nout external environment bath and repetitive pre-stretching,\nhyperhysteresis-mediated mechanical training exhibits the remarkable\nstructural retardation of hierarchical nano ﬁbrils, with negligible\nstructural recovery in simply single pre-stretch and even with changes\nin surroundings, i.e., second network precursor. In contrast to pre-\nviously reported polymer gels, eutectogels engineered via\nhyperhysteresis-mediated mechanical training—which are an order of\nmagnitude higher in terms of modulus and strength —achieve\nremarkable mechanical properties and convenient fabrication proce-\ndures owing to the combination of molecular and structural engi-\nneering (Supplementary Table 2).\nResults\nUltrastrong eutectogels via hyperhysteresis-mediated mechan-\nical training\nMechanical training is an ef ﬁcient mechanical regulation strategy.\nHowever, environmental baths and repetitive pre-stretching are\nrequired, and the hierarchical structures fail to sustainably maintain\nafter loading for further reinforcements. In order to advance\nmechanical training, we introduce mechanical hyperhysteresis to\nconduct single pre-stretch and second network construction, resulting\nin high-efﬁciency mechanical training. The hyperhysteresis is essen-\ntially mechanical hysteresis, i.e., plastic deformation, which con-\ntributes to the training-induced hierarchical structure, where we call\nstructural retardation. Speciﬁcally, ultrastrong eutectogels are engi-\nneered via hyperhysteresis-mediated mechanical training, which\nincorporates DES as hyperhysteretic intermediate within semicrystal-\nline PVA hydrogel to conduct mechanical training. We ﬁrstly used\nfreezing-thawing method to synthesize physically cross-linked single-\nnetwork PVA hydrogels (SN–H). Then, we used DES as the solvent to\nc a r r yo u ts o l v e n td i s p l a c e m e n to fS N–H. After solvent substitution,\nSN–H transforms into single-network eutectogels (SN–E). Because of\nabundant hydrogen bonds and nanocrystals, SN –E embodies\nmechanical hyperhysteresis, that is, the pre-stretched gel exhibits\nnegligible recovery after unloading. This hyperhysteresis allows\nmechanical training to be completed with only single pre-stretch.\nDuring pre-stretching process, SN –E can adopt reorientation of\nnanoﬁbrils to form anisotropic structures driven by uniaxial force. To\nfurther lock the nano ﬁbrils in the perpendicular to nano ﬁbrils, we\nintroduced chemically cross-linked second network into mechanically\ntrained SN–E to synthesize double-network eutectogels (DN–E), which\nenable stretchability after training. The DN –E exhibits exceptional\nmechanical properties compared to SN–Ha n dS N–Eo w i n gt oa n i s o -\ntropic hierarchical nano ﬁbrillar structure and long-range ordered\nnanocrystalline domain (Fig.1A, B and Supplementary Figs. 1, 2).\nThe hyperhysteresis-mediated mechanical training endows sig-\nniﬁcant changes in chain structures and internal interactions. Speciﬁ-\ncally, DES molecules, formed from choline chloride (ChCl) and\nhydrogen bond donors of glycerol (Gly) and acrylic acid (AAc), can\nspontaneously reconstruct the hyd rogen bonds to enhance crystal-\nlization during solvent substituting, and regulate the nanocrystalline\ndimension during mechanical training, and form interpenetrated net-\nwork structure during second network constructing\n20. Importantly,\nduring the construction of the second network, although AAc in DES\nwas also polymerized to form network as a monomer, ChCl and Gly still\neffectively maintained the gel state as DES. Speci ﬁcally, when AAc\npolymerizes to PAAc, Gly/ChCl as a solvent will form a supramolecular\ngel owing to the self-assembly of PAAc in the DES system, which is not\nsolidifying. (Fig. 1B and Supplementary Note 1). Alternatively, abun-\ndant hydrogen bonds/nanocrystals allow energy dissipation and\nhyperhysteresis after DES replacement. Furthermore, mechanical\ntraining, imposed on the SN–E with randomly chains and nanocrystals,\nis accompanied by the destruction of randomly distributed nano-\ncrystalline domains, simultaneously follow by the formation of hier-\narchical alignment of nano ﬁbrils and highly ordered reformed\nnanocrystalline domains. Compared with mechanical training with\nrepetitive loading, hyperhysteresis-mediated mechanical training\nshows remarkable structural retardation with only single pre-stretch,\nresulting in negligible structural recovery of hierarchically-arranged\nnanoﬁbrils after training (Fig. 1C). Such structural retardation facil-\nitates the reinforce",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "The paper introduces a 'hyperhysteresis-mediated' mechanical training strategy for polymer gels. By replacing the solvent in poly(vinyl alcohol) (PVA) hydrogels with a deep eutectic solvent (DES), the authors induce plastic deformation (hyperhysteresis) that prevents structural recovery. This allows for a single pre-stretching step to permanently fix an aligned, hierarchical nano-fibrillar architecture, bypassing the need for repetitive loading or external environmental baths.",
+        "beforeState": "Existing mechanical training strategies for soft materials (e.g., PVA hydrogels) rely on repetitive cyclic pre-stretching and immersion in specific external environments to stabilize oriented nano-fibrillar structures, often resulting in limited stretchability and complex processing requirements.",
+        "afterState": "The developed 'eutectogels' utilize a single pre-stretch process made possible by DES-induced structural retardation. This yields high-performance soft materials with significantly improved fracture strength and modulus, without requiring environmental baths or multiple stretching cycles.",
+        "researchQuestion": "Can the combination of molecular engineering (via Deep Eutectic Solvents) and structural engineering (via single-stretch mechanical training) overcome the trade-off between ultrahigh mechanical strength and limited stretchability in polymer gels?",
+        "studySetup": "PVA hydrogels were synthesized via a freezing-thawing method and subsequently subjected to solvent substitution with a Deep Eutectic Solvent (ChCl/Gly/AAc). These 'SN-E' (single-network eutectogels) underwent a single uniaxial pre-stretching training and were then reinforced with a chemically cross-linked second network to form 'DN-E' (double-network eutectogels).",
+        "theoreticalSignificance": "The work defines a new paradigm for 'force-induced self-reinforcement,' bridging the gap between biological muscle strengthening and synthetic soft matter physics through the deliberate modulation of non-covalent interactions (hydrogen bonding)., interpretation: The results demonstrate that structural retardation is the key mechanism enabling permanent chain orientation. By utilizing DES to increase energy dissipation and minimize elastic recovery, the authors provide a scalable and efficient route to engineer extreme mechanical properties in soft polymers that were previously difficult to optimize via traditional means., keyFindings: Eutectogels achieved a fracture strength of 85.2 MPa, a Young's modulus of 98 MPa, and a work of rupture of 130.6 MJ/m³."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The implementation of hyperhysteresis-mediated mechanical training using Deep Eutectic Solvents enables single-step manufacturing of ultra-robust polymer gels with strength and toughness significantly exceeding conventional hydrogels.",
+        "metrics": [
+          {
+            "category": "Mechanical Performance",
+            "label": "Fracture Strength",
+            "rawValue": "85.2 MPa",
+            "explanation": "Maximum stress sustained by the DN-E eutectogel before failure."
+          },
+          {
+            "category": "Mechanical Performance",
+            "label": "Young's Modulus",
+            "rawValue": "98 MPa",
+            "explanation": "Measure of stiffness of the material under uniaxial tensile loading."
+          },
+          {
+            "category": "Energy Dissipation",
+            "label": "Work of Rupture",
+            "rawValue": "130.6 MJ m⁻³",
+            "explanation": "Total energy absorbed by the material per unit volume prior to fracture."
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": ""
+      },
+      "taggedConcepts": [
+        {
+          "term": "Deep Eutectic Solvent",
+          "nickname": "DES",
+          "definition": "A fluid composed of a mixture of a hydrogen bond acceptor and a hydrogen bond donor, providing specific intermolecular interactions.",
+          "origin": "Chemical engineering of solvent systems",
+          "relatedTerms": [
+            "Hydrogen bonding",
+            "Supramolecular complexes"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41467-025-57800-y"
+        },
+        {
+          "term": "Hyperhysteresis",
+          "nickname": "Structural Retardation",
+          "definition": "A state of severe mechanical plastic deformation where structural relaxation is suppressed.",
+          "origin": "Material mechanics",
+          "relatedTerms": [
+            "Plastic deformation",
+            "Mechanical training"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41467-025-57800-y"
+        }
+      ],
+      "coreIdea": "The paper introduces a 'hyperhysteresis-mediated' mechanical training strategy for polymer gels. By replacing the solvent in poly(vinyl alcohol) (PVA) hydrogels with a deep eutectic solvent (DES), the authors induce plastic deformation (hyperhysteresis) that prevents structural recovery. This allows for a single pre-stretching step to permanently fix an aligned, hierarchical nano-fibrillar architecture, bypassing the need for repetitive loading or external environmental baths.",
+      "achievements": "The paper successfully achieved an order-of-magnitude increase in modulus and strength compared to traditional hydrogels. It established a novel fabrication methodology that eliminates the need for repetitive mechanical training cycles.",
+      "limitations": "The reliance on specific deep eutectic solvent compositions may limit the versatility of the material for applications requiring specific chemical inertness. The paper does not explicitly detail the long-term chemical stability of the second cross-linked network under extreme environmental degradation."
+    },
+    {
+      "category": "novel",
+      "title": "Intrinsically colored artificial silk fibers made from mini-spidroin fusion proteins",
+      "url": "https://www.semanticscholar.org/paper/56bbf9720d61d3bf3d6e23955e4cfca60ca553e8",
+      "authors": "Tomas Bohn Pessatti, Benjamin Schmuck, G. Greco, S. Stadlmayr, Elin Karlsson, B. Gross, Axel Leppert, M. Landreh, Anna Rising",
+      "year": 2026,
+      "venue": "Communications Materials",
+      "citationCount": 3,
+      "abstract": "",
+      "rationale": "This targets recent breakthroughs in bio-manufacturing and recombinant protein synthesis that enable the creation of artificial spider-web-like materials with industrial-grade tensile strength.",
+      "pdfUrl": "https://www.nature.com/articles/s43246-026-01079-z.pdf",
+      "pdfContext": "--- PAGE 1 ---\ncommunications materials Article\nA Nature Portfolio journal\nhttps://doi.org/10.1038/s43246-026-01079-z\nIntrinsically colored artiﬁcial silk ﬁbers\nmade from mini-spidroin fusion proteins\nCheck for updates\nTomas Bohn Pessatti 1,5,B e n j a m i nS c h m u c k1,5,G a b r i e l eG r e c o1, Sarah Stadlmayr 2,\nElin Karlsson 1, Bryan Gross1, Axel Leppert 3, Michael Landreh 3,4 & Anna Rising 1,2\nSpider silk is an extraordinary natural material that combines strength, extensibility, and toughness in a\nlightweight, protein-based ﬁber. While the recombinant production of spidroins has advanced, the\ncreation of silk ﬁbers with additional intrinsic functionalities, such as color, remains a major challenge.\nHere, we report the rational design, expression, and spinning of intrinsically red-colored arti ﬁcial silk\nﬁbers. A mini-spidroin variant was engineered as a fusion with the red ﬂuorescent protein mCherry,\nexpressed at high yields (20 g/L) in E. coli fed-batch fermentations, and puri ﬁed under native\nconditions. Although the presence of the mCherry globular domain reduced spinnability when used\nalone, blending with wild-type mini-spidroins enabled continuous wet spinning into robust,\nﬂuorescent ﬁbers. Our biomimetic spinning approach preserved the correct folding of the mCherry\ndomain within the ﬁber, resulting in stable red coloration and ﬂuorescence, while maintaining\nmechanical properties comparable to those of other recombinant silks. This work establishes a\nscalable, sustainable strategy for fabricating colored bio-based ﬁbers, opening avenues for\nenvironmentally friendly textiles and functional biomaterials that may reduce reliance on synthetic and\nchemically dyed ﬁbers.\nSpider silk has long been recognized as one of nature’s toughest and most\nresilient ﬁbers, combining high tensil e strength with exceptional\nextensibility1,2. These properties have made it a source of inspiration for\ndeveloping new high-performance materials 3– 6. Recombinant mini-\nspidroins7,s i m p l iﬁed versions of native spider silk proteins, have enabled\nprogress toward scalable silk production8. Despite this, the commerciali-\nzation and market penetration of arti ﬁcial spider silk materials have\nremained slow3,4. Several factors may explain the limited impact of artiﬁcial\nspider silk in industry, including a relatively high production cost3,b u ta l s o\nthat the unique features and potential of artiﬁcial spider silk remain unu-\ntilized. Since arti ﬁcial spider silk is a protein-based material, it can be\nengineered to incorporate intrinsic f unctionalities. There are several\nexamples in the scientiﬁc literature where functionalization was introduced\ninto silk-based materials post-assembly (after the material was formed),\nincluding site-speciﬁc functionalization with antibody binding or anti-\nmicrobial properties using enzymes\n9, or functionalization of artiﬁcial spider\nsilk with green ﬂuorescent protein (GFP) using biomolecular click\nchemistry10. However, a simpler and more straightforward way of making\nfunctionalizedﬁbers would be to express fusion proteins that can assemble\ninto ﬁbers with intact function of the bioactive fusion partner. A major\nproblem for achieving this would be t hat most published wet-spinning\nprotocols rely on the use of harsh denaturing conditions11– 14, which leads to\nloss of the bioactivity of the fusion partner.\nOne potentially useful application of bioactiveﬁbers would be to equip\nthem with color. Dye synthesis for textile applications relies on fossil-based\nfeedstock15,16 and many dyes contribute to signiﬁcant environmental harm\nand pose various health risks17. In addition to the dyes ’ toxicity, the pre-\ntreatment process alone requires200 L of fresh water per kg of fabric18,a n d\nmassive amounts of contaminated water are released into the\nenvironment\n19. Even though new eco-friendly technologies have been\ndeveloped, their implementation in the textile dyeing process remains\nnegligible\n20, since alternative dyes cannot yet compete in terms of avail-\nability, variety of colors, and price21.\nFor making intrinsically colored protein-based ﬁbers, ﬂuorescent\nproteins, such as GFP10, or colored proteins22 could be used, provided that\nthe spinning process is void of denaturing conditions. The recently devel-\noped all-aqueous biomimetic spinning method for making artiﬁcial spider\nsilk7 opens up a unique possibility to design recombinant fusion proteins\n1Department of Animal Biosciences, Swedish University of Agricultural Sciences, Uppsala, Box 7023, 75007, Sweden. 2Department of Medicine Huddinge,\nKarolinska Institutet, NEO, Huddinge, 14183, Sweden. 3Department for Cell and Molecular Biology, Uppsala University, Uppsala, 75124, Sweden. 4Department of\nMicrobiology, Tumor and Cell Biology, Karolinska Institutet, Solna, 171 65, Sweden. 5These authors contributed equally: Tomas Bohn Pessatti, Benjamin\nSchmuck. e-mail: anna.rising@slu.se\nCommunications Materials |            (2026) 7:70 1\n1234567890():,;\n1234567890():,;\n\n--- PAGE 2 ---\nconsisting of mini-spidroins covalently linked to colored proteins23,24.S u c ha\nbio-based strategy to produce intrinsically coloredﬁbers at the protein level\ncould eliminate the need for post-sp inning dyeing, offering a more sus-\ntainable alternative. Beyond textiles, colored andﬂuorescent silkﬁbers could\nenable new biomedical applications, such as tracking material integration in\nvivo or designing smart materials with built-in optical signals.\nHere, we demonstrate a protein engineering approach that paves the\nway towards this goal by generating aﬂuorescent mini-spidroin that can be\nproduced at high yields and spun into functionally intact compositeﬁbers\nwith robust mechanical properties. Thus, this work establishes a scalable, all-\naqueous route to producing bio-based, bioactive ﬁbers, highlighting their\npotential as sustainable alternatives to conventionalﬁbers.\nResults and discussion\nA3I-A-mCherry can be expressed and puriﬁed under native\nconditions\nBuilding on our previously describedmethod for producing mini-spidroins\nunder native conditions8,25, and our biomimetic and all-aqueous spinning\nprocess7,26,w ee x p l o r e dw h e t h e rﬂuorescent protein fusions can be used to\ngenerate intrinsically colored silk ﬁbers. We hypothesized that the high\nexpression yields obtained for these mini-spidroins, combined with the mild\nprocessing conditions, would enable the development ofﬁbers with colors\nderived from folded globular proteins. To test this, a fusion protein con-\nsisting of the mini-spidroin (A\n3I)3-(A)14\n25 fused to the red- ﬂuorescent\nprotein mCherry27 (Fig. 1) was designed, where the C-terminal mCherry\nmoiety was separated from the CT domain by a double (GS) 8 linker (see\nSupplementary information for all sequences). Hereafter, the fusion protein\nis referred to as A3I-A-mCherry. Initial tests showed that A3I-A-mCherry\ncould be over-expressed inE. coli shake-ﬂask cultures and had the expected\nmolecular weight of approximately 62 kDa (Fig. S1). Following lysis in\n20 mM Tris (pH 8.0), the fusion protein could be puriﬁed from the soluble\nfraction using afﬁnity chromatography (Fig. S1).\nReal-world applications of colored ﬁbers depend on their scalable\nproduction. We therefore set out to scale up the fermentation process in a\nfed-batch bioreactor cultivation using previously published protocols\n(Fig. 2A)\n8. From a 7.63 L culture, 2353 g of wet cell pellet was obtained\n(Fig. S2), which corresponds to 308 g wet cell mass per L of culture. The\namount of A 3I-A-mCherry expressed was estimated with SDS-PAGE to\n20 g of protein per liter of the bioreactor culture (Fig. S3), or 66 mg of protein\nper gram of wet-cell pellet. SDS-PAGE of the soluble and insoluble fractions\nafter lysis indicated that amajority of the target protein was soluble after cell\nlysis (Fig. 2B). After separation of the soluble fraction, afﬁnity chromato-\ngraphy puriﬁcation under native conditions yielded 10 g/L of culture, or\n35 mg/g of wet cell pellet (Fig. 2B and Fig. S2D). This yield is in line with\nwhat has been estimated as economica lly feasible for making high-end\ntextile ﬁbers\n28. Mass spectrometry conﬁrmed the expected protein mass of\n62.05 kDa, and together with mass photometry measurements, indicated\nthat A\n3I-A-mCherry exists predominantly as 124.1 kDa dimers in solution,\nconsistent with the constitutive dimer conformation of the C-terminal\ndomain7,29,30. A smaller fraction of higher-molecular-weight oligomers was\nalso observed (Fig. 2C, D and Figure S4). Interestingly, the fusion protein\nappeared to be equally soluble in 20 mM Tris (pH 8) as the (A3I)3-(A)14 and\ncould be concentrated to about 300 mg/mL without visible aggregation. A\nstrong burgundy color and redﬂuorescence under UV light indicated that\nthe mCherry fusion partner was functi onal, and therefore correctly fol-\nded (Fig. 3A).\nBioactive ﬂuorescent ﬁbers can be wet-spun with retained\nmechanical properties\nAfter establishing that the A3I-A-mCherry could be produced and puriﬁed\nunder native conditions, we next evaluated its ability to undergoﬁber for-\nmation. To this end, concentrated protein solutions were subjected to wet\nspinning to assess spinnability,ﬁber stability, and retention ofﬂuorescence.\nThe wet-spinning methodology descr ibed in this work is excellent for\nintroducing intrinsic functionality to wet-spun artiﬁcial spider silk, as it is\nall-aqueous, completely void of high temperatures, denaturing agents, and\nharsh solvents, and polymerization intoﬁbers is achieved by a mild pH drop\nfrom pH 8 in the spinning feedstock to pH 5 in theﬁb e rc o l l e c t i o nb a t h\n7,8,26.\nIn a ﬁrst attempt, A3I-A-mCherry could not be spun into continuousﬁbers:\nthe ﬁbers were too brittle to handle and could not be continuously collected\nby mechanical reeling. Considering that the fusion partner (mCherry) is\nalmost the same size as the mini-spidroin moiety, it is not surprising that the\npresence of this large folded globular protein negatively affects the poly-\nmerization process.\nTo overcome the poor spinnability of pure A\n3I-A-mCherry, the\nfusion protein was mixed with (A 3I)3-(A)14. This approach effectively\nsolved the spinning limitations, as mixtures containing 12.5, 25, and 50%\n(w/w) of A3I-A-mCherry were readily wet-spun into stable ﬁbers. These\nﬁbers exhibited suf ﬁcient integrity to enable continuous collection on a\nrotating take-up wheel. Notably, the wet-spun ﬁbers retained a\nburgundy-like color under white light after spinning and exhibited red\nﬂuorescence under UV illumination (Fig. 3B and Fig. S5), indicating that\na substantial fraction of the mCherry moiety remained intact. Precise\nquantiﬁcation of the fraction of correctly folded mCherry is challenging\ndue to concentration changes during the ﬁber drying, the in ﬂuence of\nwater content, ﬁber opacity, and structural alterations induced by the\nﬁber dissolution protocols. Instead, to get an indication of how well the\nmCherry tolerates the spinning conditions, we exposed the A\n3I-A-\nmCherry spinning dope to a low-pH acetate buffer and subsequent\ndrying. No reduction in ﬂuorescence was observed (Fig. S6), which\nindicates that mCherry can maintain its fold during the spinning process.\nAs expected, we found a positive correlation between mCherry con-\ncentration in the spinning dope andﬂuorescence in the ﬁber (Fig. 3C and\nFig. S6). Furthermore, structural characterization of the ﬁbers containing\nmCherry and pure (A\n3I)3-(A)14 by attenuated total re ﬂectance Fourier-\nTransform Infrared (ATR-FTIR) spectroscopy revealed that the ﬁbers\ncontaining mCherry, had an increased absorbance around 1630 cm −1,\nwhich is in line with the native beta barrel fold of mCherry (Fig. S7).\nCollectively, these results suggest that a large fraction of the mCherry\nmoieties are folded and functional, also after spinning.\nFig. 1 | The red ﬂuorescent protein mCherry was\nfused to the mini-spidroin (A 3I)3-(A)14. The full\nsequence of the fusion protein is shown in the\nSupplementar",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "By fusing a globular functional protein (mCherry) to a recombinant mini-spidroin under native purification conditions and utilizing a biomimetic all-aqueous spinning process, it is possible to fabricate intrinsically colored and fluorescent silk fibers while preserving the structural integrity and bioactivity of the fusion partner.",
+        "beforeState": "Functionalization of spider silk typically relied on post-assembly modifications using click chemistry or harsh denaturing spinning conditions that denature attached proteins, leading to poor control over functionality and loss of bioactivity.",
+        "afterState": "The production of intrinsically functionalized, colored silk fibers via native-state expression and gentle pH-controlled wet-spinning, enabling the bio-fabrication of smart materials with retained fluorescence and mechanical robustness.",
+        "researchQuestion": "Can a fusion protein consisting of a mini-spidroin and a fluorescent protein be expressed, purified, and spun into stable fibers using an all-aqueous process while maintaining the bioactivity and color of the fusion partner?",
+        "studySetup": "A fusion protein (A3I-A-mCherry) was expressed in E. coli fed-batch fermentation, purified under native conditions, and subsequently wet-spun into composite fibers by blending with wild-type (A3I)3-(A)14 mini-spidroins at various ratios (12.5%, 25%, 50% w/w). Fiber integrity and fluorescence were evaluated through mechanical reeling, fluorescence imaging, and ATR-FTIR spectroscopy.",
+        "theoreticalSignificance": "This study validates a scalable, sustainable, and eco-friendly manufacturing platform for functionalized protein-based materials that bypasses toxic chemical dyeing processes and harsh solvent-based fiber spinning techniques."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The study demonstrates that integrating mCherry with mini-spidroins allows for the scalable production of fluorescent, intrinsically colored spider silk fibers that retain mechanical properties comparable to non-functionalized recombinant counterparts.",
+        "metrics": [
+          {
+            "category": "Expression Yield",
+            "label": "Bioreactor Protein Yield",
+            "rawValue": "20 g/L",
+            "explanation": "Total amount of A3I-A-mCherry protein expressed per liter of culture.",
+            "measurementMethod": "SDS-PAGE estimation"
+          },
+          {
+            "category": "Purification",
+            "label": "Purified Protein Yield",
+            "rawValue": "10 g/L",
+            "explanation": "Amount of purified fusion protein obtained after native affinity chromatography.",
+            "measurementMethod": "Native affinity chromatography"
+          },
+          {
+            "category": "Molecular Weight",
+            "label": "Fusion Protein Monomer Mass",
+            "rawValue": "62.05 kDa",
+            "explanation": "Measured mass of the recombinant A3I-A-mCherry monomer.",
+            "significance": "Confirmed via mass spectrometry"
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": ""
+      },
+      "taggedConcepts": [
+        {
+          "term": "Mini-spidroin",
+          "nickname": "Simplified Spidroin",
+          "definition": "Synthetic, shortened versions of spider silk proteins designed for recombinant expression.",
+          "origin": "Recombinant protein engineering",
+          "relatedTerms": [
+            "Spidroin",
+            "Silk fibroin"
+          ]
+        },
+        {
+          "term": "mCherry",
+          "nickname": "Red Fluorescent Protein",
+          "definition": "A monomeric red fluorescent protein derived from Discosoma sp.",
+          "origin": "Fluorescent protein engineering",
+          "relatedTerms": [
+            "GFP",
+            "Bio-functionalization"
+          ]
+        },
+        {
+          "term": "Wet spinning",
+          "nickname": "All-aqueous spinning",
+          "definition": "A fiber formation process where protein solution is extruded into a coagulation bath to induce solidification.",
+          "origin": "Biomimetic material processing",
+          "relatedTerms": [
+            "Biomimetic spinning"
+          ]
+        },
+        {
+          "term": "Fed-batch fermentation",
+          "nickname": "Bioreactor growth",
+          "definition": "A technique where nutrients are added incrementally to a bioreactor to achieve high cell densities and protein yields.",
+          "origin": "Microbial biotechnology",
+          "relatedTerms": [
+            "E. coli expression"
+          ]
+        }
+      ],
+      "coreIdea": "By fusing a globular functional protein (mCherry) to a recombinant mini-spidroin under native purification conditions and utilizing a biomimetic all-aqueous spinning process, it is possible to fabricate intrinsically colored and fluorescent silk fibers while preserving the structural integrity and bioactivity of the fusion partner.",
+      "achievements": "The study achieved a high expression yield of 20 g/L for the A3I-A-mCherry fusion protein and demonstrated the successful creation of continuous, red-fluorescent silk fibers. By blending the fusion protein with wild-type spidroins, the researchers effectively mitigated the brittleness associated with the globular mCherry domain, resulting in robust fibers with maintained fluorescence.",
+      "limitations": "The pure fusion protein exhibited poor spinnability and brittle fiber characteristics, requiring blending with wild-type mini-spidroins to achieve continuous collection. Additionally, precise quantification of the folded fraction of the fluorescent protein within the fiber matrix remains challenging due to drying effects and fiber opacity."
+    },
+    {
+      "category": "surprise",
+      "title": "Machine learning materials physics: Multi-resolution neural networks learn the free energy and nonlinear elastic response of evolving microstructures",
+      "url": "https://www.semanticscholar.org/paper/5da67b1200ac3e52fcc409c7e0f0eed97e9dc93c",
+      "authors": "Xiaoxuan Zhang, Krishna Garikipati",
+      "year": 2019,
+      "venue": "Computer Methods in Applied Mechanics and Engineering",
+      "citationCount": 71,
+      "abstract": "",
+      "rationale": "This explores how mathematical principles of hierarchical architectures found in diverse biological systems (like shells or wood) apply to the structural integrity of synthetic tensile filaments.",
+      "pdfUrl": "https://arxiv.org/pdf/2001.01575",
+      "pdfContext": "--- PAGE 1 ---\nMachine learning materials physics: Multi-resolution neural\nnetworks learn the free energy and nonlinear elastic response of\nevolving microstructures\nXiaoxuan Zhang1, Krishna Garikipati1,2,3 ∗\n1Department of Mechanical Engineering, University of Michigan, United States\n2Department of Mathematics, University of Michigan, United States\n3Michigan Institute for Computational Discovery & Engineering, University of Michigan, United States\nAbstract\nMany important multi-component crystalline solids undergo mechanochemical spinodal decompo-\nsition: a phase transformation in which the compositional redistribution is coupled with structural\nchanges of the crystal, resulting in dynamically evolving microstructures. The ability to rapidly com-\npute the macroscopic behavior based on these detailed microstructures is of paramount importance\nfor accelerating material discovery and design. Here, our focus is on the macroscopic, nonlinear\nelastic response of materials harboring microstructure. Because of the diversity of microstructural\npatterns that can form, there is interest in taking a purely computational approach to predicting\ntheir macroscopic response. However, the evaluation of macroscopic, nonlinear elastic properties\npurely based on direct numerical simulations (DNS) is computationally very expensive, and hence\nimpractical for material design when a large number of microstructures need to be tested. A further\ncomplexity of a hierarchical nature arises if the elastic free energy and its variation with strain is a\nsmall-scale ﬂuctuation on the dominant trajectory of the total free energy driven by microstructural\ndynamics. To address these challenges, we present a data-driven approach, which combines ad-\nvanced neural network (NN) models with DNS to predict the homogenized, macroscopic, mechani-\ncal free energy and stress ﬁelds arising in a family of multi-component crystalline solids that develop\nmicrostructure. The microstructures are numerically generated by solving a coupled, mechanochem-\nical spinodal decomposition problem governed by nonlinear strain gradient elasticity and the Cahn-\nHilliard phase ﬁeld equation. The hierarchical structure of the free energy’s evolution induces a\nmulti-resolution character to the machine learning paradigm: We construct knowledge-based neural\nnetworks (KBNNs) with either pre-trained fully connected deep neural networks (DNNs), or pre-\ntrained convolutional neural networks (CNNs) that describe the dominant characteristic of the data\nto fully represent the hierarchically evolving free energy. We demonstrate multi-resolution learning\nof the materials physics; speciﬁcally of the nonlinear elastic response for both ﬁxed and evolving\nmicrostructures.\nKeywords deep neural networks· convolutional neural networks· knowledge-based neural networks· mechanochem-\nical spinodal decomposition· homogenization· mechanical free energy\n1 Introduction\nMechanochemical spinodal decomposition refers to a continuous phase transformation mechanism due to an onset\nof instability with respect to the composition and/or a structural order parameter. It occurs in materials systems\nwith a free-energy density that is non-convex in strain-composition space. Wide regimes of the state space lie far\nfrom thermodynamic equilibrium, and the resulting ﬁrst-order dynamics manifests in evolving microstructures that\nare distinguishable by strain and composition variables [1]. Mechanochemical spinodal decomposition exists in many\nimportant multi-component crystalline solids, such as cubic yttria-stabilized zirconia, the lithium-ion battery electrode\nmaterial LixMn2O4, transition metal hydrides and certain two-dimensional materials such as TaS. In such material\nsystems, as the ﬁrst-order dynamics is driven by ﬂuxes determined by the local free energy density, the material\nmicrostructure, controlled by strain and composition variables, undergoes changes. The macroscopic behaviors and\nproperties are inherently related to the evolving microstructures. Progress has been made in understanding the detailed\ndynamics and in modeling the resulting microstructures [1, 2]. However, in order to optimize the properties of existing\n∗Corresponding author. E-mail address: krishna@umich.edu June 17, 2020\narXiv:2001.01575v2  [cs.CE]  16 Jun 2020\n\n--- PAGE 2 ---\nA PREPRINT - J UNE 17, 2020\nmaterials and to design new materials, it also is essential to rapidly predict the material’s macroscopic response based\non the detailed microstructure.\nMacroscopic material responses/properties can be measured from well-designed experiments or predicted from\nphysics-based direct numerical simulations (DNS). Numerical methods to upscale the nonlinear macroscopic behav-\nior of a heterogeneous microstructure are commonly categorized as computational homogenization methods. They\nnecessitate the solution of expensive boundary value problems (BVPs) on representative volume elements (RVEs) that\nencompass the targeted material microstructures [3, 4]. It is impractical, if not impossible, to evaluate macroscopic\nmaterial properties based on either experimental measurements or DNS when a large number of microstructures need\nto be tested.\nMachine learning has emerged as a powerful approach among data-driven methods, and has been applied to study a\nwide range of problems in materials physics, such as material screening [5–7], constitutive modeling [8–10], scale\nbridging [11, 12], and system identiﬁcation [13, 14]. Interested readers are directed to Refs [15, 16] for more data-\ndriven examples in the ﬁeld of materials physics. Computational homogenization is yet another successful application\nof machine learning, where attempts to predict effective material properties [17–21] and non-linear material response\n[22–28] based on both experimentally and numerically generated data have been made by exploring different data-\ndriven techniques. For example, convolutional neural networks (CNNs), which take images of microstructures as\ninputs, have been used to construct microstructure-property linkages [17] and to predict macroscopic properties, such\nas effective ionic conductivity in ceramics [20], effective mechanical properties in composites [19] and shale [18],\neffective thermal conductivity in composites [21], and many others. Artiﬁcial neural networks (ANNs)/deep neural\nnetworks (DNNs), which are trained to construct complex nonlinear relationships between predeﬁned features (e.g.\nstrain components/volume fraction) and some quantities of interest (e.g. averaged stress responses/averaged elastic\nmodulus ), have been coupled with ﬁnite element simulations to accelerate multiscale homogenization for bone remod-\neling [22], nonlinear elastic composites [27], graphene/polymer nanocomposites with nonlinear anisotropic electrical\nresponse [28], geological materials with multi-porosity [26], oligocrystals with plastic response [25], and many others.\nData-driven computational homogenization has demonstrated the potential to drastically reduce computational time in\ntraditional multilevel calculations, making possible the inclusion of detailed microstructural information in this setting\n[27–29].\nIn this work, a data-driven homogenization approach is explored to jointly predict the mechanical free energyand ho-\nmogenized stress-strain response of a family of multi-component crystalline microstructures that are numerically gen-\nerated based on the computational framework laid out by Rudraraju et al. [1]. In this initial communication, we con-\nsider plane strain mechanics to leverage the reduction in feature complexity afforded by the resulting two-dimensional\nsetting. The physics underlying mechanochemical spinodal decomposition delivers families of microstructures that\nare not at thermodynamic equilibrium. As outlined above, these microstructures evolve, driven by the free energy.\nThere is a hierarchical nature to the free energy of this class of material phase transformations: The strain excursions\nimposed on a microstructure must remain “small” in order to prevent further evolution of the microstructure itself, or\nthe elasticity equations drive the free energy out of local basins. The corresponding structural rearrangements could\nthen be large enough that the microstructure itself changes. This would violate the notion of homogenization since the\nbase pattern over which the effective properties are being sought is itself changed. Consequently, the ﬂuctuations in\nelastic free energy themselves must remain small, implying that they should be induced by small strains. Thus, the free\nenergy of each microstructure has a multi-resolution structure with a dominant trajectory from phase transformations\nthat drive evolution of the microstructure, and small-scale ﬂuctuations from strains that explore the effective elastic\nresponse of a given microstructure. The dominant trajectory strongly depends on the microstructural information,\nsuch as the volume fraction, the location and orientation of each crystalline phase, and the interfaces. Similar multi-\nresolution data structure also exists in the ﬁeld of medical diagnosis, where ﬂuctuation of signals is used to detect\ndiseases [30–32].\nWe use knowledge-based neural networks (KBNNs) [33–35] to represent the response in the multi-resolution informa-\ntion structure. KBNN is a hybrid learning system, in which domain speciﬁc knowledge are translated into a NN via the\nform of hierarchically structured rules [33, 34], or the form of pre-trained NNs [35]. Though the knowledge, whose\ncompleteness and correctness are not required, provides only approximately correct explanation of a problem, neural\nlearning techniques can be used to train the KBNN to gain improved understanding of the problem and achieve supe-\nrior performance than randomly initialized NNs [33]. KBNN is one form of so-called transfer learning that is deﬁned\nas: “the ability of a system to recognize and apply knowledge and skills learned in previous tasks to novel tasks” [36].\nIn this work, the KBNNs are speciﬁcally built upon pre-trained DNNs or CNNs, which describe the dominant part of\nthe free energy, to learn the small-scale ﬂuctuations of free energy and predict homogenized stresses. It is important\nto mention that although the term DNN refers to a large family of neural network structures, it will speciﬁcally refer\nto deep neural networks with fully connected layers in this work. Our studies demonstrate that multi-resolution neural\nnetworks using both DNN-based and CNN-based KBNN models can accurately learn the macroscopic mechanical\n2\n\n--- PAGE 3 ---\nA PREPRINT - J UNE 17, 2020\nbehavior of a single microstructure. Furthermore, CNN-enhanced KBNN models are capable of learning the macro-\nscopic mechanical behavior of many microstructures from different DNSs. Such KBNN models for multi-resolution\nlearning and testing can be used to rapidly screen materials based on their microstructures for applications such as\nadditive manufacturing, polymer blending, or materials synthesis.\nThe rest of the paper is organized as follows. In Section 2, we summarize the mathematical description of\nmechanochemical spinodal decomposition, and the computational framework that is used to generate different mi-\ncrostructures in materials undergoing this class of phase transformations. The neural network (NN) model structures\nused in this work are presented in Section 3. Section 4 covers the procedures of data generation, feature selection,\nand hyperparameter searches. The detailed simulation results are presented in Section 5. Concluding remarks and\nperspectives are offered in Section 6.\n2 Mechanochemical spinodal decomposition\nWe ﬁrst summarize the mathematical framework of mechanochemical spinodal decomposition. Interested readers are\ndirected to Ref. [1] for details.\n2.1 Free energy density function\nIn this work, we focus on mechanochemical spinodal decomposition in plane strain. We work within the effectively\ntwo-dimensional setting that results, ",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The free energy landscape of evolving microstructures possesses a multi-resolution structure: a dominant, low-frequency component dictated by phase transformations (spinodal decomposition) and small-scale, high-frequency fluctuations induced by strain. By using Knowledge-Based Neural Networks (KBNNs), the model offloads the capture of the dominant baseline to a pre-trained, physics-informed structure, allowing the network to focus its learning capacity on the residual high-frequency elastic fluctuations.",
+        "beforeState": "Traditional computational homogenization requires solving expensive boundary value problems on representative volume elements for every unique microstructure, making it computationally prohibitive for material design exploration.",
+        "afterState": "KBNNs enable rapid inference of macroscopic mechanical free energy and homogenized stress-strain responses by leveraging pre-existing knowledge of the structural evolution, reducing the reliance on direct numerical simulations for every design iteration.",
+        "strategyUsed": "metaphor",
+        "taxonomy": "Multi-resolution learning via Knowledge-Based Neural Networks.",
+        "theoreticalSignificance": "It establishes that hierarchical neural architectures can effectively separate thermodynamic energy landscapes into coarse-grained structural trajectories and fine-grained elastic responses, mimicking the hierarchical nature of physical systems evolving far from equilibrium."
+      },
+      "zoomData": {
+        "rawFormula": "E(C, S) = E_{DNN}(C) + \\delta E(S, C)",
+        "translation": "The total mechanical free energy E is decomposed into a dominant contribution E_DNN from the microstructure C and a residual fluctuation term delta E dependent on both the strain S and microstructure C.",
+        "terms": [
+          {
+            "symbol": "E_{DNN}(C)",
+            "definition": "The dominant macroscopic free energy contribution predicted by a pre-trained Deep Neural Network based on the microstructure features.",
+            "subDefinitions": [
+              {
+                "term": "E",
+                "definition": "Free energy scalar."
+              },
+              {
+                "term": "DNN",
+                "definition": "Deep neural network component."
+              },
+              {
+                "term": "C",
+                "definition": "Microstructure characteristic vector/matrix."
+              }
+            ]
+          },
+          {
+            "symbol": "\\delta E(S, C)",
+            "definition": "The small-scale fluctuation term in the free energy capturing the elastic response.",
+            "subDefinitions": [
+              {
+                "term": "delta E",
+                "definition": "Free energy fluctuation."
+              },
+              {
+                "term": "S",
+                "definition": "Strain tensor input."
+              },
+              {
+                "term": "C",
+                "definition": "Microstructure characteristic."
+              }
+            ]
+          },
+          {
+            "symbol": "E(C, S)",
+            "definition": "The total homogenized mechanical free energy.",
+            "subDefinitions": [
+              {
+                "term": "E",
+                "definition": "Energy scalar."
+              },
+              {
+                "term": "C",
+                "definition": "Microstructural configuration."
+              },
+              {
+                "term": "S",
+                "definition": "Strain state."
+              }
+            ]
+          },
+          {
+            "symbol": "E",
+            "definition": "The macroscopic mechanical free energy density.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "S",
+            "definition": "Strain state input vector.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "C",
+            "definition": "Representational input of the microstructure.",
+            "subDefinitions": []
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [
+          {
+            "stepLabel": "Preprocessing",
+            "explanation": "Generation of microstructures via Cahn-Hilliard phase-field simulations and nonlinear strain gradient elasticity solvers."
+          },
+          {
+            "stepLabel": "Feature Decomposition",
+            "explanation": "The free energy is split into a baseline part, modeled by a DNN/CNN trained on static or coarse data, and a residual fluctuation part learned by the KBNN."
+          },
+          {
+            "stepLabel": "Knowledge Integration",
+            "explanation": "Incorporation of the pre-trained neural network as a fixed or initialization feature to constrain the optimization within a physically relevant basin."
+          }
+        ],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": "This additive decomposition is critical because it mirrors the physical separation of time and length scales in spinodal decomposition, preventing the neural network from trying to learn the entire complex energy surface as a black box and instead forcing it to only model the elastic residual."
+      },
+      "taggedConcepts": [
+        {
+          "term": "Mechanochemical spinodal decomposition",
+          "nickname": "Phase Separation",
+          "definition": "A phase transformation process in which a solution becomes unstable to small perturbations in composition and/or structural order, leading to structural evolution.",
+          "origin": "Materials Physics",
+          "relatedTerms": [
+            "Cahn-Hilliard equation",
+            "Phase-field modeling"
+          ]
+        },
+        {
+          "term": "Knowledge-based neural networks (KBNN)",
+          "nickname": "Hybrid NN",
+          "definition": "Neural network architectures that incorporate domain-specific knowledge or pre-trained models to guide the learning process.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Transfer learning",
+            "Physics-informed neural networks"
+          ]
+        },
+        {
+          "term": "Computational Homogenization",
+          "nickname": "Upscaling",
+          "definition": "Techniques for determining effective macroscopic properties from the behavior of representative volume elements.",
+          "origin": "Continuum Mechanics",
+          "relatedTerms": [
+            "Representative Volume Element (RVE)",
+            "Finite element method"
+          ]
+        }
+      ],
+      "coreIdea": "The free energy landscape of evolving microstructures possesses a multi-resolution structure: a dominant, low-frequency component dictated by phase transformations (spinodal decomposition) and small-scale, high-frequency fluctuations induced by strain. By using Knowledge-Based Neural Networks (KBNNs), the model offloads the capture of the dominant baseline to a pre-trained, physics-informed structure, allowing the network to focus its learning capacity on the residual high-frequency elastic fluctuations.",
+      "achievements": "The authors successfully demonstrated the use of Knowledge-Based Neural Networks (KBNNs) to decouple and learn the hierarchical components of free energy in multi-component crystalline solids. This approach significantly reduces the computational overhead compared to direct numerical simulations by leveraging multi-resolution neural network features.",
+      "limitations": "The current model is restricted to plane strain mechanics in a two-dimensional setting, which limits its direct applicability to complex 3D engineering components. Additionally, the reliance on pre-training and domain-specific knowledge limits the generalizability of the KBNN structure to entirely different physics without modification."
+    },
+    {
+      "category": "wildcard",
+      "title": "Liquid‒liquid phase separation of spider silk proteins",
+      "url": "https://www.semanticscholar.org/paper/ca8728002bd3f032ec2b21b5f242d7573e0494c0",
+      "authors": "Lisa Zeußel, Hendrik Bargel, Gregory P. Holland, Thomas Scheibel",
+      "year": 2025,
+      "venue": "Polymer journal",
+      "citationCount": 6,
+      "abstract": "",
+      "rationale": "This addresses the fluid dynamics and chemical processing involved in how spiders extrude silk, a critical bottleneck for any 'futur' synthetic production method of these materials.",
+      "pdfUrl": "https://www.nature.com/articles/s41428-025-01039-3.pdf",
+      "pdfContext": "--- PAGE 1 ---\nPolymer Journal (2025) 57:831 –843\nhttps://doi.org/10.1038/s41428-025-01039-3\nFOCUS REVIEW\nLiquid‒liquid phase separation of spider silk proteins\nLisa Zeußel 1 ●\nHendrik Bargel 1 ●\nGregory P. Holland 2 ●\nThomas Scheibel 1,3,4,5,6\nReceived: 20 January 2025 / Revised: 15 March 2025 / Accepted: 17 March 2025 / Published online: 24 April 2025\n© The Author(s) 2025. This article is published with open access\nAbstract\nLiquid‒liquid phase separation (LLPS) is a phenomenon relevant in the multicomponent settings of many biological\nprocesses, including compartmentation, pathological conditions such as Alzheimer ’s disease, and protein assembly. LLPS\nalso plays a key role in spider silk ﬁber formation. Many spider silk ﬁbers display properties such as elasticity in\ncombination with high mechanical strength, which result in an outstanding toughness exceeding that of steel or Kevlar. A\nthorough understanding of the natural silk spinning process is thus vital for translation to arti ﬁcial spinning techniques to\nachieve biomimetic ﬁbers with properties superior to those of other ﬁbrous materials. This focus review summarizes the\nmilestones of research on spider silk assembly, starting from two initial theories, i.e., the liquid crystal theory and the micelle\ntheory, followed by evidence for the importance of LLPS in this process. Ex vivo studies and experiments utilizing\nrecombinant spider silk proteins have highlighted the importance of LLPS during spider silk assembly. Here, we provide a\nconsolidated view of the previously separate theories as a concerted, transitional concept, and describe practical implications\nshowcasing the importance of this unifying concept for technical silk spinning.\nIntroduction\nLiquid‒liquid phase separation (LLPS) is a physical process\nthat often occurs in multicomponent mixtures. In LLPS,\nsolutions spontaneously separate into two immiscible liquid\nphases, one with a low concentration and the other with a\nhigh concentration of one or more individual components.\nThe driving forces for LLPS include temperature as well as\npressure changes, pH, charge neutralization, the speci ﬁc\npolarity of the constituting components, and other surface\ncharacteristics, e.g., hydropathicity [ 1]. The process is\nwidely known to occur in polymer-diluent systems, with\napplications, for example, in waste and pollution control or\nin the food processing industry [ 1]. In biological and bio-\nmedical research, phase separation is known to be an\nimportant compartmentation principle in physiological\nprocesses, including RNA metabolism, ribosome biogen-\nesis, DNA repair mechanisms, and signal transduction [ 2].\nLLPS has also been reported to occur under pathological\nconditions, especially in neurodegenerative diseases such as\nAlzheimer’s disease [ 1, 3]. The LLPS of proteins has\nrecently received much attention since LLPS is essential for\nthe formation of biological adhesives, e.g., in sandcastle\nworm cement or during the formation of mussel attachment\nadhesives underwater, as well as in hard biomolecular\ncomposites such as the squid beak [ 4]. Moreover, it has\nbeen reported that LLPS of spider silk proteins is important\nfor ﬁber assembly [ 5]. A common feature of proteins\nundergoing LLPS seems to be the presence of intrinsically\ndisordered protein regions (IDPs), which favor phase\nseparation to increase their concentration without structural\nchanges [ 6]. Weak but highly abundant noncovalent intra-\nand intermolecular interactions are known to be the driving\nThese authors contributed equally: Lisa Zeußel, Hendrik Bargel\n* Thomas Scheibel\nthomas.scheibel@uni-bayreuth.de\n1 University of Bayreuth, Department of Biomaterials, Prof.-\nRüdiger-Bormann-Str. 1, 95447 Bayreuth, Germany\n2 San Diego State University (SDSU), Department of Chemistry and\nBiochemistry, San Diego, CA 92182-1030, USA\n3 University of Bayreuth, Bayreuth Center of Material Science and\nEngineering (BayMat), Universitätsstr. 30, 95440\nBayreuth, Germany\n4 University of Bayreuth, Bavarian Polymer Institute (BPI),\nUniversitätsstr. 30, 95440 Bayreuth, Germany\n5 University of Bayreuth, Bayreuth Center of Colloids and\nInterfaces (BZKG), Universitätsstr. 30, 95440 Bayreuth, Germany\n6 University of Bayreuth, Bayreuth Center for Molecular\nBiosciences (BZMB), Universitätsstr. 30, 95440\nBayreuth, Germany\n1234567890();,:\n1234567890();,:\n\n--- PAGE 2 ---\nforces for LLPS in biological systems, leading the proteins\nto condense in a concentrated liquid phase as a transition\nstate for further processing or reactions [ 6]. In this manner,\nspeciﬁc preassembly processes guided by intra- and inter-\nmolecular interactions are permitted that would not occur\nwithout LLPS [ 7].\nThe natural spider silk spinning process is highly sophis-\nticated and involves liquid‒liquid and liquid‒solid transitions\nof the underlying spider silk proteins ( = spidroins) in\nresponse to multiple biological, biochemical, and mechanical\ncues [8]. Thus, a meticulously coordinated process is highly\nimportant to prevent premature solidi ﬁcation of the spidroin\nsolution in the spider ’s body, potentially obstructing ﬁber\nformation and subsequent usage. However, research on spi-\nders or silk collected from spiders through milking is ham-\npered by the cannibalistic and territorial behavior of most\nspider species, and only low quantities of silk can be acquired\nat a time by forced silking. Thus, elucidation of the\nmechanism underlying silk spinning from an aqueous solu-\ntion has been performed mainly with rehydrated or recom-\nbinantly produced spider silk proteins [ 9].\nOn the basis of the work conducted in the past 20 years\non elucidating the assembly mechanism for major ampullate\nspidroins (MaSps), we herein provide a topical overview,\nhighlighting the most recent advances.\nLiquid crystal theory and micelle theory\nLow-concentration solutions of certain amphipathic block\ncopolymers form nanometer-sized, approximately spherical\naggregates in a colloidal suspension [ 10]. However, at\nhigher polymer concentrations, self-assembly processes\nlead to the formation of cubical or cylindrical nanocrystal-\nline structures, so-called liquid crystals (LCs), that feature\nliquid-like behavior [ 7, 11]. Polymers showing such beha-\nvior have various technical applications, e.g., in LC displays\nor holographic systems [ 12]. In 1999, Vollrath and Knight\nreported that silk proteins in the spider ’s major ampullate\ngland and spinning duct also present LC characteristics,\nwith the long axes of the spidroins aligning parallel to one\nanother [13, 14]. This ﬁnding is in accordance with ﬁndings\nin block copolymers. Strikingly, the concentration of spi-\ndroins in spider glands can reach 50 wt%, a spidroin con-\ncentration that cannot be easily established in vitro without\ngelation or solidi ﬁcation of the protein solution. Vollrath\nand Knight hypothesized that the reduction in viscosity\nthrough a nematic phase preorientation of spidroins permits\ntheir speciﬁc alignment during elongational ﬂow throughout\nthe spinning duct, which is essential for the development of\nthe outstanding mechanical properties of spider silk ﬁbers.\nAccording to their observations, the following mechanism\nwas proposed for in vivo spider silk spinning: the LC\nspidroin solution is drawn through an S-shaped duct to form\nan elastic thread, whereby the inner core and the thin coat of\nthe thread are formed in two different zones. The inner core\nis made up of short, narrow spidroin ﬁlaments, whereas the\nshell of the thread is composed of hexagonal columnar LCs.\nThe epithelial layer of the duct allows increased exchange\nof water and sodium ions for kosmotropic potassium ions,\nas well as acidi ﬁcation, together initiating ﬁber assembly.\nSimultaneously, the decreasing width of the tapered spin-\nning duct promotes speci ﬁcally aligned states of the spi-\ndroin molecules. The spidroins are ﬁrst oriented in parallel\nbut perpendicular to the epithelium before they turn to\nbecome parallel to the epithelial walls. Next, the molecules\nform bilayered disks, an orientation called the cellular\noptical texture, which can further elongate and align to form\nmainly β-sheet-rich structures [15]. Finally, the silk thread is\nactively drawn from the exit spigot with the help of a\nclamp-like valve (see Fig. 1)[ 14].\nDespite the groundbreaking insights into spider silk spinning\nprocesses, the proposed LC behavior of spidroins in spider\nglands cannot fully explain how the proteins remain soluble at\nhigh concentrations and cannot be replicated in vitro. Moreover,\nmany processing steps during silk formation were not under-\nstood at the time of publication, further resulting in problems\nwhen trying to artiﬁcially replicate the process.\nInterestingly, during their work with rehydrated silk\nﬁbroin from the silkworm Bombyx mori , Jin and Kaplan\nreported micelle-like structures formed due to the\nhydrophilic-hydrophobic-hydrophilic character of silk\nﬁbroins, increasing their water solubility and preventing\npremature solidi ﬁcation [16]. The authors proposed that the\nmicellar constructs coalesce and assemble into larger glo-\nbules upon increased protein concentration. Physical shear\nsubsequently lead to elongation and alignment of these\nglobules during the drawing process in the spinning duct, an\nessential condition for the formation of insoluble β-sheet-\nrich silk threads (see Fig. 1).\nElucidating the mechanism of spider silk\nformation\nEx vivo studies\nThe best-studied type of spider silk is the major ampullate\n(MA) silk of orb-weaving spiders, which is used as dragline\nsilk and for the construction of web radii [ 17]. To date, in\nthe European Garden Spider Araneus diadematus , two\nstructurally similar MaSps have been identi ﬁed, with\nslightly different amino acid compositions [ 18]. MaSps are\ncomposed of a repetitive core and can contain 3500 amino\nacids ﬂanked by nonrepetitive (NR) amino (N)- and car-\nboxyl (C)-terminal domains of ~130 and ~110 amino acids,\n832 L. Zeußel et al.\n\n--- PAGE 3 ---\nrespectively [ 19]. Both NR domains are highly conserved\namong species and have a ﬁve-helix structure. Under sto-\nrage conditions, the C-terminal domains are present as\nparallel dimers, whereas the N-terminal domains remain in a\nmonomeric state. These conformational characteristics and\nthe potential ability of N-terminal domains to dimerize later\nin response to acidi ﬁcation are vital for spinning dope sto-\nrage and correct silk ﬁber assembly [ 20]. In the core region,\npoly-A, poly-GA, GPGQQ, GPGGX, and GGX sequences\ncan be found, wherein the poly-(G)A sequences contribute\nto mechanical stability via β-sheet formation, whereas the\nstructural features of the other sequences allow ﬂexibility\nand elasticity of the spider silk ﬁber through assembly into\nβ-spirals, β-turns, and 3\n1 helices (see Fig. 2A) [ 21].\nEx vivo biophysical studies of MA glands excised directly\nfrom black widow spiders ( Latrodectus hesperus) have pro-\nvided signiﬁcant insight into the structural and dynamic state\nof spidroins in a native-like environment prior to ﬁber spin-\nning. Importantly, because these experiments were conducted\non whole glands immediately following dissection, the state\nof the protein was as close to the true storage state as possible\nto an in vivo experiment. Solution nuclear magnetic reso-\nnance spectroscopy (NMR) of intact isotope-enriched black\nwidow MA glands has shown that spidroins behave like\nclassic IDPs [ 22]. Conformation-dependent isotropic chemi-\ncal shifts were consistent with a random coil structure\n(Fig. 2B), and NMR relaxation measurements (T\n1,T 2, NOE)\nrevealed rapid spidroin backbone dynamics on the sub-\nnanosecond timescale. The high degree of rapid backbone\nmotion is readily assessed from the heteronuclear 1H-15N\nnuclear Overhauser effect (NOE) measured in two ﬁelds\n(800 MHz and 500 MHz), which illustrates the highly ﬂex-\nible nature of the spidroins stored in the gland prior to ﬁber\nspinning (Fig. 2C). Diffusion NMR and cryogenic electron\nmicroscopy (cryo",
+      "explanation": {
+        "paperType": "review_survey",
+        "coreIntuition": "The paper reconciles the historical tension between the 'liquid crystal' and 'micelle' models of spider silk protein assembly by proposing Liquid-Liquid Phase Separation (LLPS) as the unified underlying physical mechanism that coordinates protein behavior in the silk gland prior to fiber formation.",
+        "beforeState": "Researchers held fragmented, often conflicting views: one camp championed the Liquid Crystal (LC) theory (protein orientation for high-speed spinning) while others favored the Micelle theory (solubility maintenance at high concentrations).",
+        "afterState": "LLPS is established as the overarching conceptual framework that explains how spidroins transition from disordered, soluble states in the gland to organized, solid-state fibers through a concentration-dependent, multi-stage process.",
+        "surveyScope": "The scope covers the research history of major ampullate spidroin assembly in the European Garden Spider (Araneus diadematus) and Black Widow (Latrodectus hesperus), spanning over two decades of biophysical and biochemical investigations.",
+        "taxonomy": "The taxonomy organizes silk assembly into three historical paradigms: the Liquid Crystal theory, the Micelle theory, and the emerging LLPS-mediated transitional concept.",
+        "theoreticalSignificance": "By unifying these theories, the paper provides a cohesive model for how disordered spidroins use weak noncovalent interactions to control their state, offering a template for biomimetic fiber production that bypasses traditional spinning bottlenecks."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "The field has evolved from structural models focusing on orientation (Liquid Crystals) and protein stability (Micelles) to a dynamic model centered on LLPS, which views the silk gland as a compartmentalized bioreactor using phase transitions as a regulatory checkpoint.",
+        "subcategories": [
+          {
+            "name": "Liquid Crystal Theory",
+            "approach": "Emphasis on the nematic phase pre-alignment of spidroins to reduce viscosity during elongational flow.",
+            "seminalPapers": [
+              "Vollrath and Knight (1999)"
+            ]
+          },
+          {
+            "name": "Micelle Theory",
+            "approach": "Emphasis on the amphiphilic block copolymer character of silk proteins to maintain water solubility at high concentrations.",
+            "seminalPapers": [
+              "Jin and Kaplan (2003)"
+            ]
+          },
+          {
+            "name": "LLPS-Mediated Assembly",
+            "approach": "Synthesis of existing data highlighting IDP-driven condensation as the transition state between storage and fiber formation.",
+            "seminalPapers": [
+              "Zeußel et al. (2025)"
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "challenge": "Artificial Scaling",
+            "reason": "Current in vitro recombinant silk production fails to replicate the complex, spatiotemporal water and ion exchange gradients found in natural spinning ducts."
+          },
+          {
+            "challenge": "Solubility Limits",
+            "reason": "In vitro concentrations of spidroins typically trigger premature gelation long before reaching the 50 wt% observed in vivo, preventing industrial-scale biomimetic processing."
+          }
+        ],
+        "equationImportance": ""
+      },
+      "taggedConcepts": [
+        {
+          "term": "Liquid-Liquid Phase Separation (LLPS)",
+          "nickname": "LLPS",
+          "definition": "A physical process where a homogeneous mixture separates into two distinct liquid phases, typically driven by concentration-dependent interactions.",
+          "origin": "Polymer science and cell biology",
+          "relatedTerms": [
+            "Intrinsically Disordered Proteins",
+            "Phase Transitions",
+            "Colloids"
+          ]
+        },
+        {
+          "term": "Major Ampullate Spidroin (MaSps)",
+          "nickname": "MaSps",
+          "definition": "The primary structural proteins of the spider dragline silk, characterized by repetitive core sequences and conserved terminal domains.",
+          "origin": "Spider silk biology",
+          "relatedTerms": [
+            "Beta-sheets",
+            "Amphipathic block copolymers",
+            "IDP"
+          ]
+        },
+        {
+          "term": "Intrinsically Disordered Proteins (IDP)",
+          "nickname": "IDP",
+          "definition": "Proteins that lack a fixed or ordered 3D structure under physiological conditions, often facilitating rapid conformational shifts.",
+          "origin": "Structural biology",
+          "relatedTerms": [
+            "Conformational dynamics",
+            "NMR relaxation"
+          ]
+        }
+      ],
+      "coreIdea": "The paper reconciles the historical tension between the 'liquid crystal' and 'micelle' models of spider silk protein assembly by proposing Liquid-Liquid Phase Separation (LLPS) as the unified underlying physical mechanism that coordinates protein behavior in the silk gland prior to fiber formation.",
+      "achievements": "The paper successfully synthesizes two decades of conflicting structural theories into a unified concept of silk assembly. It validates the critical role of Liquid-Liquid Phase Separation (LLPS) as the transition state that enables high protein concentration without premature solidification.",
+      "limitations": "The review acknowledges that existing recombinant protein models struggle to replicate the high-concentration stability found in natural silk. Furthermore, the precise orchestration of ion exchange and mechanical shearing in vivo remains difficult to fully translate into synthetic spinning techniques."
+    }
+  ]
+}

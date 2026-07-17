@@ -94,16 +94,16 @@ input, textarea {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-glass);
+  box-shadow: none;
 }
 
 /* Glow effects */
 .glow-primary {
-  box-shadow: 0 0 30px rgba(27, 73, 49, 0.08);
+  box-shadow: none;
 }
 
 .glow-accent {
-  box-shadow: 0 0 30px rgba(72, 46, 29, 0.08);
+  box-shadow: none;
 }
 
 /* Keyframes and Animations */
@@ -243,7 +243,7 @@ input, textarea {
   display: flex;
   flex-direction: column;
   max-height: 85vh;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 16px 20px 24px 20px;
   overflow: hidden;
@@ -362,6 +362,20 @@ input, textarea {
   overflow-x: auto;
   margin-bottom: 16px;
   text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  /* Premium horizontal scroll fade effect */
+  mask-image: linear-gradient(to right, transparent, white 12px, white calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, white 12px, white calc(100% - 12px), transparent);
+}
+
+.formula-display-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.formula-display-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
 }
 
 .latex-formula {
@@ -573,7 +587,7 @@ input, textarea {
 .metric-grid-card.active {
   background: rgba(59, 130, 246, 0.08);
   border-color: #3b82f6;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  box-shadow: none;
 }
 
 .metric-card-val {
@@ -804,14 +818,14 @@ input, textarea {
 .math-term-box:hover {
   background: rgba(168, 85, 247, 0.16);
   border-color: #c084fc;
-  box-shadow: 0 0 6px rgba(168, 85, 247, 0.25);
+  box-shadow: none;
   transform: translateY(-0.5px);
 }
 
 .math-term-box.active {
   background: rgba(168, 85, 247, 0.28);
   border-color: #c084fc;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.45);
+  box-shadow: none;
   color: white;
   transform: translateY(-0.5px);
   font-weight: 800;
@@ -820,25 +834,25 @@ input, textarea {
 .metric-interactive-row.active {
   background: rgba(59, 130, 246, 0.08);
   border-color: #3b82f6;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  box-shadow: none;
 }
 
 .proof-step-btn.active {
   background: rgba(16, 185, 129, 0.08);
   border-color: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
+  box-shadow: none;
 }
 
 .subcategory-btn.active {
   background: rgba(245, 158, 11, 0.08);
   border-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
+  box-shadow: none;
 }
 
 .gap-btn-row.active {
   background: rgba(245, 158, 11, 0.08);
   border-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
+  box-shadow: none;
 }
 
 /* Sub-definitions Variable Decomposition Box */
@@ -966,12 +980,13 @@ input, textarea {
   border-radius: var(--radius-md);
   margin-top: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(9, 9, 11, 0.03);
+  box-shadow: none;
   transition: box-shadow var(--transition-normal);
+  flex-shrink: 0;
 }
 
 .interactive-deconstruction-accordion.open {
-  box-shadow: 0 10px 24px rgba(27, 73, 49, 0.06);
+  box-shadow: none;
 }
 
 .deconstruction-header-btn {
@@ -1005,6 +1020,11 @@ input, textarea {
   font-size: 0.95rem;
 }
 
+.deconstruction-title {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+
 .deconstruction-arrow {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -1035,11 +1055,22 @@ input, textarea {
 
 .deconstruction-content .equation-latex-render {
   font-family: var(--font-mono);
-  font-size: 1.25rem;
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
   color: var(--color-primary) !important;
   text-align: center;
-  overflow-x: auto;
   padding: 8px 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.deconstruction-content .equation-latex-render::-webkit-scrollbar {
+  height: 4px;
+}
+
+.deconstruction-content .equation-latex-render::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
 }
 
 .deconstruction-content .equation-translation-text,
@@ -1107,7 +1138,7 @@ input, textarea {
 .deconstruction-content .gap-btn-row.active {
   background: var(--color-primary-glow) !important;
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 8px var(--color-primary-glow);
+  box-shadow: none;
 }
 
 .deconstruction-content .var-sym {
@@ -1306,6 +1337,233 @@ input, textarea {
   color: var(--color-accent) !important;
 }
 
+/* ──── DECONSTRUCTION CAROUSEL STYLES ──── */
+.zoom-carousel-container {
+  margin-top: 20px;
+}
+.zoom-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.zoom-carousel-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.zoom-carousel-scroll-area {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.zoom-carousel-scroll-area::-webkit-scrollbar {
+  display: none;
+}
 
+/* Card Styling */
+.zoom-carousel-card {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: all var(--transition-fast);
+}
+.zoom-carousel-card.active {
+  background: var(--color-primary-glow);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.zoom-carousel-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.zoom-carousel-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.zoom-carousel-card-content {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
 
+/* Sub-cards and details */
+.zoom-carousel-card-extra {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 10px;
+}
+.zoom-carousel-card-extra-lbl {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.zoom-carousel-card-extra-txt {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.zoom-carousel-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.zoom-carousel-card-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  border-top: 1px dashed var(--border-glass);
+  padding-top: 6px;
+}
+.zoom-carousel-card-detail-lbl {
+  color: var(--text-muted);
+}
+.zoom-carousel-card-detail-val {
+  color: var(--text-primary);
+  font-weight: 600;
+}
 
+/* Breakdown list */
+.zoom-carousel-breakdown {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 10px;
+}
+.zoom-carousel-breakdown-lbl {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.zoom-carousel-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.zoom-carousel-breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+.zoom-carousel-breakdown-item.clickable {
+  cursor: pointer;
+}
+.zoom-carousel-breakdown-item.clickable:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.zoom-carousel-breakdown-term {
+  background: var(--color-primary-glow);
+  color: var(--color-primary);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+}
+.zoom-carousel-breakdown-desc {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+/* Dark Drawer Theme Overrides for Carousel */
+.semantic-zoom-drawer .zoom-carousel-lbl,
+.semantic-zoom-drawer .zoom-carousel-card-detail-lbl,
+.semantic-zoom-drawer .zoom-carousel-card-extra-lbl,
+.semantic-zoom-drawer .zoom-carousel-breakdown-lbl {
+  color: #a1a1aa !important;
+}
+.semantic-zoom-drawer .zoom-carousel-card-title,
+.semantic-zoom-drawer .zoom-carousel-card-detail-val {
+  color: #ffffff !important;
+}
+.semantic-zoom-drawer .zoom-carousel-card-content,
+.semantic-zoom-drawer .zoom-carousel-card-extra-txt,
+.semantic-zoom-drawer .zoom-carousel-breakdown-desc {
+  color: #e5e7eb !important;
+}
+.semantic-zoom-drawer .zoom-carousel-card {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
+}
+.semantic-zoom-drawer .zoom-carousel-card.active {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  box-shadow: none !important;
+}
+.semantic-zoom-drawer .zoom-carousel-card-badge {
+  color: #c084fc !important;
+}
+.semantic-zoom-drawer .zoom-carousel-breakdown-item {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+.semantic-zoom-drawer .zoom-carousel-breakdown-item.clickable:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.semantic-zoom-drawer .zoom-carousel-breakdown-term {
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #c084fc !important;
+}/* Between-paper divider (inside scrollable card) */
+.paper-stack-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-top: 1px dashed var(--border-glass);
+  background: rgba(9, 9, 11, 0.01);
+  margin-top: 20px;
+}
+.paper-stack-divider span {
+  animation: nudgeDown 1.8s ease-in-out infinite;
+}
+@keyframes nudgeDown {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%       { transform: translateY(4px); opacity: 1; }
+}
+
+/* End of digest marker */
+.paper-stack-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px 12px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  gap: 8px;
+  border-top: 1px dashed var(--border-glass);
+  margin-top: 20px;
+}

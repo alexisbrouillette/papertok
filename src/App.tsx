@@ -406,16 +406,6 @@ function App() {
         />
       )}
 
-      {currentScreen !== 'demo' && (
-        <button
-          className="floating-demo-trigger"
-          onClick={() => setCurrentScreen('demo')}
-          type="button"
-        >
-          ✨ UI Demo Mode
-        </button>
-      )}
-
       {/* Global Semantic Zoom Drawer Overlay */}
       {activeZoomPaper && (
         <SemanticZoomDrawer
@@ -434,27 +424,6 @@ function App() {
         .app-container {
           min-height: 100vh;
           width: 100%;
-        }
-
-        .floating-demo-trigger {
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          background: linear-gradient(135deg, #a855f7, #6366f1);
-          color: white;
-          padding: 10px 18px;
-          border-radius: 99px;
-          font-weight: 700;
-          font-size: 0.8rem;
-          box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
-          z-index: 999;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all var(--transition-fast);
-        }
-
-        .floating-demo-trigger:hover {
-          transform: translateY(-2px) scale(1.05);
-          box-shadow: 0 6px 24px rgba(168, 85, 247, 0.6);
         }
 
         .error-screen-container {

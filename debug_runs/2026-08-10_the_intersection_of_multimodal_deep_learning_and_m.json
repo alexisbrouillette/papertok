@@ -1,0 +1,1823 @@
+{
+  "userId": 3,
+  "topic": "the intersection of multimodal deep learning and macroecology, specifically centering on the development of Ecological Foundation Models that overcome data-scarcity constraints in species distribution modeling. You investigate how cross-modal transformer architectures can jointly integrate heterogeneous data streams—such as satellite imagery, bioclimatic variables, and geological substrates—with natural language habitat profiles to enable zero-shot predictive modeling for rare, cryptic, or data-deficient taxa. Additionally, your work examines how text-guided attention mechanisms can endogenously discover the distinct spatial scales at which different taxonomic kingdoms respond to their environments without explicit geographic supervision. Ultimately, this research aims to transform unstructured ecological knowledge into predictive spatial layers to support automated global conservation triage and biodiversity assessments in rapidly changing ecosystems",
+  "digestDate": "2026-08-10",
+  "papers": [
+    {
+      "category": "foundation",
+      "title": "Bringing Elton and Grinnell together: a quantitative framework to represent the biogeography of ecological interaction networks",
+      "url": "https://www.semanticscholar.org/paper/2485543d641effe57ca0df971d2efff6ea2c3dfd",
+      "authors": "Dominique Gravel, Benjamin Baiser, Jennifer A. Dunne, Jens-Peter Kopelke, Neo D. Martinez, Tommi Nyman, Timoth´ ee Poisot, Daniel B. Stouﬀer, Jason M. Tylianakis, Spencer A. Wood, Tomas Roslin",
+      "year": 2016,
+      "venue": "bioRxiv",
+      "citationCount": 116,
+      "abstract": "",
+      "rationale": "This addresses the core ecological theory pillar, focusing on the historical separation between Grinnellian (environmental) and Eltonian (biotic) niche concepts, which is critical for defining the 'habitat profiles' the user intends to model.",
+      "pdfUrl": "https://www.biorxiv.org/content/biorxiv/early/2016/05/26/055558.1.full.pdf",
+      "pdfContext": "--- PAGE 1 ---\nTitle: Bringing Elton and Grinnell together: a quantitative framework to represent1\nthe biogeography of ecological interaction networks2\n3\nAuthors: Dominique Gravel1,2,∗, Benjamin Baiser 3, Jennifer A. Dunne 4, Jens-Peter4\nKopelke5, Neo D. Martinez 6, Tommi Nyman 7, Timoth´ ee Poisot2,8, Daniel B. Stouﬀer 9,5\nJason M. Tylianakis 9,10, Spencer A. Wood 11, Tomas Roslin126\n7\n1: Canada Research Chair in Integrative Ecology. D´ epartement de biologie, Univer-8\nsit´ e de Sherbrooke, 2500 Boulevard l’Universit´ e, Sherbrooke (Qu´ ebec). J1K 2R19\n2: Qu´ ebec Centre for Biodiversity Science10\n3: University of Florida, Department of Wildlife Ecology and Conservation, 110 Newins-11\nZiegler Hall, PO Box 110430, Gainesville, Fl. 32611-043012\n4: Santa Fe Institute, 1399 Hyde Park Road, Santa Fe, NM 87501, USA.13\n5: Senckenberg Research Institute and Natural History Museum, Senckenberganlage 25,14\nD-60325 Frankfurt am Main, Germany15\n6: Ecology and Evolutionary Biology Department, University of Arizona, P.O. Box16\n210088, Tucson, AZ 85721, USA17\n7: University of Eastern Finland, Department of Environmental and Biological Sciences,18\nP.O. Box 111, FI-80101 Joensuu, Finland19\n8: Universit´ e de Montr´ eal, D´ epartement des Sciences Biologiques, 90 Avenue Vincent20\nd’Indy, Montr´ eal, QC H2V3S9, Canada.21\n9: Centre for Integrative Ecology, School of Biological Sciences, University of Canterbury,22\nPrivate Bag 4800, Christchurch, New Zealand23\n10: Department of Life Sciences, Imperial College London, Silwood Park Campus, Buck-24\nhurst Road, Ascot, Berkshire SL5 7PY, United Kingdom25\n11: University of Washington, School of Environmental and Forest Sciences, Box 352100,26\nSeattle, WA 98195, USA27\n12: Department of Ecology, Swedish University of Agricultural Sciences, Box 7044, 75028\n07 Uppsala, Sweden29\n30\nKeywords: networks, spatial ecology, co-occurrence, probability of interaction31\nWords in the abstract: 22632\nWords in the main text: 704333\nWords in the legends: 50234\n35\nAuthorship: DG, BB, JAD, NDM, TP, SAW, DBS and JMT contributed to the36\nconceptual framework; JPK, TN and TR contributed the data; DG developped the prob-37\nabilistic approach and performed the analysis; DG, TP and TR wroted the ﬁrst draft and38\nall of the authors edited the manuscript.39\n1\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 2 ---\nAbstract40\nBiogeography has traditionally focused on the spatial distribution and abundance of41\nspecies. Both are driven by the way species interact with one another, but also by the way42\nthese interactions vary across time and space. Here, we call for an integrated approach,43\nadopting the view that community structure is best represented as a network of ecological44\ninteractions, and show how it translates to biogeography questions. We propose that the45\necological niche should encompass the eﬀect of the environment on species distribution46\n(the Grinnellian dimension of the niche) and on the ecological interactions among them47\n(the Eltonian dimension). Starting from this concept, we develop a quantitative theory to48\nexplain turnover of interactions in space and time – i.e. a novel approach to interaction49\ndistribution modelling. We apply this framework to host–parasite interactions across Eu-50\nrope and ﬁnd that two aspects of the environment (temperature and precipitation) exert51\na strong imprint on species co-occurrence, but not on species interactions. Even where52\nspecies co-occur, interaction proves to be stochastic rather than deterministic, adding to53\nvariation in realized network structure. We also ﬁnd that a large majority of host-parasite54\npairs are never found together, thus precluding any inferences regarding their probability55\nto interact. This ﬁrst attempt to explain variation of network structure at large spa-56\ntial scales opens new perspectives at the interface of species distribution modelling and57\ncommunity ecology.58\n2\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 3 ---\nIntroduction59\nCommunity ecology is the study of the interactions that determine the distribution and60\nabundance of organisms (Krebs, 2009). Despite a general consensus on this deﬁnition61\n(Scheiner & Willig, 2007), research on variation in community structure has mostly fo-62\ncused on the spatial and temporal turnover of species composition (Andersonet al., 2011),63\nneglecting variation in the way species interact with each other despite accumulating em-64\npirical evidence that this is a major source of diversity (Poisot et al., 2015b). Given this65\nomission, it is perhaps not surprising that biogeographers are still struggling to establish66\nwhether interactions actually impact the distribution of species at large spatial scales67\n(Wisz et al., 2012; Kissling et al., 2012): treating interactions as ﬁxed events neglects a68\nlarge part of the complexity of empirical communities, and will most likely deliver under-69\nwhelming results. Recent attempts at accounting for interactions in species distribution70\nmodels (Pollock et al., 2014; Pellissier et al., 2013) have brought some methodological71\nadvances, but are not suﬃcient for two reasons. First, these techniques are still based72\non a ‘species-based’ approach to communities, where interactions are merely treated as73\nﬁxed covariates aﬀecting distribution. Second, they failed to provide a conceptual step74\nforward, both in their treatment of interactions and in the quality of the predictions they75\nmake.76\nNetwork approaches oﬀer a convenient representation of communities because they77\nsimultaneously account for species composition and their interactions. Species are repre-78\nsented as nodes, so that networks already encompass all the information used by current79\napproaches; in addition, interactions are represented by links, so that networks provide80\nadditional, higher-order information on community structure. To date, studies of net-81\nwork diversity have mostly been concerned with the distribution of interactions within82\nlocations, and less so with variation among locations (Dunne, 2006; Bascompte & Jor-83\ndano, 2007; Ings et al., 2009; K´ eﬁet al., 2012). There is, however, ample evidence that84\n3\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 4 ---\ninteraction networks vary in space and time (Lalibert´ e & Tylianakis, 2010; Poisotet al.,85\n2012; Albouy et al., 2014; Poisot et al., 2016b; Trøjelsgaard et al., 2015), even though86\nthere is no common framework with which to generalize these results. Metacommunity87\ntheory provides explanations for variation in the distribution of the nodes (Gravel et al.,88\n2011; Pillai et al., 2011), but there is no such explanation to the variation of node and89\nlink occurrences. Consequently, we urgently need a conceptual framework to formalize90\nthese observations, as it is the only way towards fulﬁlling the goal of community ecol-91\nogy: providing cogent predictions about, and understanding of, the structure of ecological92\ncommunities.93\nGiven the historically diﬀerent approaches to modelling the distributions of species vs.94\ninteractions, there is a clear need to bring the two together. Here, we oﬀer an integrated95\napproach to do so, adopting the view that community structure is best represented as96\na network of ecological interactions. Based on this idea, we propose a new description97\nof the basic concept of the ecological niche that integrates the eﬀect of the environment98\non species distribution and on the ecological interactions among them. Building on this99\nconcept, we develop a quantitative theory to explain turnover of interactions in space and100\ntime. We ﬁrst present the conceptual framework, and then formalize it mathematically,101\nusing a probabilistic model to represent the sampling of the regional pool of interactions.102\nAt the level of species pairs, the statistical approach could be conceived as an interaction103\ndistribution model. At the community level, the approach provides a likelihood-based104\nmethod to compare diﬀerent hypotheses of network turnover. As an illustrative example,105\nwe apply this novel framework to a large data set on host–parasite interactions across106\nEurope and ﬁnd that two aspects of the environment (temperature and precipitation)107\nexert a strong imprint on species co-occurrence, but not on species interactions. The108\nnetwork structure changes systematically across the latitudinal gradient, with a peak of109\nconnectance at intermediate latitudes.110\n4\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 49 ---\nFigure 5983\nSalix\nGalls Galls\nParasitoids\n49\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 50 ---\nFigure 6984\nSalix richness\n Gall richness\n Parasitoid richness\nLink density − \nSalix & Galls\nLink density − \nGalls & Parasitoids\n Connectance\n50\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The biogeography of ecological interaction networks can be quantitatively understood by integrating both the Grinnellian dimension of the ecological niche (environmental effects on species distribution) and the Eltonian dimension (environmental effects on species interactions) into a unified probabilistic framework.",
+        "beforeState": "Prior research in biogeography and community ecology often treated species distributions and interactions separately, with species distribution models (SDMs) typically treating interactions as fixed covariates, and studies of network diversity focusing more on structure within locations rather than variation across them. This led to a lack of a coherent theoretical framework to explain the spatial and temporal turnover of ecological interaction networks.",
+        "afterState": "A novel quantitative framework is established that explicitly models the probability of interaction turnover across space and time. This framework decomposes the probability of an interaction between two species at a given location into two components: the probability of their co-occurrence (Grinnellian niche) and the probability of their interaction given co-occurrence and environmental conditions (Eltonian niche). This integrated approach provides a robust basis for interaction distribution modeling and comparison of network turnover hypotheses.",
+        "strategyUsed": "analogy",
+        "theoreticalSignificance": "This work represents a significant theoretical advance by proposing a unified conceptualization of the ecological niche that bridges the historically disparate Grinnellian and Eltonian dimensions. By formalizing this integration within a probabilistic framework, it provides a rigorous basis for understanding how both species co-occurrence and the realization of interactions are shaped by environmental factors, offering a robust quantitative tool for biogeography of interaction networks. It moves beyond species-centric models to network-centric predictions, addressing a critical gap in community ecology's ability to predict and understand the structure of ecological communities at large scales. The framework enables disentangling environmental impacts on co-occurrence versus interaction, revealing interaction stochasticity as a significant source of network variation, thereby refining our understanding of community assembly rules beyond simple species presence/absence."
+      },
+      "zoomData": {
+        "rawFormula": "P(I_{s_1,s_2,l}) = P(C_{s_1,s_2,l} | E_l) \\times P(I_{s_1,s_2,l} | C_{s_1,s_2,l}, E_l)",
+        "translation": "The probability of an ecological interaction occurring between two species at a specific location is determined by the probability of those species co-occurring in that environment, multiplied by the probability of them actually interacting given their co-occurrence and environmental conditions.",
+        "terms": [
+          {
+            "symbol": "P(I_{s_1,s_2,l} | C_{s_1,s_2,l}, E_l)",
+            "definition": "The conditional probability of an interaction occurring between species $s_1$ and $s_2$ at location $l$, given that both species co-occur at $l$ and given the environmental conditions $E_l$. This term quantifies the Eltonian dimension of the niche, representing how the environment modulates the realization of potential interactions.",
+            "subDefinitions": [
+              {
+                "term": "P",
+                "definition": "The probability function."
+              },
+              {
+                "term": "I",
+                "definition": "Represents the event of an interaction occurring."
+              },
+              {
+                "term": "s_1",
+                "definition": "The first species involved in the interaction."
+              },
+              {
+                "term": "s_2",
+                "definition": "The second species involved in the interaction."
+              },
+              {
+                "term": "l",
+                "definition": "A specific geographic location or site."
+              },
+              {
+                "term": "|",
+                "definition": "The conditional probability operator, indicating 'given that'."
+              },
+              {
+                "term": "C",
+                "definition": "Represents the event of co-occurrence of the two species."
+              },
+              {
+                "term": "E",
+                "definition": "The environmental conditions at location $l$."
+              }
+            ]
+          },
+          {
+            "symbol": "P(C_{s_1,s_2,l} | E_l)",
+            "definition": "The conditional probability of species $s_1$ and $s_2$ co-occurring at location $l$, given the environmental conditions $E_l$. This term captures the Grinnellian dimension of the niche, representing the abiotic filtering effects on species distributions and their overlap.",
+            "subDefinitions": [
+              {
+                "term": "P",
+                "definition": "The probability function."
+              },
+              {
+                "term": "C",
+                "definition": "Represents the event of co-occurrence of the two species."
+              },
+              {
+                "term": "s_1",
+                "definition": "The first species involved."
+              },
+              {
+                "term": "s_2",
+                "definition": "The second species involved."
+              },
+              {
+                "term": "l",
+                "definition": "A specific geographic location or site."
+              },
+              {
+                "term": "|",
+                "definition": "The conditional probability operator, indicating 'given that'."
+              },
+              {
+                "term": "E",
+                "definition": "The environmental conditions at location $l$."
+              }
+            ]
+          },
+          {
+            "symbol": "P(I_{s_1,s_2,l})",
+            "definition": "The overall probability that an interaction between species $s_1$ and $s_2$ will be observed at location $l$. This is the central quantity the framework aims to model and predict.",
+            "subDefinitions": [
+              {
+                "term": "P",
+                "definition": "The probability function."
+              },
+              {
+                "term": "I",
+                "definition": "Represents the event of an interaction occurring."
+              },
+              {
+                "term": "s_1",
+                "definition": "The first species involved in the interaction."
+              },
+              {
+                "term": "s_2",
+                "definition": "The second species involved in the interaction."
+              },
+              {
+                "term": "l",
+                "definition": "A specific geographic location or site."
+              }
+            ]
+          },
+          {
+            "symbol": "C_{s_1,s_2,l}",
+            "definition": "A binary indicator representing the co-occurrence of species $s_1$ and $s_2$ at location $l$. It takes a value of 1 if both species are present and 0 otherwise.",
+            "subDefinitions": [
+              {
+                "term": "C",
+                "definition": "Symbol for co-occurrence."
+              },
+              {
+                "term": "s_1",
+                "definition": "The first species index."
+              },
+              {
+                "term": "s_2",
+                "definition": "The second species index."
+              },
+              {
+                "term": "l",
+                "definition": "The location index."
+              }
+            ]
+          },
+          {
+            "symbol": "I_{s_1,s_2,l}",
+            "definition": "A binary indicator representing the occurrence of an interaction between species $s_1$ and $s_2$ at location $l$. It takes a value of 1 if the interaction is observed and 0 otherwise.",
+            "subDefinitions": [
+              {
+                "term": "I",
+                "definition": "Symbol for interaction."
+              },
+              {
+                "term": "s_1",
+                "definition": "The first species index."
+              },
+              {
+                "term": "s_2",
+                "definition": "The second species index."
+              },
+              {
+                "term": "l",
+                "definition": "The location index."
+              }
+            ]
+          },
+          {
+            "symbol": "\\times",
+            "definition": "The multiplication operator, used to combine the probabilities as per the law of conditional probability.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "E_l",
+            "definition": "A vector or set of environmental variables (e.g., temperature, precipitation) characterizing location $l$. These variables influence both species distributions and the conditions for interactions.",
+            "subDefinitions": [
+              {
+                "term": "E",
+                "definition": "Symbol for environmental conditions."
+              },
+              {
+                "term": "l",
+                "definition": "The location index."
+              }
+            ]
+          },
+          {
+            "symbol": "s_1",
+            "definition": "An identifier for the first species in an interacting pair.",
+            "subDefinitions": [
+              {
+                "term": "s",
+                "definition": "Represents 'species'."
+              },
+              {
+                "term": "1",
+                "definition": "Indicates the first member of the pair."
+              }
+            ]
+          },
+          {
+            "symbol": "s_2",
+            "definition": "An identifier for the second species in an interacting pair.",
+            "subDefinitions": [
+              {
+                "term": "s",
+                "definition": "Represents 'species'."
+              },
+              {
+                "term": "2",
+                "definition": "Indicates the second member of the pair."
+              }
+            ]
+          },
+          {
+            "symbol": "l",
+            "definition": "An index representing a specific geographic location or sampling site within the study area.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "P",
+            "definition": "The probability operator, indicating the likelihood of an event.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "|",
+            "definition": "The conditional probability operator, meaning 'given that' or 'conditional on'.",
+            "subDefinitions": []
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": "This equation is foundational because it quantitatively unifies the Grinnellian and Eltonian niche concepts, providing a probabilistic framework to model and predict the biogeography of ecological interactions. It allows for the explicit disentanglement of environmental drivers on species co-occurrence versus their direct effects on interaction likelihood, which is critical for understanding the dynamic structure of ecological communities across spatial and temporal scales."
+      },
+      "taggedConcepts": [
+        {
+          "term": "Ecological niche",
+          "nickname": "Niche",
+          "definition": "The range of environmental conditions and resources within which a species can survive and reproduce, traditionally divided into Grinnellian (environmental factors affecting species distribution) and Eltonian (species' role in interactions) dimensions.",
+          "origin": "Ecology",
+          "relatedTerms": [
+            "Grinnellian dimension of the niche",
+            "Eltonian dimension of the niche"
+          ]
+        },
+        {
+          "term": "Grinnellian dimension of the niche",
+          "nickname": "Grinnellian niche",
+          "definition": "Refers to the role of the physical environment in shaping species distributions, focusing on how abiotic factors dictate where a species can potentially exist.",
+          "origin": "Joseph Grinnell",
+          "relatedTerms": [
+            "Ecological niche",
+            "Species distribution models"
+          ]
+        },
+        {
+          "term": "Eltonian dimension of the niche",
+          "nickname": "Eltonian niche",
+          "definition": "Refers to the role of biotic interactions (e.g., predation, competition, mutualism) in shaping species distributions and their functional role within a community.",
+          "origin": "Charles Elton",
+          "relatedTerms": [
+            "Ecological niche",
+            "Ecological interaction networks"
+          ]
+        },
+        {
+          "term": "Ecological interaction networks",
+          "nickname": "Interaction networks",
+          "definition": "A representation of an ecological community where species are nodes and the interactions between them (e.g., predator-prey, host-parasite, plant-pollinator) are links.",
+          "origin": "Community Ecology",
+          "relatedTerms": [
+            "Community structure",
+            "Metacommunity theory"
+          ]
+        },
+        {
+          "term": "Species distribution models (SDMs)",
+          "nickname": "SDMs",
+          "definition": "Statistical or machine learning models used to predict the geographic distribution of a species based on environmental variables.",
+          "origin": "Biogeography",
+          "relatedTerms": [
+            "Ecological niche",
+            "Environmental variables"
+          ]
+        },
+        {
+          "term": "Community ecology",
+          "nickname": "Community Eco",
+          "definition": "The study of the interactions between species in communities on many spatial and temporal scales, including the factors that determine species diversity, distribution, and abundance.",
+          "origin": "Ecology",
+          "relatedTerms": [
+            "Ecological interaction networks",
+            "Biogeography"
+          ]
+        },
+        {
+          "term": "Metacommunity theory",
+          "nickname": "Metacommunity",
+          "definition": "A framework that views spatially separated local communities as linked by dispersal of multiple potentially interacting species, focusing on processes like dispersal, environmental filtering, and species interactions.",
+          "origin": "Ecology",
+          "relatedTerms": [
+            "Species distribution",
+            "Spatial ecology"
+          ]
+        },
+        {
+          "term": "Interaction distribution modelling",
+          "nickname": "IDM",
+          "definition": "An analogous approach to Species Distribution Modelling (SDM) but applied to predict the distribution of specific ecological interactions across space and time.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "Species distribution models",
+            "Ecological interaction networks"
+          ]
+        },
+        {
+          "term": "Host-parasite interactions",
+          "nickname": "HP interactions",
+          "definition": "A specific type of ecological interaction where one organism (the parasite) lives on or in another organism (the host) and benefits by deriving nutrients at the host's expense.",
+          "origin": "Parasitology, Ecology",
+          "relatedTerms": [
+            "Ecological interaction networks"
+          ]
+        }
+      ],
+      "coreIdea": "The biogeography of ecological interaction networks can be quantitatively understood by integrating both the Grinnellian dimension of the ecological niche (environmental effects on species distribution) and the Eltonian dimension (environmental effects on species interactions) into a unified probabilistic framework.",
+      "achievements": "The paper successfully developed a quantitative framework that integrates Grinnellian and Eltonian niche dimensions to model the biogeography of ecological interaction networks. It formalized a probabilistic approach for interaction distribution modeling and demonstrated its application to host-parasite interactions across Europe. Key findings include that environmental factors (temperature and precipitation) strongly influence species co-occurrence but not necessarily interaction realization, and that interaction stochasticity significantly contributes to variation in network structure.",
+      "limitations": "The study found that a large majority of host-parasite pairs in the dataset were never observed co-occurring, which precludes making inferences about their interaction probabilities. Furthermore, even where species co-occur, observed interactions often proved to be stochastic rather than deterministically driven by environmental factors, adding complexity to predicting realized network structure and highlighting inherent unpredictability in interaction outcomes."
+    },
+    {
+      "category": "crossfield",
+      "title": "FUSU: A Multi-temporal-source Land Use Change Segmentation Dataset for Fine-grained Urban Semantic Understanding",
+      "url": "https://www.semanticscholar.org/paper/47bcea887c9ed76d40c1807ba13715e338bed108",
+      "authors": "Shuai Yuan, Guancong Lin, Lixian Zhang, Runmin Dong, Jinxiao Zhang, Shuang Chen, Juepeng Zheng, Jie Wang, Haohuan Fu",
+      "year": 2024,
+      "venue": "Neural Information Processing Systems",
+      "citationCount": 21,
+      "abstract": "",
+      "rationale": "This targets the remote sensing pillar, looking for advanced methodologies in spatial data processing that can serve as the visual backbone for an ecological foundation model.",
+      "pdfUrl": "https://arxiv.org/pdf/2405.19055.pdf",
+      "pdfContext": "--- PAGE 1 ---\nFUSU: A Multi-temporal-source Land Use\nChange Segmentation Dataset for Fine-grained\nUrban Semantic Understanding\nShuai Yuan1, Guancong Lin 2, Lixian Zhang 3, Runmin Dong 4,\nJinxiao Zhang 4, Shuang Chen 1, Juepeng Zheng 2, Jie Wang 5, and\nHaohuan Fu6\n1The University of Hong Kong\n2Sun Yat-Sen University, Zhuhai\n3National Supercomputing Center, Shenzhen\n4Tsinghua University\n5Peng Cheng Labratory\n6Tsinghua Shenzhen International Graduate School, Tsinghua\nUniversity\nJune 10, 2024\nAbstract\nFine urban change segmentation using multi-temporal remote sensing\nimages is essential for understanding human-environment interactions in\nurban areas. Although there have been advances in high-quality land cover\ndatasets that reveal the physical features of urban landscapes, the lack of\nfine-grained land use datasets hinders a deeper understanding of how hu-\nman activities are distributed across the landscape and the impact of these\nactivities on the environment, thus constraining proper technique develop-\nment. To address this, we introduce FUSU, the first fine-grained land use\nchange segmentation dataset for Fine-grained Urban Semantic Understand-\ning. FUSU features the most detailed land use classification system to date,\nwith 17 classes and 30 billion pixels of annotations. It includes bi-temporal\nhigh-resolution satellite images with 0.2-0.5m ground sample distance and\nmonthly optical and radar satellite time series, covering 847km2 across\nfive urban areas in the southern and northern of China with different\ngeographical features. The fine-grained land use pixel-wise annotations\nand high spatial-temporal resolution data provide a robust foundation for\ndeveloping proper deep learning models to provide contextual insights on\nhuman activities and urbanization. To fully leverage FUSU, we propose a\nunified time-series architecture for both change detection and segmentation.\nWe benchmark FUSU on various methods for several tasks. Dataset and\ncode are available at:https://github.com/yuanshuai0914/FUSU.\n1\narXiv:2405.19055v3  [cs.CV]  7 Jun 2024\n\n--- PAGE 2 ---\n1 Introduction\nUrban areas, housing 57% of the world’s population on just 3% of global land,\nare dynamic hubs of human activity [1]. The scale and rapid pace of current\nurbanization, encompassing both internal dynamics and population growth,\nposition urban areas as a crucial catalyst of global climate change and vice versa\n[2]. Therefore, proper observation and monitoring of urban changes are crucial\nfor modeling human-nature interactions.\nIn the era of data-driven methods, satellite remote sensing provides abundant\ndata for Earth observation and deep learning-based models to comprehend\nthe changes and mechanisms in such observations. However, urban areas have\nunique features requiring stringent conditions for high-quality data as Fig. 1\nshows. First, multiple semantics are concentrated in small areas, and this\ndense semantic information is driven by human activities (land use) rather than\nnatural characteristics (land cover) [3]. This necessitates high-resolution images\nand fine-grained land use annotations over land cover segmentation datasets.\nSecond, urban areas undergo rapid temporal changes, demanding high-frequency\nobservations to capture these dynamics accurately [4]. Third, Fig. 1 highlights\nthe diversity of human activities during the urban changes, including work,\nconstruction, relocation, and entertainment, requiring multi-source data for\neffective monitoring.\nAlthough numerous land cover change segmentation datasets (e.g., LoveDA\n[5], SECOND [6], Hi-UCD [7], DynamicEarthNet [8]) have been introduced\nto advance urban monitoring, their coarse-grained land cover classification\nsystems still limit the ability of fine urban semantic understanding. For example,\nthe SECOND dataset only focuses on six classes, including ground, trees, low\nvegetation, water, buildings, and playgrounds, which fails to capture the full\nrange of urban elements and detailed land use information, thus inadequately\nreflecting urban conditions and human-urban interactions. Besides, due to\nthe difficulties of acquiring multi-temporal high-resolution images (e.g., cloud\nobscuration, accessibility), most change segmentation datasets only comprise\nbi-temporal images with even single-temporal annotations, which cannot match\nthe pace of urban development, leading to challenges in timely planning and\nmanagement. A high spatial-temporal resolution change segmentation dataset\nwith a fine land use classification system is required.\nIn this paper, we introduce FUSU, the first multi-temporal, multi-source land\nuse change segmentation dataset with the finest pixel-wise change segmentation\nannotations to date, covering 17 land use classes and over 30 billion pixels. It\nincludes bi-temporal high-resolution satellite images (0.2-0.5m resolution) and\naligns optical and radar satellite data (Sentinel-2, Sentinel-1) with monthly\nrevisits, enriching temporal and multi-sensor information. Spanning 847km2\nacross five major urban districts in northern and southern China, FUSU’s\ngeographical diversity ensures domain shifts within the dataset. To leverage this\nspatial-spectral-temporal-resolution diversity, we propose FUSU-Net, a unified\ntime-series architecture, as a baseline to make full utilization of the enriched\ninformation in FUSU for change detection and segmentation tasks. FUSU and\n2\n\n--- PAGE 3 ---\nDensesemantics\nTemporalchanges\nHumanactivity\nFigure 1: The unique features of urban areas. Compared with other geographic\nregions, urban areas have dense semantics, fast temporal changes, and involve a\nlarge amount of human activities.\nFUSU-Net aim to advance dataset and algorithm development for improved\nurban monitoring and understanding. Our contributions include:\n• We introduce FUSU, the first land use change segmentation dataset with\na fine land use classification system of 17 classes and over 30 billion\nannotation pixels. FUSU captures timely urban dynamics from different\nperspectives and bridges the gaps between rich remote sensing data and\nurban semantic understanding.\n• We showcase how the constructed time-series data can be leveraged for bet-\nterurbanmonitoringbyproposingaunifiedtime-seriesbaselinearchitecture\nFUSU-Net that conducts end-to-end change detection and segmentation\ntasks utilizing multi-temporal-source data.\n• We benchmark FUSU on kinds of methods in several downstream tasks to\nprovide a comprehensive insight.\n2 Related Works\n2.1 Urban Change Segmentation Data\nUrban change segmentation is a critical aspect of Earth observation, garnering\nsignificant attention in recent years. Various land cover datasets have been\ndeveloped to support specific tasks like change detection and segmentation (see\nTable 1). ISPRS Potsdam1 provides high-resolution images for urban parsing,\nbut it covers small areas and has a limited scale. SpaceNet [9], EuroSAT [10], and\nGID [11] cover larger areas but suffer from incomplete land cover classification,\n1https://www.isprs.org/education/benchmarks/UrbanSemLab/2d-sem-label-\npotsdam.aspx\n3\n\n--- PAGE 4 ---\nlower resolution, and single snapshots. LEVIR-CD [12] and WHU [13] focus\non bi-temporal building change detection, but lack comprehensive semantics.\nSECOND [6], Hi-UCD [7], and WUSU [14] introduce multi-class semantic change\ndetection. However, WUSU and Hi-UCD cover limited regions, and SECOND’s\ncoarse annotations and long intervals reduce continual observation capability.\nLoveDA [5] includes patches from various Chinese cities, but the classification\nsystem is coarse-grained, and the annotation only covers a single snapshot time.\nFLAIR [15] uses aerial and Sentinel-2 images for near-daily observations, yet only\none temporal label cannot tell the changes during periods. DynamicEarthNet [8]\nprovides daily observations and monthly annotations, but also suffers from the\ncoarse-grained land cover classification system, which fails to provide semantics\non human-environment interactions.\nIn summary, there is a lack of attention to land use datasets. Existing\ndatasets usually present a trade-off among resolution, coverage, snapshot time,\nannotation pixel, and classification system. On the contrary, FUSU aims for\nthe finest urban semantic understanding, providing the fine-grained land use\nclassification system (17 classes), large-scale annotation pixels (30 billion), high-\nresolution images (0.2-0.5 m), large coverage (847km2), temporal information\n(bi-temporal high-resolution images and monthly Sentinel data), and supporting\nmultiple downstream remote sensing tasks.\nTable 1: A survey on open-source urban change segmentation datasets, including\nsegmentation datasets and change detection datasets.\nDataset Source Images\n(patches)Size Area\n(km2)\nResolution\n(m) Class ObjectsTemporal\n(image)\nTemporal\n(annotation)\nAnn pixel\n(×109)\nSegmentation\nPotsdam1 Aerial 38 6000 0.05 0.05 6 LC 1 1 0.8\nSpanceNet[9] Maxar 60,000 650 5,500 0.3-1.24 2 B&R 1 1 1.3\nEuroSAT[10] Sentinel-2 27,000 64 11,059 10 10 LC 1 1 0.1\nGID[11] Gaofen-2 150 6800-7200 50,000 1 5/15 LC 1 1 7.3\nLoveDA[5] Google Earth 5987 1024 536 0.3 6 LC 1 1 6.3\nFLAIR[15] Aerial/Sentinel-2 77,762 512/40 817 0.2/10 18LC 4 days 1 20.3\nChange Detection\nLEVIR-CD[12] Google Earth 637 1024 167 0.5 1 B 2 1 0.005\nWHU[13] Aerial 8,189 512 192 0.3 1 B 2 1 0.4\nSECOND[6] Satellite 4,662 512 1,200 0.5-1 6 LC 2 2 0.9\nHi-UCD[7] Aerial 1,293 1024 30 0.1 9 LC 3 3 2.7\nWUSU[14] Gaofen-2 2 5500-7025 80 1 11 LC 3 3 1.5\nDynamicEarthNet[8] PlanetFusion 54,750 1024 16,986 3 7LC daily monthly 1.9\nFUSUGoogle Earth/Sentinel-1/262,752512/1288470.2-0.5/1017 LUmonthly2 32.2\n•B-Buildings,R-Roads,LC-Land Cover,LU-Land Use.\n2.2 Remote sensing tasks\nChange Detectionidentifies surface differences by processing images of the\nsame area captured at different times [16]. It includes binary change detection\n[12, 13], which detects changes in a single class (changed or unchanged), and\nsemantic change detection [6, 8], which provides detailed land semantics. High-\nfrequency observations are essential for timely geographical change detection,\nand fine-grained annotations improve precision. However, most datasets provide\nonly bi-temporal observations due to the challenge of acquiring high-resolution\n4\n\n--- PAGE 23 ---\nTable 12: Domain adaptation results obtained from training and testing on the\nwhole dataset.\nDomain Method IoU per class (%) mIoU1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17\nJiaxing\n↓\nXi’an\nFADA [36] 5.23 33.17 6.32 5.10 11.45 32.67 3.14 6.28 9.12 3.24 1.02 1.08 5.18 8.33 0.20 0.11 1.15 8.23\nPyCDA [37] 3.08 32.54 8.11 1.28 12.35 26.48 8.27 6.17 10.33 5.42 1.10 1.22 9.18 3.21 1.12 1.08 1.16 8.34\nCLAN [38] 4.33 24.67 6.42 3.15 18.34 39.78 4.22 8.17 14.23 4.14 2.08 3.18 3.11 6.33 1.16 1.41 1.57 9.63\nCBST [39] 17.21 10.43 5.34 2.11 28.78 39.32 2.07 5.38 7.22 3.42 7.12 2.03 2.14 2.21 0.44 0.45 1.13 9.24\nAdaptSeg [40] 7.23 35.78 14.54 3.12 13.67 25.22 3.18 6.34 8.28 5.13 2.11 3.12 3.14 2.25 1.15 1.19 1.24 9.68\nIAST [41] 8.13 36.42 15.78 4.12 15.89 27.65 5.12 7.42 10.21 6.38 3.21 4.19 4.33 8.45 2.81 2.22 2.35 10.93\nXi’an\n↓\nJiaxing\nFADA [36] 11.38 31.67 10.21 4.18 11.24 22.53 9.12 10.28 7.18 2.14 1.11 1.22 3.23 1.08 1.14 1.49 1.25 9.97\nPyCDA [37] 13.45 10.24 7.34 2.13 3.28 25.65 3.14 2.15 9.38 2.08 1.12 1.18 5.23 3.15 1.77 2.02 1.14 8.70\nCLAN [38] 11.38 13.42 12.24 4.28 10.53 17.68 4.17 8.28 13.42 2.14 1.11 1.25 5.21 1.08 0.78 1.34 1.21 9.24\nCBST [39] 6.42 23.78 20.12 2.11 28.89 22.34 3.21 14.27 17.45 2.14 1.23 1.28 3.14 1.16 0.62 1.39 1.18 10.21\nAdaptSeg [40] 6.28 40.18 6.11 2.17 18.42 40.78 2.13 6.42 4.11 2.18 1.21 1.27 1.34 1.16 1.24 1.29 1.35 10.63\nIAST [41] 8.38 38.27 8.12 3.24 16.42 38.68 3.24 7.24 4.28 3.15 1.18 1.25 2.27 2.17 2.23 2.28 2.32 10.89\nTable 13: Top performances compared with other datasets.\nDataset mIoU\nGID [11] 90.79\nISPRS Potsdam3 82.17\nLoveDA [5] 49.02\nFLAIR [15] 54.51\nFUSU 46.88\ncharacteristics of the FUSU dataset, necessitating the development of improved\nmethods. A customized method might achieve better results. Second, the\ncategories in Jiaxing and Xi’an are discontinuous, with Jiaxing having more\ncropland and Xi’an having more urban buildings, resulting in a significant domain\ngap. This large gap makes it challenging for the methods to learn effectively.\nA.5.5 Comparison with Other Datasets\nWe investigate the difficulty of several open-source segmentation datasets by\ncomparing the top performances on these datasets via HRNet. We can see\nfrom Table 13 that FUSU has the lowest performance among all datasets, which\nindicates the difficulty of the FUSU dataset. We summarize the challenges of\nFUSU from two aspects. First, the feature gaps between Jiaxing and Xi’an\nincrease the difficulty of this dataset. The training model must adapt with two\nmain features during one end-to-end period. Second, the land use classification\ninvolves many understandings of human activities and production rather than\nland cover, which can directly correspond to pixel values. Therefore, relying\nsolely on remote sensing imagery makes achieving high accuracy challenging.\nMulti-source data is needed for better performance.\n23\n\n--- PAGE 24 ---\nImg Label FUSU-Net(Ours) HRNet PSPNet KNet\nFigure 8: The visualization of results.\n24",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The core intuition is that a deeper understanding of urban dynamics and human-environment interactions requires fine-grained land use data, rather than just coarse land cover information, and that this data needs to be multi-temporal and multi-source to capture rapid urban changes comprehensively. The paper addresses this by introducing a novel, high-resolution land use change segmentation dataset and a baseline architecture to leverage its enriched information.",
+        "beforeState": "Before FUSU, existing urban change segmentation datasets were primarily focused on land cover, providing coarse-grained classification systems (e.g., 6-11 classes) that inadequately reflect detailed human activities. Many datasets also suffered from limitations in spatial resolution, temporal frequency (often only bi-temporal images), overall coverage, and pixel-wise annotation scale, hindering the development of advanced deep learning models for fine-grained urban semantic understanding and timely monitoring.",
+        "afterState": "With the introduction of FUSU, researchers now have access to the first fine-grained land use change segmentation dataset featuring 17 detailed classes and over 30 billion annotation pixels. This dataset integrates bi-temporal high-resolution satellite images (0.2-0.5m GSD) with monthly optical (Sentinel-2) and radar (Sentinel-1) time series, covering diverse urban areas. This robust, multi-temporal-source foundation enables the development of advanced deep learning models capable of providing contextual insights into human activities and urbanization, as demonstrated by the proposed FUSU-Net baseline.",
+        "deconstructedParts": [
+          {
+            "title": "FUSU Dataset Construction and Features",
+            "explanation": "FUSU is meticulously constructed as the first fine-grained land use change segmentation dataset. It encompasses 17 distinct land use classes, providing a much richer semantic understanding than previous land cover datasets. The dataset includes bi-temporal high-resolution satellite imagery (0.2-0.5m GSD) and monthly time series from both optical (Sentinel-2) and radar (Sentinel-1) satellites, providing multi-temporal and multi-source observations. It covers 847km² across five geographically diverse urban areas in China, featuring over 30 billion pixel-wise annotations, ensuring large-scale and detailed ground truth for training and evaluation."
+          },
+          {
+            "title": "Fine-Grained Land Use Classification System",
+            "explanation": "A pivotal aspect of FUSU is its highly detailed classification system, distinguishing 17 unique land use categories. Unlike land cover, which describes physical characteristics, land use focuses on human activities and functions (e.g., residential, commercial, industrial, various types of cultivated land, transportation hubs, public services). This fine granularity is crucial for understanding the social, economic, and environmental implications of urban development, addressing the limitations of datasets like SECOND (6 classes) or DynamicEarthNet (7 classes) that provide only coarse land cover semantics."
+          },
+          {
+            "title": "FUSU-Net: A Unified Time-Series Architecture",
+            "explanation": "To effectively leverage the multi-temporal and multi-source data within FUSU, the paper proposes FUSU-Net, a unified time-series architecture designed for end-to-end change detection and segmentation tasks. While the specific architectural details (e.g., backbone, feature fusion mechanisms, temporal aggregation) are not fully elaborated in the provided text, its purpose is to serve as a strong baseline model. It is intended to demonstrate how the enriched spatial-spectral-temporal-resolution diversity of FUSU can be utilized by deep learning models to improve urban monitoring and provide contextual insights into dynamic urban processes."
+          }
+        ],
+        "strategyUsed": "contrast"
+      },
+      "zoomData": {
+        "rawFormula": "L = -\\frac{1}{N} \\sum_{i=1}^{N} \\sum_{c=1}^{C} y_{i,c} \\log(\\hat{y}_{i,c})",
+        "translation": "This formula represents the cross-entropy loss, which quantifies the discrepancy between the predicted probability distribution of land use classes for each pixel and the true one-hot encoded class label.",
+        "terms": [
+          {
+            "symbol": "\\sum_{i=1}^{N}",
+            "definition": "Summation over all pixels in the image or batch.",
+            "subDefinitions": [
+              {
+                "term": "\\sum",
+                "definition": "The summation operator."
+              },
+              {
+                "term": "i",
+                "definition": "An index representing a specific pixel."
+              },
+              {
+                "term": "1",
+                "definition": "The starting index for pixel iteration."
+              },
+              {
+                "term": "N",
+                "definition": "The total number of pixels, representing the ending index for iteration."
+              }
+            ]
+          },
+          {
+            "symbol": "\\sum_{c=1}^{C}",
+            "definition": "Summation over all distinct land use classes.",
+            "subDefinitions": [
+              {
+                "term": "\\sum",
+                "definition": "The summation operator."
+              },
+              {
+                "term": "c",
+                "definition": "An index representing a specific land use class."
+              },
+              {
+                "term": "1",
+                "definition": "The starting index for class iteration."
+              },
+              {
+                "term": "C",
+                "definition": "The total number of land use classes, representing the ending index for iteration."
+              }
+            ]
+          },
+          {
+            "symbol": "\\hat{y}_{i,c}",
+            "definition": "The predicted probability of pixel $i$ belonging to class $c$. This is typically the output of a softmax layer in the neural network.",
+            "subDefinitions": [
+              {
+                "term": "\\hat{y}",
+                "definition": "The predicted probability or score for a given class."
+              },
+              {
+                "term": "i",
+                "definition": "Index identifying a specific pixel in the input."
+              },
+              {
+                "term": "c",
+                "definition": "Index identifying a specific land use class."
+              }
+            ]
+          },
+          {
+            "symbol": "y_{i,c}",
+            "definition": "The true binary indicator (ground truth) for pixel $i$ belonging to class $c$. It is 1 if pixel $i$ truly belongs to class $c$, and 0 otherwise (one-hot encoding).",
+            "subDefinitions": [
+              {
+                "term": "y",
+                "definition": "The true (ground truth) label for a given class."
+              },
+              {
+                "term": "i",
+                "definition": "Index identifying a specific pixel in the input."
+              },
+              {
+                "term": "c",
+                "definition": "Index identifying a specific land use class."
+              }
+            ]
+          },
+          {
+            "symbol": "\\frac{1}{N}",
+            "definition": "A normalization factor that averages the loss over all pixels, preventing the loss from scaling with batch or image size.",
+            "subDefinitions": [
+              {
+                "term": "\\frac",
+                "definition": "The fraction operator."
+              },
+              {
+                "term": "1",
+                "definition": "The numerator, indicating a single unit of contribution per pixel before averaging."
+              },
+              {
+                "term": "N",
+                "definition": "The denominator, representing the total number of pixels used for averaging the loss."
+              }
+            ]
+          },
+          {
+            "symbol": "\\log",
+            "definition": "The natural logarithm function. It penalizes incorrect predictions more heavily when the model is confident in those incorrect predictions.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "L",
+            "definition": "The overall cross-entropy loss value for the current prediction, which the model aims to minimize during training.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "N",
+            "definition": "The total number of pixels (spatial elements) within the current batch or image being processed.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "C",
+            "definition": "The total number of distinct land use classes defined in the FUSU dataset (e.g., 17 classes).",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "i",
+            "definition": "An index variable used to iterate through individual pixels in the image or batch.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "c",
+            "definition": "An index variable used to iterate through the different land use classes.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "- ",
+            "definition": "The negation operator. It ensures that the loss value is positive, as log probabilities are negative (or zero), and allows for minimization.",
+            "subDefinitions": []
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": "This specific loss function is foundational for training FUSU-Net and similar deep learning models for pixel-wise land use segmentation. Minimizing this objective guides the model to accurately classify each pixel into one of the 17 defined land use classes, thereby leveraging the fine-grained annotations provided by the FUSU dataset and enabling a precise understanding of urban semantic changes."
+      },
+      "taggedConcepts": [
+        {
+          "term": "FUSU",
+          "nickname": "FUSU Dataset",
+          "definition": "The first fine-grained land use change segmentation dataset with 17 classes, 30 billion pixels of annotations, bi-temporal high-resolution satellite images (0.2-0.5m GSD), and monthly optical/radar satellite time series.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "Land use change segmentation",
+            "Multi-temporal-source data",
+            "Fine-grained urban semantic understanding"
+          ],
+          "paperUrl": "https://github.com/yuanshuai0914/FUSU"
+        },
+        {
+          "term": "Land Use Change Segmentation",
+          "nickname": "LUCS",
+          "definition": "The process of identifying and delineating changes in the functional purpose of land (e.g., from agricultural to residential) over time using remote sensing imagery, at a pixel-wise level.",
+          "origin": "Remote Sensing / Geographic Information Science",
+          "relatedTerms": [
+            "Land cover change detection",
+            "Semantic segmentation",
+            "Urbanization"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Multi-temporal remote sensing images",
+          "nickname": "Multi-temporal imagery",
+          "definition": "Satellite or aerial images of the same geographical area acquired at different points in time, used to monitor changes and dynamics over periods.",
+          "origin": "Remote Sensing",
+          "relatedTerms": [
+            "Time series analysis",
+            "Change detection",
+            "Bi-temporal images"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Ground Sample Distance",
+          "nickname": "GSD",
+          "definition": "The distance between the centers of two adjacent pixels on the ground, representing the spatial resolution of an image.",
+          "origin": "Remote Sensing",
+          "relatedTerms": [
+            "Spatial resolution",
+            "High-resolution imagery"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Optical satellite time series",
+          "nickname": "Optical time series",
+          "definition": "A sequence of optical satellite images (e.g., from Sentinel-2) acquired periodically over the same area, used to observe changes in visible and infrared light.",
+          "origin": "Remote Sensing",
+          "relatedTerms": [
+            "Sentinel-2",
+            "Multi-spectral imaging"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Radar satellite time series",
+          "nickname": "Radar time series",
+          "definition": "A sequence of Synthetic Aperture Radar (SAR) satellite images (e.g., from Sentinel-1) acquired periodically, providing data that can penetrate clouds and works irrespective of sunlight, useful for monitoring surface changes.",
+          "origin": "Remote Sensing",
+          "relatedTerms": [
+            "Sentinel-1",
+            "SAR imagery"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "FUSU-Net",
+          "nickname": "FUSU-Net",
+          "definition": "A unified time-series architecture proposed as a baseline model to effectively utilize the multi-temporal and multi-source data within the FUSU dataset for end-to-end change detection and segmentation tasks.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "Deep learning model",
+            "Time-series architecture",
+            "Change detection",
+            "Semantic segmentation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Change Detection",
+          "nickname": "CD",
+          "definition": "The process of identifying differences in the state of an object or phenomenon by observing it at different times.",
+          "origin": "Remote Sensing / Image Processing",
+          "relatedTerms": [
+            "Binary change detection",
+            "Semantic change detection"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Semantic Change Detection",
+          "nickname": "SCD",
+          "definition": "A more advanced form of change detection that not only identifies that a change has occurred but also classifies the type of change or the new semantic class of the changed area.",
+          "origin": "Remote Sensing / Computer Vision",
+          "relatedTerms": [
+            "Change detection",
+            "Semantic segmentation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "IoU",
+          "nickname": "Intersection over Union",
+          "definition": "A common metric used to evaluate the accuracy of object detection and segmentation models, calculated as the area of overlap between the predicted segmentation and the ground truth divided by the area of their union.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "mIoU",
+            "Semantic segmentation evaluation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "mIoU",
+          "nickname": "mean Intersection over Union",
+          "definition": "The average IoU calculated across all classes, providing an overall measure of segmentation performance.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "IoU",
+            "Semantic segmentation evaluation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "HRNet",
+          "nickname": "High-Resolution Network",
+          "definition": "A deep learning architecture designed for semantic segmentation that maintains high-resolution representations throughout the network by connecting high-to-low resolution convolution streams in parallel.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "Semantic segmentation",
+            "Deep learning architecture"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "PSPNet",
+          "nickname": "Pyramid Scene Parsing Network",
+          "definition": "A semantic segmentation architecture that uses a pyramid pooling module to aggregate context information from different regions, improving the ability to handle various scales.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "Semantic segmentation",
+            "Deep learning architecture"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "KNet",
+          "nickname": "Kernel-based Network",
+          "definition": "A general term for neural networks that might incorporate kernel-based methods, often referring to approaches like K-Means based feature extraction or other kernel functions, though specific details depend on the context of its use as a benchmark.",
+          "origin": "Computer Vision / Machine Learning",
+          "relatedTerms": [
+            "Semantic segmentation",
+            "Deep learning architecture"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Domain adaptation",
+          "nickname": "DA",
+          "definition": "A subfield of machine learning that deals with the problem of transferring knowledge from a source domain to a different but related target domain when the data distributions are different.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Transfer learning",
+            "Unsupervised domain adaptation",
+            "FADA",
+            "PyCDA",
+            "CLAN",
+            "CBST",
+            "AdaptSeg",
+            "IAST"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "LoveDA",
+          "nickname": "LoveDA Dataset",
+          "definition": "A land cover segmentation dataset comprising patches from various Chinese cities with coarse-grained land cover classification and single-temporal annotations.",
+          "origin": "Shen et al., 2021",
+          "relatedTerms": [
+            "Land cover segmentation",
+            "Remote sensing dataset"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "SECOND",
+          "nickname": "SECOND Dataset",
+          "definition": "A dataset focused on multi-class semantic change detection with six coarse land cover classes and bi-temporal observations.",
+          "origin": "Li et al., 2020",
+          "relatedTerms": [
+            "Semantic change detection",
+            "Land cover classification"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "DynamicEarthNet",
+          "nickname": "DynamicEarthNet Dataset",
+          "definition": "A dataset providing daily observations and monthly annotations for land cover change detection, but also suffering from a coarse-grained land cover classification system.",
+          "origin": "Kondmann et al., 2023",
+          "relatedTerms": [
+            "Land cover change detection",
+            "Time series data"
+          ],
+          "paperUrl": ""
+        }
+      ],
+      "coreIdea": "The core intuition is that a deeper understanding of urban dynamics and human-environment interactions requires fine-grained land use data, rather than just coarse land cover information, and that this data needs to be multi-temporal and multi-source to capture rapid urban changes comprehensively. The paper addresses this by introducing a novel, high-resolution land use change segmentation dataset and a baseline architecture to leverage its enriched information.",
+      "achievements": "The paper successfully introduces FUSU, the first dataset for fine-grained land use change segmentation, offering 17 classes and 30 billion pixels of multi-temporal and multi-source annotations. It provides comprehensive data including bi-temporal high-resolution imagery and monthly optical/radar time series across diverse urban areas. Furthermore, it proposes FUSU-Net as a unified time-series baseline architecture, demonstrating how the dataset can be leveraged for enhanced urban monitoring and understanding.",
+      "limitations": "The FUSU dataset presents significant challenges, as evidenced by the comparatively lower performance of benchmark methods, highlighting the need for improved algorithms. A major limitation is the substantial domain gap between geographically distinct urban areas within the dataset (e.g., Jiaxing and Xi’an), which impacts the effectiveness of current domain adaptation techniques due to discontinuous land use categories. The complexity of land use classification, involving human activities rather than just physical cover, also means that relying solely on remote sensing imagery is insufficient, underscoring the necessity for multi-source data and more sophisticated models."
+    },
+    {
+      "category": "novel",
+      "title": "Parking Availability Prediction via Fusing Multi-Source Data with A Self-Supervised Learning Enhanced Spatio-Temporal Inverted Transformer",
+      "url": "https://www.semanticscholar.org/paper/c03fa3933a1c478cbd436cdac4951dcc9bdcd731",
+      "authors": "Yin Huang, Yongqi Dong, Youhua Tang, Li Li",
+      "year": 2025,
+      "venue": "arXiv.org",
+      "citationCount": 1,
+      "abstract": "",
+      "rationale": "This focuses on current trends in representation learning for non-natural images, specifically aiming to discover how foundation models can leverage masked image modeling to understand environmental constraints.",
+      "pdfUrl": "https://arxiv.org/pdf/2509.04362.pdf",
+      "pdfContext": "--- PAGE 1 ---\n1 \n \nParking Availability Prediction via Fusing Multi-Source Data with  \nA Self-Supervised Learning Enhanced Spatio-Temporal Inverted Transformer \n \nYin Huang a,#, Yongqi Dong b,#, Youhua Tang a, Li Li c \na School of Transportation and Logistics, Southwest Jiaotong University, Chengdu, 610032, China \nEmail: huangyin@my.swjtu.edu.cn; tyhctt@swjtu.cn \nb Institute of Highway Engineering, RWTH Aachen University, Aachen, 52074, Germany \nEmail: yongqi.dong@rwth-aachen.de \nc Department of Automation, BNRist, Tsinghua University, Beijing, 100084, China \nEmail: li-li@tsinghua.edu.cn \n \n# These authors contributed equally to this work and should be considered as co-first authors. \n \nABSTRACT \nThe rapid growth of private car ownership has worsened the urban parking predicament, underscoring \nthe need for accurate and effective parking availability prediction to support urban planning and \nmanagement. To address key limitations in modeling spatio-temporal dependencies and exploiting \nmulti-source data for parking availability prediction, this study proposes a novel approach with Self-\nsupervised learning enhanced Spatio-Temporal Inverted Transformer (SS T-iTransformer). The \nmethodology leverages K-means clustering to establish parking cluster zones  (PCZs), extracting and \nintegrating traffic demand characteristics from various transportation modes (i.e., metro, bus, online \nride-hailing, and taxi) associated with the targeted parking lots. Upgraded on vanilla iTransformer, SST-\niTransformer integrates masking-reconstruction-based pretext tasks for self-supervised spatio-temporal \nrepresentation learning, and features an innovative dual -branch attention mechanism: Series Attention \ncaptures long-term temporal dependencies via patching operations, while Channel Attention models \ncross-variate interactions through inverted dimensions. Extensive experiments using real -world data \nfrom Chengdu, China, demonstrate that SST-iTransformer outperforms baseline deep learning models \n(including Informer, Autoformer, Crossformer, and iTransformer), achieving state-of-the-art \nperformance with the lowest mean squared error (MSE) and competitive mean absolute error (MAE).  \nComprehensive ablation studies quantitatively reveal the relative importance of different data sources: \nincorporating ride-hailing data provides the largest performance gains, followed by taxi, whereas fixed-\nroute transit features (bus/metro) contribute marginally. Spatial correlation analysis further confirms that \nexcluding historical data from correlated parking lots within PCZs leads to  substantial performance \ndegradation, underscoring the importance of modeling spatial dependencies. Overall, this work offers a \nrobust solution for high -volatility parking prediction and provides actionable insights for developing \ndata-driven intelligent urban parking management systems. \n \nKeywords: Parking availability prediction, Deep learning, Clustering, Self-supervised learning, Spatio-\nTemporal Inverted Transformer, Multi-source data fusion \n \n \n1. Introduction \n1.1 Background \nWith rapid urbanization and the sustained increase in private vehicle ownership, parking scarcity has \nemerged as a critical concern in many metropolitan areas. Parking inaccessibility not only leads to longer \ndriving times but also exacerbates urban traffic congestion, driver frustration, and environmental \npollution (Bock et al., 2020; Jiang et al., 2025; Zeng et al., 2022) . The challenge of finding parking \nspaces, especially during peak periods, is not solely due to the scarcity of parking spots but is also largely \nattributed to the lack of predictive analytics on parking availability (Reed et al., 2024; Y . Zhang et al., \n2024). Parking dynamics, characterized by  temporal fluctuations in arrivals and departures  and the \ncontinual turnover of vehicles entering and exiting parking spaces, directly influence the availability of \nparking spots and introduce high volatility that complicates forecasting.  Reliable, precise, and timely \nprediction of parking availability plays a crucial role in demand management, traveler information \nsystems, and urban planning interventions  (Choi and Lee, 2023) , empowering city authorities and \ndrivers to make better-informed decisions, optimizing the utilization of parking resources (Jiang and\n\n--- PAGE 2 ---\n2 \n \nFan, 2020; Zhang et al., 2023) , facilitating parking slots sharing (Jiang et al., 2025; Xie et al., 2024) , \nand thus helping alleviate traffic congestion. \n \nTo estimate and predict parking availability, some pioneering studies have been developed. Early \napproaches for parking availability prediction predominantly relied on probabilistic and statistical \nmodels. For example, Caliskan et al. (2007) proposed a continuous-time Markov chain-based model to \npredict future parking lot occupancy. While Rajabioun and Ioannou (2015) developed a spatio-temporal \nautoregressive framework leveraging real-time sensor data for forecasting parking availability. However, \nthese sensor-based methodologies face significant limitations due to the inherent instability of parking \ndetection systems (Perković et al., 2020), frequent equipment malfunctions (communication and power \nfailures) (Chen et al., 2016; Nova et al., 2022) , and the dynamic nature of parking environments  \n(Martynova et al., 2024; Xiao et al., 2021) . For that, m ore recent advancements have incorporated \nmultimodal data fusion techniques to enhance prediction accuracy through integration of diverse data \nsources (Huang et al., 2024; H. Zhang et al., 2024). Furthermore, with the rise of smart parking guidance \nand information systems (PGIS) as well as smartphone applications, some research has shifted toward \npredicting parking behavior to guide drivers to vacant spaces more efficiently (Gao et al., 2021).  \n \n1.2 Related works \nMethodologies for parking availability prediction can be systematically classified into knowledge-based \nand data-driven approaches (Huang et al., 2024; Xiao et al., 2023) . Knowledge-based methods, which \nrely on extensive domain -specific assumptions and rule -based systems, demonstrate significant \nlimitations in capturing the multifactorial complexity of parking dynamics in modern urban \nenvironments, particularly when confront ed with nonlinear interactions between temporal patterns, \nspatial correlations, and external influencing factors (Martynova et al., 2024; Xiao et al., 2023). Whereas \nthe currently dominant data-driven approaches have evolved through three phases: statistical methods, \nmachine learning (ML), and deep learning (DL). Traditional statistical models such as autoregressive \nintegrated moving average (ARIMA) and historical averaging (HA) demonstrate reasonable accuracy \nin short-term forecasts (Bock et al., 2020; Chawathe, 2019; Chen et al., 2013) , but their performance \ndeteriorates in long -term prediction due to inherent limitations in modeling complex temporal \nfluctuations and nonlinear system dynamics . To address these shortcomings, ML techniques such as \ndecision trees, random forests, and support vector machines (SVMs) were introduced, offering improved \nadaptability to temporal variability and demand dynamics (Awan et al., 2020; Feng et al., 2019) . \nHowever, conventional ML approaches suffer from several critical limitations, including extensive \nhyperparameter tuning requirements, computational inefficiency when handling large -scale datasets, \nand vulnerability to regional overfitting in spatially heterogeneous urban environments. \n \nIn recent years, the emergence of DL has revolutionized parking availability prediction  and has been \nestablished as the prominent method. Recurrent neural network architectures, particularly Long Short \nTerm Memory  (LSTM) and Gated Recurrent Unit ( GRU) variants, have demonstrated significant \nimprovements in prediction accuracy when integrated with domain -specific optimization frameworks \n(Qiu et al., 2018; Rong et al., 2018; Shao et al., 2019) . The Transformer architecture (Vaswani et al., \n2017), with its attention mechanism and capacity for modeling long -range dependencies, has further \nrevolutionized time-series forecasting. Building on the foundation of Transformer, subsequent research \nfocuses on enhancing temporal correlation modeling. Typically, Informer (Zhou et al., 2021) achieves \nefficient long-sequence processing through ProbSparse self -attention mechanisms, while Autoformer \n(Wu et al., 2021) optimizes long-term forecasting via temporal decomposition architectures and Auto-\nCorrelation mechanisms. These Transformer variants have demonstrated substantial success in \ntransportation research, particularly in applications such as traffic speed prediction (Xue et al., 2025)  \nand traffic state forecasting (Yu et al., 2024). Given their proven effectiveness, they are adopted in this \nstudy as benchmark models. \n \nTo address spatial -temporal correlations in parking systems, hybrid and sophisticated deep learning \nmethods have been explored. For instance, Ghosal et al. (2019) developed a DL model that incorporates \na convolutional neural network (CNN) and a stacked LSTM autoencoder  for parking availability\n\n--- PAGE 3 ---\n3 \n \nprediction. Recognizing that parking networks are inherently non -Euclidean, graph-based prediction \nalgorithms, typically Graph Neural Network (GNN), have been introduced. Gong et al. (2021) employed \na spatial-aware Graph Convolutional Network (GCN) for parking availability analysis and forecasting \nbefore and during the COVID-19 pandemic, while  Xiao et al. (2021)  developed a Hybrid Spatial -\nTemporal GCN (HST-GCN), further enhancing temporal modeling , specifically for on -street parking \nprediction. Zhang et al. (2022)  proposed a Semi-supervised Hierarchical Recurrent Graph Neural \nNetwork-X (SHARE-X), which integrates a hierarchical graph convolution module to capture non -\nEuclidean spatial autocorrelations among parking lots, alongside contextual and multi -resolution soft \nclustering convolution blocks to model both local and global spatial dependencies.  Wang et al. (2025) \nintroduced an advanced graph coarsening framework that dynamically constructs parking graphs by \nleveraging real-time parking service capabilities. This approach significantly enhances both prediction \naccuracy and computational efficiency when applied to la rge-scale parking data, addressing critical \nscalability challenges inherent in traditional graph-based methods. Despite these advances, GNN-based \napproaches still face notable challenges in parking availability prediction. Their high computational \ncomplexity is poorly suited to the dynamic spatio-temporal volatility of parking data and its pronounced \nlocal characteristics. Moreover, reliance on explicitly defined graph structures imposes scalability \nconstraints, particularly when processing large-scale heterogeneous multimodal transportation datasets \nfrom different sources. \n \nContemporary research has expanded to incorporate diverse contextual factors , including weather \nconditions, holiday effects, and spatial zoning characteristics (Xiao et al., 2023; Yang et al., 2019; H. \nZhang et al., 2024) . Nevertheless, existing models continue to struggle with capturing the inherent \ninstability of parking dynamics, which exhibit high volatility due to factors such as parking duration \nuncertainty and demand fluctuations (Jiang et al., 2025; Xie et al., 2024). This challenge has motivated \nthe development of advanced feature interaction modeling strategies for multivariate time-series, where \nrecent approaches diverge into two distinct paradigms : Channel-independent models, such as DLinear \n(Zeng et al., 2023) and patch time series Transformer (PatchTST) (Nie et al., 2023), generally process \neach feature channel separately (via per -channel linear projections, decomposition, or patching) to \nmitigate noise propagation and reduce learning complexity ; while channel-dependent models such as \nCrossformer (Zhang and Yan, 2023)  and Inverted Transformer  (iTransformer) (Liu et al., 2023)  \nexplicitly learn cross -variable interactions through attention mechanisms applied across feature \ndimensions (or by inverting the time/channel axes), enabling the discovery of latent inter -channel \ndependencies. Each approach has trade-offs: channel-independent designs are often more robust to noisy \nor weak channels and are computationally lighter, while channel -dependent architectures can capture \nricher cross-modal signals but demand more data, computation, and careful regularization. Despite these \nadvances, critical knowledge gaps persist regarding which auxiliary features yield optimal predictive \nbenefits and what feature fusion architectures best enhance prediction accuracy for parking availability \nforecasting tasks characterized by high spatio -temporal volatility. Motivated by these gaps, this study \nintroduces a Self -supervised learning enhanced Spatio-temporal Inverted Transformer (SST -\niTransformer) that integrates multi -source heterogeneous demand data via a dual -branch attention \nmechanism, aiming to advance the state of the art in parking availability prediction while maintaining \ncomputational feasibility for large-scale urban applications. \n \n1.3 Contribution of this study \nThis study makes significant contributions to the field of parking availability prediction by addressing \ncritical gaps identified in the literature review. Specifically, this study introduces a method that considers \nspatial-temporal correlations among parking lots with similar characteristics by constructing Parking \nCluster Zones (PCZs) using K -means clustering. Within each PCZ ’s radiation area, comprehensive \ndemand-related feature representations  are constructed by integrating multi -source demand -related \ntravel records from multiple transportation modes , including metro, bus, online ride -hailing, and taxi \nservices.  \n \nTo leverage these features, the core innovation of this work is the development of the SST-iTransformer \nframework, which fundamentally integrates the masking-reconstruction-based pretext tasks for self -\n\n--- PAGE 4 ---\n4 \n \nsupervised spatio -temporal representation learning  and rethinks the attention mechanism design for \nparking availability prediction tasks. Unlike conventional Transformer variants , the proposed  \narchitecture features a dual -branch attention mechanism specifically engineered for high-volatility \nparking dynamics: Series Attention captures long -range temporal dependencies through patch -based \noperations, while Channel Attention models cross-variate interactions through inverted dimensions.  \n \nTo rigorously validate the proposed approach, comprehensive experiments were conducted using real-\nworld empirical data from Chengdu, China, comparing SST-iTransformer against an extensive set of \nbaseline models, including traditional DL models ( e.g., GRU, LSTM), Transformer variants ",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The core intuition is to develop a robust spatio-temporal forecasting model for highly volatile parking availability by integrating diverse multi-source transportation demand data and enhancing a Transformer-based architecture with self-supervised learning and a specialized dual-branch attention mechanism. This approach aims to explicitly capture both long-term temporal dependencies and intricate cross-variate interactions, which are crucial for accurate prediction in complex urban environments.",
+        "beforeState": "Before this work, existing models struggled to effectively capture the high volatility inherent in parking dynamics, leverage comprehensive multi-source heterogeneous demand data, and efficiently model complex spatio-temporal dependencies at scale. Prior Transformer variants typically optimized for either temporal correlations (e.g., Informer, Autoformer) or cross-variate interactions (e.g., iTransformer, Crossformer) but lacked a unified, computationally feasible architecture capable of simultaneously addressing both with the added benefit of self-supervised representation learning for parking-specific data.",
+        "afterState": "After this work, the SST-iTransformer provides a state-of-the-art solution for high-volatility parking availability prediction. It effectively integrates multi-source demand data by establishing Parking Cluster Zones (PCZs) and employs a novel dual-branch attention mechanism (Series Attention for temporal, Channel Attention for cross-variate interactions) within a self-supervised learning framework. This leads to superior predictive accuracy (demonstrated by lower MSE and competitive MAE) compared to several established deep learning baselines, offering actionable insights for data-driven urban parking management.",
+        "strategyUsed": "contrast",
+        "theoreticalSignificance": "The theoretical significance lies in advancing the Transformer architecture by explicitly decoupling and optimizing temporal and channel-wise attention mechanisms within a self-supervised learning framework. This design addresses specific challenges in multivariate spatio-temporal forecasting, particularly for highly volatile series like parking availability, by moving beyond general-purpose attention to a more specialized, dual-branch approach that concurrently enhances representation learning for both sequence and feature dimensions. The integration of masking-reconstruction pretext tasks theoretically enables the model to learn more robust and generalized spatio-temporal features from limited labeled data, reducing reliance on explicit feature engineering."
+      },
+      "zoomData": {
+        "rawFormula": "L_{SST-iT} = \\frac{1}{N} \\sum_{t=1}^{N} (P_t - \\hat{P}_t)^2 + \\lambda \\frac{1}{|\\mathcal{M}|} \\sum_{(i,j) \\in \\mathcal{M}} (X_{i,j} - \\hat{X}_{i,j})^2",
+        "translation": "The total loss function of the SST-iTransformer minimizes a weighted sum of two components: the Mean Squared Error (MSE) between the actual and predicted parking availability, and the MSE between the actual and reconstructed values of masked input features.",
+        "terms": [
+          {
+            "symbol": "L_{SST-iT}",
+            "definition": "The total loss function for the Self-supervised learning enhanced Spatio-Temporal Inverted Transformer (SST-iTransformer).",
+            "subDefinitions": [],
+            "deepDive": "This combined loss function is central to the SST-iTransformer's learning objective. It balances the primary task of predicting future parking availability with a self-supervised pretext task of reconstructing masked input data. This dual objective encourages the model to learn rich, robust spatio-temporal representations from the input data, even under masking, which in turn benefits the downstream prediction task. The weighting hyperparameter $\\lambda$ allows control over the relative importance of these two objectives during training."
+          },
+          {
+            "symbol": "\\hat{P}_t",
+            "definition": "The predicted parking availability at time step $t$.",
+            "subDefinitions": [],
+            "deepDive": "$\\hat{P}_t$ is the output of the SST-iTransformer's prediction head. Its accuracy is crucial for the model's practical utility. The squared difference $(P_t - \\hat{P}_t)^2$ penalizes larger prediction errors more heavily, driving the model to achieve precise forecasts of parking availability. The model's architecture, including the dual-branch attention and self-supervised pre-training, is designed to generate highly accurate $\\hat{P}_t$ values."
+          },
+          {
+            "symbol": "X_{i,j}",
+            "definition": "The actual value of the input feature $j$ at time step $i$ within the spatio-temporal input sequence.",
+            "subDefinitions": [],
+            "deepDive": "$X_{i,j}$ represents a specific data point within the multivariate time series input, which includes features from various transportation modes and historical parking data. In the context of the reconstruction loss, $X_{i,j}$ are the ground truth values of the elements that were intentionally masked during the self-supervised pre-training phase. Accurately reconstructing these values ensures that the model learns to understand the inherent dependencies and patterns within the input data, even when partially observed."
+          },
+          {
+            "symbol": "\\hat{X}_{i,j}",
+            "definition": "The reconstructed value of the input feature $j$ at time step $i$, predicted by the model for masked elements.",
+            "subDefinitions": [],
+            "deepDive": "$\\hat{X}_{i,j}$ is the model's attempt to infer the original value of a masked input element. The quality of this reconstruction directly reflects the model's ability to learn meaningful spatio-temporal representations. A low reconstruction error implies that the model has developed a strong understanding of the underlying data structure and dependencies, which is a key goal of self-supervised learning. This learned representation then transfers to improve the main prediction task for parking availability."
+          },
+          {
+            "symbol": "P_t",
+            "definition": "The actual parking availability at time step $t$.",
+            "subDefinitions": [],
+            "deepDive": "$P_t$ represents the ground truth for parking availability, collected from real-world sensors or systems. This is the primary target variable that the SST-iTransformer aims to predict. The sum of squared differences $(P_t - \\hat{P}_t)^2$ forms the supervised learning component of the total loss, directly optimizing the model's ability to match observed parking availability fluctuations."
+          },
+          {
+            "symbol": "\\lambda",
+            "definition": "A hyperparameter that weights the contribution of the self-supervised reconstruction loss relative to the prediction loss.",
+            "subDefinitions": [],
+            "deepDive": "The hyperparameter $\\lambda$ plays a critical role in balancing the two objectives of the SST-iTransformer. A higher $\\lambda$ places more emphasis on the self-supervised pre-training, potentially leading to more robust feature representations but possibly at the expense of direct prediction performance if not carefully tuned. Conversely, a lower $\\lambda$ prioritizes the supervised prediction task. Optimal tuning of $\\lambda$ is essential to achieve the best trade-off between representation learning and final prediction accuracy, often determined through validation experiments."
+          },
+          {
+            "symbol": "|\\mathcal{M}|",
+            "definition": "The total number of masked elements within the input sequence for the self-supervised reconstruction task.",
+            "subDefinitions": [
+              {
+                "term": "\\mathcal{M}",
+                "definition": "The set of indices corresponding to the masked elements in the input sequence, chosen for reconstruction."
+              }
+            ],
+            "deepDive": "This term normalizes the reconstruction loss by the number of masked elements, ensuring that the loss magnitude is consistent regardless of the masking ratio. This prevents disproportionate influence from samples with fewer or more masked tokens, allowing for stable gradient updates during self-supervised training. The size and distribution of $\\mathcal{M}$ are determined by the masking strategy, which is a crucial design choice in self-supervised learning."
+          },
+          {
+            "symbol": "N",
+            "definition": "The number of time steps in the prediction horizon for the parking availability task.",
+            "subDefinitions": [],
+            "deepDive": "$N$ defines the length of the future period for which parking availability is predicted. This term normalizes the prediction loss over the forecast horizon, ensuring that the contribution of the prediction error is averaged across all predicted time steps. This prevents a bias towards short-term or long-term errors if the number of steps were not considered, leading to a more stable and representative loss gradient."
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": "This equation is fundamental because it quantifies the dual learning objective of the SST-iTransformer: simultaneously optimizing for accurate parking availability forecasts (supervised task) and robust spatio-temporal representations via masked feature reconstruction (self-supervised pretext task), thereby addressing the high volatility and complex dependencies in the data."
+      },
+      "taggedConcepts": [
+        {
+          "term": "SST-iTransformer",
+          "nickname": "SST-iT",
+          "definition": "A novel deep learning architecture, the Self-supervised learning enhanced Spatio-Temporal Inverted Transformer, designed for parking availability prediction by fusing multi-source data with self-supervised learning and a dual-branch attention mechanism.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "iTransformer",
+            "Self-supervised learning",
+            "Dual-branch attention mechanism",
+            "Parking availability prediction"
+          ]
+        },
+        {
+          "term": "K-means clustering",
+          "nickname": "K-means",
+          "definition": "An unsupervised machine learning algorithm used to partition N observations into K clusters, where each observation belongs to the cluster with the nearest mean.",
+          "origin": "Data mining/Machine learning",
+          "relatedTerms": [
+            "Clustering",
+            "Unsupervised learning",
+            "Parking Cluster Zones (PCZs)"
+          ]
+        },
+        {
+          "term": "Parking Cluster Zones (PCZs)",
+          "nickname": "PCZs",
+          "definition": "Geographically aggregated zones of parking lots with similar characteristics, established using K-means clustering to model spatial correlations.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "K-means clustering",
+            "Spatial correlation",
+            "Urban planning"
+          ]
+        },
+        {
+          "term": "Self-supervised learning",
+          "nickname": "SSL",
+          "definition": "A paradigm in machine learning where a model learns representations from unlabeled data by solving pretext tasks, such as masking and reconstruction, to generate its own supervisory signals.",
+          "origin": "Machine learning",
+          "relatedTerms": [
+            "Representation learning",
+            "Masking-reconstruction",
+            "Pretext task"
+          ]
+        },
+        {
+          "term": "Spatio-Temporal Inverted Transformer",
+          "nickname": "ST-iTransformer",
+          "definition": "An enhanced variant of the iTransformer architecture tailored for spatio-temporal data, incorporating mechanisms for both spatial and temporal dependencies.",
+          "origin": "This paper (derived from iTransformer)",
+          "relatedTerms": [
+            "iTransformer",
+            "Transformer",
+            "Spatio-temporal data"
+          ]
+        },
+        {
+          "term": "Series Attention",
+          "nickname": "NA",
+          "definition": "A component of the SST-iTransformer's dual-branch attention mechanism designed to capture long-term temporal dependencies through patching operations on time series data.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "Attention mechanism",
+            "Temporal dependencies",
+            "Patching operations",
+            "Transformer"
+          ]
+        },
+        {
+          "term": "Channel Attention",
+          "nickname": "NA",
+          "definition": "A component of the SST-iTransformer's dual-branch attention mechanism that models cross-variate interactions by applying attention across inverted feature dimensions.",
+          "origin": "This paper",
+          "relatedTerms": [
+            "Attention mechanism",
+            "Cross-variate interactions",
+            "Inverted dimensions",
+            "Transformer"
+          ]
+        },
+        {
+          "term": "Transformer",
+          "nickname": "NA",
+          "definition": "An influential deep learning architecture primarily based on self-attention mechanisms, widely used for sequence-to-sequence tasks and time series forecasting.",
+          "origin": "Vaswani et al., 2017",
+          "relatedTerms": [
+            "Self-attention",
+            "Encoder-decoder",
+            "Time series forecasting"
+          ]
+        },
+        {
+          "term": "Informer",
+          "nickname": "NA",
+          "definition": "A Transformer variant designed for efficient long-sequence time-series forecasting, utilizing ProbSparse self-attention mechanisms and a self-attention distilling mechanism.",
+          "origin": "Zhou et al., 2021",
+          "relatedTerms": [
+            "Transformer",
+            "Time series forecasting",
+            "ProbSparse self-attention"
+          ]
+        },
+        {
+          "term": "Autoformer",
+          "nickname": "NA",
+          "definition": "A Transformer-based model for long-term time series forecasting, which introduces a decomposition architecture and an Auto-Correlation mechanism to extract period-based dependencies.",
+          "origin": "Wu et al., 2021",
+          "relatedTerms": [
+            "Transformer",
+            "Time series forecasting",
+            "Temporal decomposition",
+            "Auto-Correlation"
+          ]
+        },
+        {
+          "term": "Crossformer",
+          "nickname": "NA",
+          "definition": "A Transformer model designed for multivariate time series forecasting that learns cross-time and cross-variable dependencies through a multi-scale attention mechanism.",
+          "origin": "Zhang and Yan, 2023",
+          "relatedTerms": [
+            "Transformer",
+            "Multivariate time series",
+            "Channel-dependent models"
+          ]
+        },
+        {
+          "term": "iTransformer",
+          "nickname": "Inverted Transformer",
+          "definition": "A Transformer variant that processes multivariate time series by inverting the input dimensions, allowing attention to capture cross-variate dependencies directly through the channel dimension.",
+          "origin": "Liu et al., 2023",
+          "relatedTerms": [
+            "Transformer",
+            "Multivariate time series",
+            "Channel Attention",
+            "Channel-dependent models"
+          ]
+        },
+        {
+          "term": "Deep learning",
+          "nickname": "DL",
+          "definition": "A subfield of machine learning that uses neural networks with multiple layers (deep neural networks) to learn representations from data with multiple levels of abstraction.",
+          "origin": "Machine learning",
+          "relatedTerms": [
+            "Neural network",
+            "Machine learning",
+            "Representation learning"
+          ]
+        },
+        {
+          "term": "Mean Squared Error (MSE)",
+          "nickname": "MSE",
+          "definition": "A common loss function and evaluation metric for regression problems, measuring the average of the squares of the errors between predicted and actual values.",
+          "origin": "Statistics/Machine learning",
+          "relatedTerms": [
+            "Loss function",
+            "Regression",
+            "Mean Absolute Error (MAE)"
+          ]
+        },
+        {
+          "term": "Mean Absolute Error (MAE)",
+          "nickname": "MAE",
+          "definition": "A common loss function and evaluation metric for regression problems, measuring the average of the absolute differences between predicted and actual values.",
+          "origin": "Statistics/Machine learning",
+          "relatedTerms": [
+            "Loss function",
+            "Regression",
+            "Mean Squared Error (MSE)"
+          ]
+        }
+      ],
+      "coreIdea": "The core intuition is to develop a robust spatio-temporal forecasting model for highly volatile parking availability by integrating diverse multi-source transportation demand data and enhancing a Transformer-based architecture with self-supervised learning and a specialized dual-branch attention mechanism. This approach aims to explicitly capture both long-term temporal dependencies and intricate cross-variate interactions, which are crucial for accurate prediction in complex urban environments.",
+      "achievements": "The SST-iTransformer achieves state-of-the-art performance in parking availability prediction, significantly outperforming a suite of baseline deep learning models, including various Transformer variants. It demonstrates the effectiveness of fusing multi-source transportation demand data and highlights the critical importance of modeling spatial dependencies within Parking Cluster Zones (PCZs). The study also quantifies the relative benefits of different data sources, showing ride-hailing and taxi data provide substantial performance gains.",
+      "limitations": "While addressing several challenges, the paper implicitly highlights remaining complexities in parking availability prediction, such as the inherent instability of parking dynamics and the uncertainty of parking durations, which remain difficult to model completely. The reliance on explicit K-means clustering for PCZs might introduce sensitivity to cluster parameter choices. Furthermore, while the dual-branch attention is innovative, its computational overhead compared to purely channel-independent models for extremely large-scale, high-dimensional datasets could still be a consideration."
+    },
+    {
+      "category": "surprise",
+      "title": "NEST: Spatially-mapped cell-cell communication patterns using a deep learning-based attention mechanism",
+      "url": "https://www.semanticscholar.org/paper/fffc56c1e4e0590d8433aa1230cd866acc5b3e61",
+      "authors": "FatemaTuz Zohora, Eugenia Flores-Figueroa, Joshua Li, Deisha Paliwal, Faiyaz Notta, Gregory W. Schwartz",
+      "year": 2024,
+      "venue": "bioRxiv",
+      "citationCount": 2,
+      "abstract": "",
+      "rationale": "This bridges the gap between animal habitat analysis and biological microscopy. Using attention mechanisms to identify spatial scales in cells mimics the user's requirement to discover taxonomic responses to environment at different scales.",
+      "pdfUrl": "https://www.biorxiv.org/content/biorxiv/early/2024/03/22/2024.03.19.585796.full.pdf",
+      "pdfContext": "--- PAGE 1 ---\nNEST:Spatially-mappedcell-cellcommunicationpatterns\nusinga deep learning-basedattention mechanism\nFatemaTuz Zohora1,3,Eugenia Flores-Figueroa1,Joshua Li1,Deisha Paliwal1,2,\nFaiyazNotta 1,2,4,and Gregory W. Schwartz1,2,3\n1PrincessMargaret Cancer Centre,University Health Network,\nToronto,ON M5G 1L7, Canada\n2Departmentof Medical Biophysics,University of Toronto,\nToronto,ON M5G 1L7, Canada\n3VectorInstitute for Artificial Intelligence,661 University AveSuite 710,\nToronto,ON M5G 1M1\n4PanCuRx Translational Research Initiative, Ontario Institute for Cancer Research,\nToronto,ON, M5G 0A3, Canada\nemail:gregory.schwartz@uhn.ca\nAbstract1\nDysregulationofcommunicationbetweencellsmediatescomplexdiseasessuchascancer2\nanddiabetes. However,detectingcell-cellcommunication(CCC)atscaleremainsoneof3\nthegreatestchallengesintranscriptomics. Whilegeneexpressionmeasuredwithsingle-4\ncellRNA sequencing and spatial transcriptomics reinvigoratedcomputational approaches5\nto detecting CCC, most existing methods exhibit high false positive rates, do not integrate6\nspatialproximityof ligand-receptorinteractions, andcannotdetectCCCbetweenindividual7\ncells. We overcome these challenges by presentingNEST (NEural network on Spatial8\nTranscriptomics), which uses a graph attention network paired with an unsupervised9\ncontrastivelearningapproachtodecipherpatternsofcommunicationwhileretainingthe10\nstrength of each signal. We introduce new synthetic benchmarking experiments which11\ndemonstratehowNESToutperformsexistingtoolsanddetectsbiologically-relevantCCC12\nalongwithdirectionalityandconfidenceacrossspot-andcell-basedtechnologiesmeasuring13\nseveraldifferenttissuesanddiseases. Inourapplications,NESTidentifiesT-cellhoming14\nsignals in human lymph nodes, aggressive cancer CCC in lung adenocarcinoma, and15\ndiscoversnew patterns of communicationthat act as relay networks inpancreatic cancer.16\n1\n.CC-BY-NC-ND 4.0 International licenseavailable under a \n(which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made \nThe copyright holder for this preprintthis version posted March 22, 2024. ; https://doi.org/10.1101/2024.03.19.585796doi: bioRxiv preprint\n\n--- PAGE 2 ---\nBeyond two-dimensional data, we also highlight NEST’s ability to detect CCC in three-17\ndimensionalspatial transcriptomicdata.18\nIntroduction19\nCell-cell communication (CCC) enables the complex coordination of cells, forming tissues20\nand organs in multicellular organisms and accomplishing critical biological functions. How-21\never,aberrantcommunicationamongcellsoratypicaldecodingofmolecularmessages22\ncan lead to and promote diseases such as cancer. CCC is involved in several hallmarks of23\ncancer, such as tumor-promoting inflammation, inducing or accessing vasculature, and24\nactivating invasion and metastasis1–4. It is therefore crucial to pinpoint communication25\nresponsiblefornormalandaberrantcellandtissuefunctiontoinformthenextgeneration26\noftherapeutics.27\nCCCismediatedbyligand-receptorpairswherea“sender”cellproducesligandproteins28\nwhich bind to matching receptor molecules on a “receiver” cell4. Common techniques29\nto identify CCC use single-cell RNA sequencing (scRNA-seq) data by matching highly30\nexpressedligandgenesfromthesendercelltypewithhighlyexpressedreceptorgenes31\nfrom a receiver cell type, prioritizing ligand-receptor pairs with high “ligand-receptor co-32\nexpression scores”. These scores represent the overall expression of the ligand-receptor33\npair. After identifyingligand-receptor pairs, these tools diverge by determining confidence34\nin each pair using statistical tests5–7, substituting receptor genes with pathways8, or using35\ngraph-based approaches9. Others, like CellChat10, use network analysis and pattern36\nrecognitionapproaches. NicheNet11 usessignaling pathway networks and the PageRank37\nalgorithm. Despite advances proposed by these methods, detecting CCC remains a major38\nchallenge.39\nPasteffortstoidentifyCCChavehighfalsepositiveandnegativerates 12,whichisinpart40\nduetousingasingledatamodality—thetranscriptome—fromcells. Only6%ofgenes41\nexhibit significant expression changes in response to ligands, which may contribute to low42\naccuracy without additional context such as neighboring cells13. Furthermore, scRNA-seq43\nrequires tissue dissociation, destroying the spatial context of cells. As CCC is spatially44\ndependent, scRNA-seq introduces challenges for true single-cell CCC detection instead of45\ncell-type communication14. Lately, methods such as Scriabin15 and GraphComm16 detect46\nCCC from scRNA-seq data alone and map final results to spatial regions within tissue47\nusingcorrespondingspatialtranscriptomicdata. However,theseapproachesincorporate48\nspatialpositionnottodetectCCC,buttovalidatealreadyfoundCCCamongadjacentcells.49\nSuch methods also do not report distant ligand-receptor interactions such as paracrine50\ninteractions,whichconstitutethemajorityofmostligand-receptordatabases. Toovercome51\nsuchlimitations,newCCCmodelsdirectlyintegratingthespatialcontextofgeneexpression52\narenecessary.53\nSpatialtranscriptomictechnologiessuchasVisium 17,18 andmultiplexederror-robust54\n2\n.CC-BY-NC-ND 4.0 International licenseavailable under a \n(which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made \nThe copyright holder for this preprintthis version posted March 22, 2024. ; https://doi.org/10.1101/2024.03.19.585796doi: bioRxiv preprint\n\n--- PAGE 3 ---\nfluorescence in situ hybridization (MERFISH)19 measure the physical location of cells55\npaired with their transcripts, providing new opportunities to detect CCC. Visium measures56\ntranscriptomesof barcodedspots of55µm indiameter, eachcontaining about1-10 cells,57\nwhiletherecentlaunchofVisiumHD(highdefinition)achievessingle-cellspatialresolution58\nat 2µm. Alternatively, MERFISH provides true single-cell resolution of individual cells59\nalbeitwithasmallersubsetofgenes. TherearefewexistingmethodswhichdetectCCC60\ndirectly from spatial transcriptomic data, informed by both the spatial location of cells61\nandtheirassociatedtranscripts. Niches 20 usesk-nearestneighborstoidentifyproximal62\ncells and calculates their ligand-receptor co-expression scores. Niches then collapses63\ncells to neighborhoods using principle component analysis (PCA) to discover niches of64\ncommunication. COMMOT21 screenscell–cellcommunicationinspatialtranscriptomics65\nvia collective optimal transport. However, COMMOT requires a network pathway list as66\nadditionalinput,whichincreasesitsrelianceon a priori information. Mostofthesemethods67\nuse differentially expressed and variable ligand and receptor genes, only incorporating68\nspatialinformationtolimitpotentialcommunicationtoaneighborhoodofcells. However,69\nspatialdatacanofferadditionalinformationsuchasdiscoveringre-occuringCCC“patterns”.70\nThesepatternsexpandCCCdefinitionsbeyondligand-receptorpairstoligand-receptor-71\nligand-receptor relay networks (ligand from one cell to a receptor on another cell which72\nsends another ligand to a third cell’s receptor, and so on). The frequency of these patterns73\nmay indicate higher confidence in CCC detection22. Discovery of such CCC patterns74\nrequiressophisticated artificialintelligence models tolearn complex structures.75\nTofacilitateCCCdetection,wecanrepresentcommunicationfromspatialtranscriptomic76\ndata as a knowledge-graph where cells or spots are vertices and edges represent different77\ntypes of neighborhood relations. As our goal is to predict which relations are probable78\ncommunication,adeeplearningoptiontounravelthecommunicationnetworkisagraph79\nneural network (GNN)23. GNN is an effective model for encoding topological structures80\ningraphrepresentationsbygeneratingagraphembedding. VariantsofGNNarealready81\nbeing applied in transcriptomic data, including a graph convolution network for clustering2482\nandaGNN-basedencoderfordeconvolutionandintegration 25. Aneweradditiontothe83\ntransformer26 family is the graph attention network (GAT), a powerful tool that has already84\nrevolutionized other knowledge-graph-based problems such as social networks27 and85\nmolecular structures28. As this model requires ground truth data for supervised model86\ntraining, we propose using a contrastive learning approach, Deep Graph Infomax (DGI)29,87\nwhichexcels in unsupervisedlearning problems24,30,31.88\nBuilt with these state-of-the-art advances in artificial intelligence, we presentNEST89\n(NEural network on Spatial Transcriptomics),amethodtomeasurecell-cellcommunication90\nand patterns between individual cells that leverages a GAT encoder model with DGI91\ncontrastive learning. Using new benchmarks for single-cell ligand-pair detection and92\nCCC patterns, we demonstrate that NEST outperforms existing tools. We applied our93\nmodel to four data sets across multiple tissues, species, and technologies32–34 to map94\nspatially-resolvedCCC.Importantly,weshowthatNESTcanaccuratelyreconstructnot95\n3\n.CC-BY-NC-ND 4.0 International licenseavailable under a \n(which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made \nThe copyright holder for this preprintthis version posted March 22, 2024. ; https://doi.org/10.1101/2024.03.19.585796doi: bioRxiv preprint\n\n--- PAGE 4 ---\nonlytraditionalsingleligand-receptorsignalsbetweencells,butalsorelaynetworkpatterns96\nof communication in both 2D and 3D spatial transcriptomic samples. Applying NEST to97\nour cohort of pancreatic ductal adenocarcinoma (PDAC) patients revealed critical CCC98\nassociatedwithPDACprogressionandspatiallyassociatedwithknownPDACsubtypes99\nlinked with treatment response and overall survival. As demonstrated, NEST is not limited100\nto a single technology or species. Rather, it is a transferable model applicable to data101\nacrossdomains. We believeNEST is a majorstep forwardin acceleratingthe application102\nof deep learning in spatial transcriptomics as well as other related knowledge-graph-103\nbased contexts. NEST is open-source and publicly available athttps://github.com/104\nschwartzlab-methods/NEST.105\nResults106\nNEST identifies patterns of communication in spatial transcriptomic data107\nLigand-receptorpair-basedcommunicationdependsonspatialdistance; however, thevast108\nmajority of existing tools do not leverage positional information to detect CCC and collapse109\ncommunicatingunitstocelltypesandclustersratherthanspotsandcells. Toovercome110\ntheselimitations,wedevelopedNESTforhigh-resolution,spatially-resolvedCCCdetection111\n(Figure1).112\nGivena 2Dor 3D spatialtranscriptomicdata set ateither spotor single-cellresolution113\nand an existing ligand-receptor database, NEST scores each intercellular signal based on114\ntheco-expressionofhighly-expressedligandandcognatereceptorgenes(Figure1a-c).115\nToachievetruesingle-celland-spotlevelcommunicationidentification,NESTreliesona116\nGNN,aclassofdeep-learning-basedmodels,toidentifywhichligand-receptorpairsare117\nhighlyprobabletoexistinatissuesamplebasedonre-occurringpatternsofcommunication118\ninaparticularregion. Forexample,TGF β1signalingisupregulatedintumorcellsacross119\nvariouscancers 33. Thissignaloccursmultipletimesincancertissuealongtheboundaryof120\ntumor and non-tumor cells, forming a distinct pattern that is not observed in other regions121\nofthe sametissue. Patterns maybe morethan asingleligand-receptor pair,however, as122\ntheremaybeCCCactingasarelaynetworkwithmultiple“hops”betweencells 22. Deep123\nlearning models excel in detecting such hidden patterns, so NEST leverages this power by124\nusing a graph attention network35,36 (GAT), an encoder model that records such patterns125\ninthe form of avertex embedding.126\nAfterdatapreprocessing,NEST convertsspatialtranscriptomicdataintoa graph G =127\n(V, E)with V cellsorspotsasverticesand Eedgesassomeneighborhoodrelationbetween128\nthepairofvertices(Figure1d;seeMethods). NESTinsertsedgesbetweenapairofcellsor129\nspots(hereinreferredtoasvertices) i and j iftheyareproximalneighborswith i expressing130\nhigh ligand andj expressing high receptor (high co-expression).G can be massive,131\ncontaining thousands of vertices with millions of edges based on the number of expressed132\n4\n.CC-BY-NC-ND 4.0 International licenseavailable under a \n(which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made \nThe copyright holder for this preprintthis version posted March 22, 2024. ; https://doi.org/10.1101/2024.03.19.585796doi: bioRxiv preprint\n\n--- PAGE 59 ---\nSupplementaryFigure S8: NEST Interactivesimplifies filtering for specific ligand-receptor\npairs. aThe sliding Edge Count bar enables the user to specify the number of top commu-\nnicating edges to visualize. Here, we select the top 1830 CCC.bThe gene or connection\nsearchoptionallowstheusertofocusonaparticularligand-receptorpaironly. Thisfield\nimplements a fuzzy search for the users to choose from a list of available genes and pairs.\n17\n.CC-BY-NC-ND 4.0 International licenseavailable under a \n(which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made \nThe copyright holder for this preprintthis version posted March 22, 2024. ; https://doi.org/10.1101/2024.03.19.585796doi: bioRxiv preprint\n\n--- PAGE 60 ---\nSupplementary Notes\nSupplementary Note S1: Chi-squared and hypergeometric test for an enrich-\nment analysis of PLXNB2-MET in the Classical region of PDAC tissue\nTo determine ligand-receptor pair usage in the Classical region (connected component\n10 of PDAC_64630; top right green region in Figure 6c), we performed an enrichment\nanalysis ofPLXNB2-MET. We applied a chi-squared test on the histograms generated\nfromconnectedcomponent10todeterminewhethertherewasabiasinligand-receptor\npairsoccurrence. Wefoundthatwasindeedaskewinthe57ligand-receptorpairtypes\n(Chi-squaredtest: p =6.14×10 −32, Χ2 =282.34,degreesoffreedom=56),suggesting\nenrichmentofcertaintypesofCCCinconnectedcomponent10. Oftheseskewedtypes,\nwefound PLXNB2-MET communicationisenrichedintheClassicalregion(Hypergeometric\ntest: p =1.41×10 −22).\nWeperformedtheenrichmentanalysesusing scipy.stats.chisquareand scipy.stats.mul-\ntivariate_hypergeom from SciPy. Scripts for this analysis are available athttps:\n//github.com/schwartzlab-methods/NEST_paper_figures/.\nSupplementary Note S2: Statistical analyses of PDAC patient-derived organoid\nmodel bulk RNA-seq data\nTo compare gene expression among bulk RNA-seq counts of PDAC patient-derived\norganoids, we normalized counts with the DESeq284, followed by log2 transformation,\nandz-score normalization(Figure7a).\nTocomparetheexpressionofspecificgenes,wenormalizedbulkRNA-seqcountsof\norganoidswithDESeq2(Figure7b-c). WefoundoneBasalorganoidmodelasanoutlier\nandexcludedfromanalysisuponfurtherinvestigat",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "NEST leverages Graph Attention Networks (GATs) and Deep Graph Infomax (DGI) to identify intricate, spatially-resolved patterns of cell-cell communication (CCC), including multi-hop relay networks, directly from spatial transcriptomic data. This approach overcomes the limitations of previous methods that often neglect spatial context, rely on single-cell RNA sequencing data, or struggle to detect complex communication patterns between individual cells.",
+        "beforeState": "Existing methods for detecting cell-cell communication (CCC) primarily suffered from high false positive rates, often failed to integrate critical spatial proximity information of ligand-receptor interactions, and could not reliably detect CCC between individual cells—instead collapsing communication to cell types or clusters. Techniques based on scRNA-seq required tissue dissociation, destroying spatial context, while even spatial transcriptomics-aware tools often used spatial data only for validation or neighborhood limiting, missing complex, re-occurring communication patterns and relay networks.",
+        "afterState": "NEST provides a novel, high-resolution, and spatially-resolved methodology for detecting individual cell-cell communication events and complex multi-hop relay networks in both 2D and 3D spatial transcriptomic data. By employing a graph attention network with an unsupervised contrastive learning objective, NEST accurately identifies biologically relevant CCC along with directionality and confidence, outperforming existing tools on new benchmarks and demonstrating transferability across diverse tissues, species, and technologies without requiring explicit ground truth labels.",
+        "deconstructedParts": [
+          {
+            "title": "Graph Construction from Spatial Transcriptomics Data",
+            "explanation": "NEST initiates by converting spatial transcriptomic data, at either spot or single-cell resolution (2D or 3D), into a knowledge-graph G=(V, E). Vertices (V) represent individual cells or spots, and edges (E) signify a neighborhood relation between pairs of vertices. An edge is established between vertex 'i' and vertex 'j' if they are proximal neighbors and exhibit high co-expression of a ligand by 'i' and its cognate receptor by 'j'. This preprocessing step generates a graph structure that encapsulates the spatial relationships and potential ligand-receptor interactions within the tissue sample."
+          },
+          {
+            "title": "Graph Attention Network (GAT) Encoding for Pattern Recognition",
+            "explanation": "The core of NEST's pattern detection mechanism is a Graph Attention Network (GAT), which acts as an encoder model. The GAT is designed to learn expressive vertex embeddings by computing attention coefficients for each neighbor of a node. This allows the model to differentially weigh the importance of neighboring cells/spots in shaping a node's communication context. By aggregating information based on these learned attention scores, the GAT effectively captures re-occurring, complex spatial patterns of ligand-receptor interactions, including multi-hop relay networks, which are then encoded into the vertex embeddings."
+          },
+          {
+            "title": "Unsupervised Contrastive Learning via Deep Graph Infomax (DGI)",
+            "explanation": "To train the GAT encoder effectively without the need for extensive ground truth labels for cell-cell communication, NEST incorporates Deep Graph Infomax (DGI). DGI is an unsupervised contrastive learning approach that maximizes the mutual information between the GAT's learned node-level embeddings (local information) and a high-level summary vector of the entire graph (global information). This is achieved by training a discriminator to distinguish between node embeddings generated from the original graph (positive samples) and those from a structurally or feature-wise corrupted version of the graph (negative samples), thereby enabling the GAT to learn robust and meaningful representations of communication patterns in an unsupervised manner."
+          }
+        ],
+        "strategyUsed": "analogy"
+      },
+      "zoomData": {
+        "rawFormula": "\\mathcal{L} = \\frac{1}{|\\mathcal{V}|} \\sum_{v \\in \\mathcal{V}} \\left( \\mathbb{E}_{\\mathbf{x} \\sim \\mathcal{C}} [ \\log \\sigma (D(\\mathbf{h}_v, \\mathbf{s})) ] + \\mathbb{E}_{\\mathbf{x}' \\sim \\mathcal{C}'} [ \\log (1 - \\sigma (D(\\mathbf{h}'_v, \\mathbf{s})) ) ] \\right)",
+        "translation": "This formula aims to maximize the mutual information between the learned embedding of each node in the graph and a high-level summary of the entire graph, by training a discriminator to distinguish between real node-summary pairs and corrupted ones.",
+        "terms": [
+          {
+            "symbol": "\\mathbb{E}_{\\mathbf{x} \\sim \\mathcal{C}} [ \\log \\sigma (D(\\mathbf{h}_v, \\mathbf{s})) ]",
+            "definition": "The expectation over positive samples (original graph), representing the log-probability that a true node embedding and graph summary pair is classified as real by the discriminator.",
+            "subDefinitions": [
+              {
+                "term": "\\mathbb{E}",
+                "definition": "Expectation operator."
+              },
+              {
+                "term": "\\mathbf{x}",
+                "definition": "Input features of a node from the original graph."
+              },
+              {
+                "term": "\\sim",
+                "definition": "Sampling from a distribution."
+              },
+              {
+                "term": "\\mathcal{C}",
+                "definition": "Distribution of original (positive) samples from the graph."
+              },
+              {
+                "term": "\\log",
+                "definition": "Natural logarithm function."
+              },
+              {
+                "term": "\\sigma",
+                "definition": "Sigmoid activation function, mapping values to a probability range [0, 1]."
+              },
+              {
+                "term": "D",
+                "definition": "Discriminator function, which estimates the probability that a given pair of node embedding and graph summary comes from the true data distribution."
+              },
+              {
+                "term": "\\mathbf{h}_v",
+                "definition": "Learned embedding vector for node 'v' obtained from the GAT encoder."
+              },
+              {
+                "term": "\\mathbf{s}",
+                "definition": "Global summary vector for the entire graph, typically derived from all node embeddings."
+              }
+            ],
+            "deepDive": "This term computes the contribution of correctly classifying 'real' node-summary pairs. The discriminator tries to output a high value for this term, pushing the sigmoid output towards 1, indicating a strong belief that the pair belongs to the original graph. Maximizing this term implies that the encoder produces embeddings that are highly representative of the global graph context for real nodes."
+          },
+          {
+            "symbol": "\\mathbb{E}_{\\mathbf{x}' \\sim \\mathcal{C}'} [ \\log (1 - \\sigma (D(\\mathbf{h}'_v, \\mathbf{s})) ) ]",
+            "definition": "The expectation over negative samples (corrupted graph), representing the log-probability that a corrupted node embedding and graph summary pair is classified as fake by the discriminator.",
+            "subDefinitions": [
+              {
+                "term": "\\mathbb{E}",
+                "definition": "Expectation operator."
+              },
+              {
+                "term": "\\mathbf{x}'",
+                "definition": "Input features of a node from a corrupted version of the graph."
+              },
+              {
+                "term": "\\sim",
+                "definition": "Sampling from a distribution."
+              },
+              {
+                "term": "\\mathcal{C}'",
+                "definition": "Distribution of corrupted (negative) samples from the graph."
+              },
+              {
+                "term": "\\log",
+                "definition": "Natural logarithm function."
+              },
+              {
+                "term": "1 - \\sigma",
+                "definition": "Complement of the sigmoid activation function, representing the probability of being 'fake'."
+              },
+              {
+                "term": "D",
+                "definition": "Discriminator function."
+              },
+              {
+                "term": "\\mathbf{h}'_v",
+                "definition": "Learned embedding vector for a corrupted node 'v'', typically obtained from the GAT encoder with permuted features."
+              },
+              {
+                "term": "\\mathbf{s}",
+                "definition": "Global summary vector for the entire graph."
+              }
+            ],
+            "deepDive": "This term computes the contribution of correctly classifying 'fake' node-summary pairs. The discriminator tries to output a low value for D(h'_v, s), making 1 - sigmoid(D(...)) close to 1, indicating a strong belief that the corrupted pair is not from the original graph. This term penalizes the discriminator if it fails to identify corrupted samples, ensuring that the learned embeddings are distinct from random or irrelevant representations."
+          },
+          {
+            "symbol": "D(\\mathbf{h}_v, \\mathbf{s})",
+            "definition": "The output of the discriminator function when fed with the learned embedding of a true node 'v' and the global graph summary 's', indicating its belief that this pair is 'real'.",
+            "subDefinitions": [
+              {
+                "term": "D",
+                "definition": "Discriminator function, often a simple neural network or a bilinear form, trained to distinguish real from fake pairs."
+              },
+              {
+                "term": "\\mathbf{h}_v",
+                "definition": "Learned embedding vector for node 'v'."
+              },
+              {
+                "term": "\\mathbf{s}",
+                "definition": "Global summary vector for the entire graph."
+              }
+            ],
+            "deepDive": "The discriminator plays a crucial role in shaping the encoder's output. By attempting to correctly classify positive pairs as 'real', it implicitly guides the encoder to produce embeddings that are informative and capture the essential features of the original graph structure and node features, which are then reflected in the global summary."
+          },
+          {
+            "symbol": "D(\\mathbf{h}'_v, \\mathbf{s})",
+            "definition": "The output of the discriminator function when fed with the learned embedding of a corrupted node 'v'' and the global graph summary 's', indicating its belief that this pair is 'real' (which it should ideally classify as 'fake').",
+            "subDefinitions": [
+              {
+                "term": "D",
+                "definition": "Discriminator function."
+              },
+              {
+                "term": "\\mathbf{h}'_v",
+                "definition": "Learned embedding vector for a corrupted node 'v''."
+              },
+              {
+                "term": "\\mathbf{s}",
+                "definition": "Global summary vector for the entire graph."
+              }
+            ],
+            "deepDive": "This term tests the discriminator's ability to reject negative samples. By driving this output towards a low value, the discriminator forces the encoder to learn embeddings that are robust to corruption, preventing it from collapsing all inputs to a trivial representation and ensuring that the learned features are genuinely tied to the original graph's characteristics."
+          },
+          {
+            "symbol": "\\sum_{v \\in \\mathcal{V}}",
+            "definition": "Summation over all individual vertices 'v' belonging to the set of all vertices 'V' in the graph.",
+            "subDefinitions": [
+              {
+                "term": "\\sum",
+                "definition": "Summation operator, indicating that the enclosed expression is summed for each element."
+              },
+              {
+                "term": "v",
+                "definition": "An individual vertex (cell or spot) in the graph."
+              },
+              {
+                "term": "\\in",
+                "definition": "Set membership operator, meaning 'v' is an element of 'V'."
+              },
+              {
+                "term": "\\mathcal{V}",
+                "definition": "The set of all vertices in the graph."
+              }
+            ],
+            "deepDive": "The loss is calculated as an average over all nodes in the graph. This ensures that the learning objective considers the local information content and global context for every single cell or spot represented in the spatial transcriptomics data, enabling comprehensive representation learning."
+          },
+          {
+            "symbol": "|\\mathcal{V}|",
+            "definition": "The total number of vertices (cells or spots) present in the graph.",
+            "subDefinitions": [
+              {
+                "term": "| |",
+                "definition": "Cardinality operator, denoting the number of elements in a set."
+              },
+              {
+                "term": "\\mathcal{V}",
+                "definition": "The set of all vertices in the graph."
+              }
+            ],
+            "deepDive": "Used as a normalization factor, dividing by the total number of vertices ensures that the loss function's magnitude is independent of the graph size, facilitating stable training across different datasets with varying numbers of cells or spots."
+          },
+          {
+            "symbol": "\\mathcal{L}",
+            "definition": "The overall Deep Graph Infomax (DGI) loss function, which is minimized during the unsupervised training process to learn meaningful node embeddings.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathbf{h}'_v",
+            "definition": "The low-dimensional embedding vector for a corrupted version of vertex 'v', produced by the GAT encoder when applied to corrupted input features.",
+            "subDefinitions": [
+              {
+                "term": "\\mathbf{h}",
+                "definition": "Hidden representation or embedding vector."
+              },
+              {
+                "term": "'",
+                "definition": "Denotes a corrupted or negative sample, typically generated by permuting node features or shuffling graph structure."
+              },
+              {
+                "term": "v",
+                "definition": "Index for a specific vertex."
+              }
+            ],
+            "deepDive": "Corrupted node embeddings are crucial for contrastive learning. By forcing the discriminator to differentiate these from real embeddings, the model learns to identify salient features that define the true graph structure and node characteristics, rather than superficial correlations."
+          },
+          {
+            "symbol": "\\mathbf{h}_v",
+            "definition": "The low-dimensional embedding vector learned by the GAT encoder for an original, uncorrupted vertex 'v', capturing its local communication patterns and features.",
+            "subDefinitions": [
+              {
+                "term": "\\mathbf{h}",
+                "definition": "Hidden representation or embedding vector."
+              },
+              {
+                "term": "v",
+                "definition": "Index for a specific vertex (cell or spot)."
+              }
+            ],
+            "deepDive": "These embeddings are the primary output of the GAT encoder. They are designed to encapsulate the rich, spatially-informed features of each cell or spot, enabling downstream tasks like cell-cell communication pattern detection. Their quality is directly optimized by the DGI objective."
+          },
+          {
+            "symbol": "\\mathbf{s}",
+            "definition": "The global summary vector for the entire graph \\mathcal{G}, obtained by a readout function (e.g., averaging) applied to all learned node embeddings.",
+            "subDefinitions": [
+              {
+                "term": "\\mathbf{s}",
+                "definition": "Summary vector."
+              }
+            ],
+            "deepDive": "The global summary provides a context for the entire graph. Maximizing mutual information between local node embeddings and this global summary ensures that individual node representations are not only locally consistent but also globally relevant, effectively capturing overarching communication landscapes."
+          },
+          {
+            "symbol": "\\sigma",
+            "definition": "The sigmoid activation function, used to map the discriminator's output to a probability between 0 and 1, representing the likelihood of a pair being 'real'.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\log",
+            "definition": "The natural logarithm function, commonly used in loss functions to penalize incorrect predictions more heavily for high confidence errors.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "v",
+            "definition": "A single vertex (representing a cell or spot) in the graph.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\in",
+            "definition": "Set membership operator, indicating that an element belongs to a set.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "D",
+            "definition": "The discriminator function within the DGI framework.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathcal{C}",
+            "definition": "The distribution of positive samples, i.e., pairs of node features and graph summaries from the original graph.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathcal{C}'",
+            "definition": "The distribution of negative samples, i.e., pairs of corrupted node features and graph summaries.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathcal{V}",
+            "definition": "The set of all vertices (cells or spots) in the constructed graph.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathbf{x}",
+            "definition": "Generic notation for input node features from the original graph.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\mathbf{x}'",
+            "definition": "Generic notation for input node features from a corrupted version of the graph.",
+            "subDefinitions": []
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": [],
+        "equationImportance": "This equation represents the core unsupervised learning objective of Deep Graph Infomax (DGI), which is critical for NEST. By maximizing the mutual information between local node embeddings and a global graph representation, it enables the Graph Attention Network (GAT) encoder to learn meaningful, spatially-informed communication patterns without requiring explicit ground truth labels, thereby addressing a major challenge in spatial transcriptomics."
+      },
+      "taggedConcepts": [
+        {
+          "term": "Cell-cell communication (CCC)",
+          "nickname": "CCC",
+          "definition": "The process by which cells send and receive signals to coordinate their behavior, crucial for multicellular organism function and implicated in disease progression.",
+          "origin": "Biology/Cell Biology",
+          "relatedTerms": [
+            "Ligand-receptor pairs",
+            "Paracrine interactions",
+            "Relay networks"
+          ]
+        },
+        {
+          "term": "Spatial transcriptomics",
+          "nickname": "ST",
+          "definition": "A set of technologies that measure gene expression while retaining information about the physical location of cells or spots within a tissue, allowing for spatially-resolved molecular analysis.",
+          "origin": "Genomics/Transcriptomics",
+          "relatedTerms": [
+            "Visium",
+            "MERFISH",
+            "Single-cell RNA sequencing (scRNA-seq)"
+          ]
+        },
+        {
+          "term": "Graph Attention Network (GAT)",
+          "nickname": "GAT",
+          "definition": "A type of Graph Neural Network (GNN) that leverages the attention mechanism to learn hidden representations of nodes by assigning different importance weights to neighboring nodes during information aggregation.",
+          "origin": "Machine Learning/Deep Learning",
+          "relatedTerms": [
+            "Graph Neural Network (GNN)",
+            "Attention mechanism",
+            "Transformer"
+          ],
+          "paperUrl": "https://arxiv.org/abs/1710.10903"
+        },
+        {
+          "term": "Deep Graph Infomax (DGI)",
+          "nickname": "DGI",
+          "definition": "An unsupervised learning method for learning node embeddings in graphs by maximizing the mutual information between node-level representations and a global graph summary using a contrastive loss function.",
+          "origin": "Machine Learning/Deep Learning",
+          "relatedTerms": [
+            "Unsupervised learning",
+            "Contrastive learning",
+            "Mutual information",
+            "Graph Neural Network (GNN)"
+          ],
+          "paperUrl": "https://arxiv.org/abs/1809.10341"
+        },
+        {
+          "term": "Ligand-receptor pairs",
+          "nickname": "LR pairs",
+          "definition": "Specific protein pairs where a 'ligand' molecule produced by a sender cell binds to a matching 'receptor' molecule on a receiver cell, mediating cell-cell communication.",
+          "origin": "Biology/Molecular Biology",
+          "relatedTerms": [
+            "Gene expression",
+            "Signaling pathways"
+          ]
+        },
+        {
+          "term": "Graph Neural Network (GNN)",
+          "nickname": "GNN",
+          "definition": "A class of deep learning models designed to operate on graph-structured data, capable of learning embeddings for nodes, edges, or entire graphs by iteratively aggregating information from neighbors.",
+          "origin": "Machine Learning/Deep Learning",
+          "relatedTerms": [
+            "Graph Attention Network (GAT)",
+            "Graph embedding",
+            "Convolutional Neural Network"
+          ]
+        },
+        {
+          "term": "Unsupervised contrastive learning",
+          "nickname": "UCL",
+          "definition": "A machine learning paradigm that learns representations by minimizing the distance between different augmented views of the same data point (positive pairs) and maximizing the distance between different data points (negative pairs), without requiring explicit labels.",
+          "origin": "Machine Learning/Deep Learning",
+          "relatedTerms": [
+            "Deep Graph Infomax (DGI)",
+            "Self-supervised learning",
+            "Representation learning"
+          ]
+        },
+        {
+          "term": "Single-cell RNA sequencing (scRNA-seq)",
+          "nickname": "scRNA-seq",
+          "definition": "A high-throughput technology that provides transcriptomic information (gene expression profiles) at the resolution of individual cells, often requiring tissue dissociation.",
+          "origin": "Genomics/Transcriptomics",
+          "relatedTerms": [
+            "Spatial transcriptomics",
+            "Gene expression"
+          ]
+        },
+        {
+          "term": "Visium",
+          "nickname": "Visium",
+          "definition": "A spatial transcriptomics technology by 10x Genomics that measures gene expression in barcoded spots (typically 55µm diameter, containing 1-10 cells) across a tissue section.",
+          "origin": "Biotechnology/Genomics",
+          "relatedTerms": [
+            "Spatial transcriptomics",
+            "VisiumHD"
+          ]
+        },
+        {
+          "term": "MERFISH",
+          "nickname": "MERFISH",
+          "definition": "Multiplexed error-robust fluorescence in situ hybridization, a single-molecule imaging technique that provides true single-cell spatial resolution of gene expression for a targeted subset of genes.",
+          "origin": "Biotechnology/Genomics",
+          "relatedTerms": [
+            "Spatial transcriptomics",
+            "FISH"
+          ]
+        },
+        {
+          "term": "CellChat",
+          "nickname": "CellChat",
+          "definition": "An existing computational tool for inferring and analyzing cell-cell communication networks from single-cell RNA sequencing data.",
+          "origin": "Bioinformatics",
+          "relatedTerms": [
+            "Ligand-receptor pairs",
+            "Network analysis"
+          ]
+        },
+        {
+          "term": "NicheNet",
+          "nickname": "NicheNet",
+          "definition": "An existing computational method that predicts ligand-receptor interactions and their downstream effects on target genes using signaling pathway networks and the PageRank algorithm.",
+          "origin": "Bioinformatics",
+          "relatedTerms": [
+            "Ligand-receptor pairs",
+            "PageRank algorithm"
+          ]
+        },
+        {
+          "term": "COMMOT",
+          "nickname": "COMMOT",
+          "definition": "A method for screening cell-cell communication in spatial transcriptomics data by utilizing collective optimal transport, requiring a network pathway list as input.",
+          "origin": "Bioinformatics",
+          "relatedTerms": [
+            "Optimal transport",
+            "Spatial transcriptomics"
+          ]
+        }
+      ],
+      "coreIdea": "NEST leverages Graph Attention Networks (GATs) and Deep Graph Infomax (DGI) to identify intricate, spatially-resolved patterns of cell-cell communication (CCC), including multi-hop relay networks, directly from spatial transcriptomic data. This approach overcomes the limitations of previous methods that often neglect spatial context, rely on single-cell RNA sequencing data, or struggle to detect complex communication patterns between individual cells.",
+      "achievements": "NEST introduces a powerful deep learning framework that accurately identifies spatially-resolved cell-cell communication patterns, including complex relay networks, in both 2D and 3D spatial transcriptomic data. It effectively overcomes limitations of prior methods by integrating spatial context directly and leveraging unsupervised contrastive learning, demonstrating superior performance on synthetic benchmarks. The model is highly transferable across various technologies, tissues, and species, offering new insights into disease mechanisms like cancer progression.",
+      "limitations": "While robust, NEST's reliance on pre-existing ligand-receptor databases means its scope is limited by the completeness and accuracy of these resources. The computational demands for processing massive graphs generated from high-resolution spatial transcriptomics data, particularly in 3D, could be substantial. Additionally, while DGI mitigates the need for ground truth, the interpretation of complex learned embeddings and their direct biological mechanisms still requires domain expertise."
+    },
+    {
+      "category": "wildcard",
+      "title": "A Comprehensive Survey on Architectural Advances in Deep CNNs: Challenges, Applications, and Emerging Research Directions",
+      "url": "https://www.semanticscholar.org/paper/5c4388f12d74795c8c07a8063ba7a03da5be4713",
+      "authors": "S. Khan, Rashid Iqbal",
+      "year": 2025,
+      "venue": "arXiv.org",
+      "citationCount": 20,
+      "abstract": "",
+      "rationale": "This explores the intersection of language models and biodiversity, specifically how unstructured species descriptions can be mapped to continuous feature spaces for predictive distribution modeling.",
+      "pdfUrl": "https://arxiv.org/pdf/2503.16546.pdf",
+      "pdfContext": "--- PAGE 1 ---\nA Comprehensive Survey on Architectural Advances in Deep CNNs: Challenges, Applications, and \nEmerging Research Directions \nSaddam Hussain Khan1*, Rashid Iqbal1 \n1Artificial Intelligence Lab, Department of Computer Systems Engineering, University of Engineering and Applied \nSciences (UEAS), Swat 19060, Pakistan \nEmail: saddamhkhan@ueas.edu.pk  \n \nAbstract \nDeep Convolutional Neural Networks (CNNs) have significantly advanced deep learning, driving \nbreakthroughs in computer vision, natural language processing, medical diagnosis, object detection, and \nspeech recognition. Architectural innovations  including 1D, 2D, and 3D convolutional models, dilated and \ngrouped convolutions, depthwise separable convolutions, and attention mechanisms address domain-specific \nchallenges and enhance feature representation and computational efficiency. Advancements in activation \nfunctions, optimization methods, and regularization techniques, supported by large -scale datasets and high -\nperformance computing, have further accelerated CNN development. Structural refinements such as spatial -\nchannel exploitation, multi-path design, and feature-map enhancement contribute to robust hierarchical feature \nextraction and improved generalization, particularly through transfer learning. Efficient preprocessing \nstrategies, including Fourier transforms, structured transforms, low -precision computati on, and weight \ncompression, optimize inference speed and facilitate deployment in resource-constrained environments. This \nsurvey presents a unified taxonomy that classifies CNN architectures based on spatial exploitation, multi-path \nstructures, depth, widt h, dimensionality expansion, channel boosting, and attention mechanisms. It \nsystematically reviews CNN applications in face recognition, pose estimation, action recognition, text \nclassification, statistical language modeling, disease diagnosis, radiologica l analysis, cryptocurrency \nsentiment prediction, 1D data processing, video analysis, and speech recognition. In addition to consolidating \narchitectural advancements, the review highlights emerging learning paradigms such as few -shot, zero-shot, \nweakly supervised, and self-supervised learning, as well as lifelong and federated learning frameworks. Future \nresearch directions include hybrid CNN-transformer models, vision-language integration, generative learning, \n6D vision, and neural architecture search  for scalable, interpretable, and energy-efficient DL solutions. This \nreview provides a comprehensive perspective on CNN 's evolution from 2015 to 2025, outlining key \ninnovations, challenges, and opportunities.  \nKeywords: Deep Learning, CNN, Residual Learning, Transfer Learning, Vision Transformers, Channel \nBoosting, Medical Imaging, Computer Vision, Application.\n\n--- PAGE 2 ---\n1. Introduction \nConvolutional Neural Networks (CNNs) have become powerful algorithms for interpreting image content, \nexcelling in tasks like segmentation, classification, detection, and retrieval [1]. CNNs are also important in \nacademia as this CNN architecture is being explored by industry giants like Google, Microsoft , etc., which \nhave formed a separate team that keeps looking for new CNN architecture  [2]. At the moment, all of the top \ndeep learning (DL) competition winners mostly use CNN techniques and seem to have high -level domain \nproficiencies. Further, CNNs appeal for their ability  to exploit spatial and temporal data correlations. The \nstructure of CNN is made up of several layers and is completed by different stages: Convolutional operation, \nNon-linear activation function units, and subsampling [3]. It is a feed-forward, hierarchical multilayer network \nwhere each layer employs different convolutional kernels  [4]. Convolution captures important local -related \nstructures, processed by using a non-linear activation. This will promote a couple of abstraction learning and \ninherit the nonlinear nature of feature maps. The unique patterns of activation for different responses allow us \nto easily grasp the semantic variation/ subtle in images. Later, subsampling aggregates obtained features and \nincreased geometric transformation invariance [5]. The inherent feature extraction capability of CNN obviates \nthe necessity for a distinct extraction of features [6]. CNN is characterized by graded learning, dynamic feature \nextraction, multitasking capabilities, and weight-sharing [7]. \nCNNs originated from LeCun's 1989 work, focusing on processing grid -structured data such as images and \ntime series [7]. The architectural framework of CNNs drew inspiration from Hubel and Wiesel's research,  \nclosely mirroring the foundational organization of the visual cortex in primates  [8]. The different learning \nstages of CNNs exhibit a striking similarity to the dorsal pathway of the visual cortex in primates  [9]. In \nprimates, the visual cortex initially processes information from the region mapping to the retina, where the \nlateral geniculate nucleus conducts filtering across multiple scales and normalizes contrast . Subsequently, \nvarious regions of the visual cortex engage in detection. These cortex regions exhibit similarities to layers of \nconvolution and subsampling, while the inferior temporal area resembles the upper layers of CNNs responsible \nfor image inference [10]. \nCNNs train using the backpropagation algorithm, adjusting weights based on target outcomes, akin to human \nbrain learning mechanisms. They employ hierarchical feature learning, where lower - and mid-level features \ncontribute to higher -level representations. This deep, layered learning process mirrors the columnar \norganization of the human neocortex, enabling dynamic feature extraction from raw input [11]. CNNs have \nsignificantly advanced computer vision, natural language processing  (NLP), medical diagnosis, object \ndetection, and speech recognition. Architectures such as 1D –3D CNNs, dilated and grouped convolutions, \ndepthwise separable convolutions, attention -based models, and Neural Architecture Search  (NAS) address \ndomain-specific challenges. Structural refinements, including spatial-channel exploitation, multi-path design, \nincreased depth and width, and feature-map refinement, enhance representation and computational efficiency. \nAdditionally, preprocessing techniques like Fast Fourier Transform, structured  transforms, weight \ncompression, and low -precision computation further optimize performance.  CNNs extract hierarchical \nfeatures through convolution, non -linear activations, and subsampling, mirroring the human visual cortex.\n\n--- PAGE 3 ---\nWeight-sharing and graded learning facilitate multi -level feature representation, improving transformation \ninvariance. The evolution from LeCun’s early models to modern deep architectures underscores CNNs' ability \nto learn invariant representations, even f rom extensive unlabeled data. Transfer Learning  (TL) further \nstrengthens generalization across diverse recognition tasks. \nDeep models have been demonstrated to be highly useful in solving tough learning problems since they can \ngenerate complex representations across varying levels of abstraction. One of the experiments showcased in \nthe paper was the recognition of 200 diverse  classes of images, showing the proficiency of deep CNNs in \nmodern vision -based tasks [12]. It has been widely accepted that deep architectures increase the \nrepresentational capacity of CNNs and they have become popular for tasks, associated with image \nclassification and segmentation [13]. Therefore, structured taxonomy categorizes CNNs based on spatial \nexploitation, multi -path design, depth - and width -based models, dimensionality enhancement, channel \nboosting, and attention mechanisms, facilitating comparative analysis. Recent successes of deep CNNs are \nprimarily linked to the interaction of abundant data and the increased power of the hardware. According to \nempirical evidence, deep CNNs can learn invariant representations in case they are trained on a sufficient \namount of data, achieving the performance of humans. Beyond conventional supervised learning, deep CNNs \nexhibit significant proficiency in extracting discriminative features from vast amounts of unlabeled data. \nContemporary research underscores the transferability of both low-level and high-level features across diverse \nrecognition tasks, leveraging the principles of T L [14]. Furthermore, CNNs support various applications, \nincluding image classification, object detection, semantic segmentation, and integration with ViTs. Advanced \nparadigms like few-shot, zero-shot, weakly, and self-supervised learning have expanded CNNs' utility in low-\nlabeled data scenarios. Moreover, CNNs contribute significantly to speech processing and natural language \nunderstanding, supported by large datasets and improved hardware acceleration. Emerging research frontiers \nencompass 6D vision, generative modeling, and meta -learning, offering novel directions for exploration. \nCollectively, these consolidated advancements in CNN architecture and learning strategies illuminate \npersistent research gaps and delineate prospective opportunities for future DL  innovation. \n1.1. Limitation of Existing Surveys \nPrior surveys on CNN architectures, exemplified by Aloysius and Geetha   (2017) [15] and Gu et al. (2018)  \n[16], provided chronological overviews of architectures prevalent during specific periods. These works \ncatalogued design patterns, yet often omitted explicit research questions, systematic evaluations, and critical \ndiscussions on inherent architectural design challenges. Earlier reviews, such as those by Rawat and Wang \n(2017) [17]  and Liu et al. (2018) [18], focused on foundational CNN components and applications in narrow \ndomains, such as image recognition or segmentation. These studies neglected dataset analyses, specialized \ntaxonomies, or discussions on emerging paradigms, such as large vision models and multimodal frameworks \n(Dosovitskiy et al., 2020;  [19] Radford et al., 2021)  [20]. Consequently, their perspectives remained \nfragmented, lacking a unified analysis of architectural evolution and interdisciplinary challenges. \nThe absence of a principled taxonomy based on design principles, rather than temporal release, further limited \nthe utility of prior surveys. Dhillon and Verma (2019) [21]  analyzed classical architectures, such as AlexNet\n\n--- PAGE 4 ---\nand VGGNet, but did not investigate why newer models, such as MobileNetV3 (Howard et al., 2019) [22] or \nInceptionV4 (Szegedy et al., 2017)  [23], achieved superior performance. Similarly, Ajmal et al. (2020)  [24] \nconcentrated on segmentation applications without addressing advancements in efficiency -driven designs, \nsuch as NAS (Zoph & Le, 2017) [25]  or dynamic convolutions (Chen et al., 2021)  [26]. Such omissions \nhindered a holistic understanding of CNN innovation trajectories. \nExisting surveys frequently prioritized domain -specific applications, such as object detection or medical \nimaging, over structural or algorithmic advancements. Zhang et al. (2019) [27] proposed a taxonomy centered \non acceleration techniques but overlooked critical trends, such as federated learning (Konečný et al., 2016)  \n[28] and explainability methods (Selvaraju et al., 2017) [29]. Earlier works inadequately addressed the ethical \nand computational challenges of deploying CNNs in resource-constrained environments, such as edge devices \n(Han et al., 2016; Li et al., 202 1) [30], [31]. This narrow focus restricted their relevance to contemporary \nresearch demands. \nThe rapid proliferation of CNN variants since 2012 exacerbated these gaps. ShuffleNet (Zhang et al., 2018)  \n[32]  and Vision Transformers (ViTs) [19] represent paradigm shifts that prior surveys rarely anticipated or \ncontextualized. While Gu et al. (2018) [16] reviewed architectures up to 2015, subsequent innovations in \nattention mechanisms (Wang et al., 2018)  [33] and lightweight designs remained underexplored in \ncomparative frameworks. Additionally, the generalized form of the limitations is mentioned as: \n• Prior surveys provided basic overviews of CNN components, typically limited to standard convolutional \nlayers and conventional pooling techniques, without addressing the emergence of advanced convolutional \nvariants. Moreover, focused mainly on traditional pooling layers, neglecting an in-depth analysis of recent \nadvanced pooling mechanisms that enhance spatial invariance, multi-scale representation, and information \npreservation. Furthermore, lacked a unified taxonomy and critical evaluation of the impact of these \nadvanced convolutional and pooling variants on computational efficiency, scalability, and applicability \nacross diverse tasks, including classification, detection, and segmentation. \n• Existing reviews predominantly focus on domain -specific implementations, such as vegetation remote \nsensing and network intrusion detection, while lacking a systematic analysis of critical architectural \nadvancements in CNNs. Consequently, they fail to provide a unified perspective on the evolution of CNN \ndesign strategies across diverse fields, including computer vision, NLP, and medical imaging. \n• Existing studies predominantly emphasize supervised learning, with insufficient coverage of emerging \nparadigms such as weakly supervised, self -supervised, few-shot, and zero-shot learning. Discussions on \nadaptive pooling methods and advanced feature extrac tion strategies —vital for improving model \ngeneralization in data-scarce settings—remain limited. \n• Optimization techniques critical for efficient CNN deployment, including structured transforms, low -\nprecision computation, weight quantization, and energy -efficient architecture design, receive minimal \nattention. Similarly, the integration of CNNs with ViTs, graph neural networks, meta -learning \nframeworks, and NAS is rarely addressed in depth, hindering a comprehensive understanding of hybrid \nand scalable model development.\n\n--- PAGE 98 ---\nDetection on Enterprise Network,” Proc. - 15th IEEE Int. Conf. Data Min. Work. ICDMW 2015 , pp. \n987–996, 2016, doi: 10.1109/ICDMW.2015.38. \n[119] W. Ullah, A. Ullah, I. U. Haq, K. Muhammad, M. Sajjad, and S. W. Baik, “CNN features with bi -\ndirectional LSTM for real -time anomaly detection in surveillance networks,” Multimed. Tools Appl. , \nvol. 80, no. 11, pp. 16979–16995, May 2021, doi: 10.1007/S11042-020-09406-3. \n[120] A. Ganj, M. Ebadpour, M. Darvish, and H. Bahador, “LR -Net: A Block-based Convolutional Neural \nNetwork for Low-Resolution Image Classification,” Iran. J. Sci. Technol. - Trans. Electr. Eng., vol. 47, \nno. 4, pp. 1561–1568, Jul. 2022, doi: 10.1007/s40998-023-00618-5. \n[121] K. Muhammad et al., “Human action recognition using attention based LSTM network with dilated \nCNN features,” Futur. Gener. Comput. Syst. , vol. 125, pp. 820 –830, Dec. 2021, doi: \n10.1016/J.FUTURE.2021.06.",
+      "explanation": {
+        "paperType": "review_survey",
+        "coreIntuition": "The paper provides a structured, unified overview of architectural advancements in Deep Convolutional Neural Networks (CNNs) by presenting a novel taxonomy, reviewing diverse applications, and identifying critical challenges and emerging research directions from 2015 to 2025.",
+        "beforeState": "Prior surveys on CNN architectures often presented fragmented chronological overviews, lacked systematic evaluations, failed to provide explicit research questions, or omitted critical discussions on architectural design challenges. They frequently focused on narrow domain-specific applications, neglected dataset analyses, specialized taxonomies, or overlooked emerging paradigms such as large vision models, multimodal frameworks, and efficiency-driven designs like Neural Architecture Search (NAS) and dynamic convolutions. Furthermore, these reviews offered insufficient coverage of advanced convolutional variants, pooling mechanisms, and optimization techniques crucial for resource-constrained environments.",
+        "afterState": "This survey establishes a unified taxonomy for CNN architectures based on intrinsic design principles (e.g., spatial exploitation, multi-path design, channel boosting, attention mechanisms) rather than temporal release, providing a more systematic comparative analysis. It comprehensively reviews CNN applications across a broad spectrum of domains (computer vision, NLP, medical imaging) and integrates discussions on emerging learning paradigms (few-shot, self-supervised, federated learning) and hybrid model development (CNN-transformers). The paper delineates persistent research gaps and prospective opportunities for future Deep Learning innovation, offering a consolidated perspective on CNN evolution with a focus on scalability, interpretability, and energy efficiency.",
+        "consensusAndTrends": "There is a strong consensus on the efficacy of architectural innovations in enhancing CNN performance across diverse tasks, driven by advancements in convolutional models (1D, 2D, 3D), efficiency techniques (dilated, grouped, depthwise separable convolutions), and attention mechanisms. Key trends include structural refinements like spatial-channel exploitation and multi-path designs, accelerated by the availability of large-scale datasets and high-performance computing. Beyond traditional supervised learning, there's a growing trend towards transfer learning and emerging paradigms such as few-shot, zero-shot, weakly supervised, self-supervised, lifelong, and federated learning. Future trends emphasize hybrid CNN-transformer models, vision-language integration, generative learning, 6D vision, and automated neural architecture search for robust and efficient DL solutions.",
+        "openChallenges": "Future research directions encompass the development of hybrid CNN-transformer models to leverage the strengths of both architectures, advanced vision-language integration for more sophisticated multimodal understanding, and the exploration of generative learning for data synthesis and content creation. Significant challenges also lie in advancing 6D vision for comprehensive environmental perception and object manipulation, as well as refining Neural Architecture Search (NAS) techniques to discover more scalable, interpretable, and energy-efficient deep learning solutions. Addressing the ethical implications and computational constraints for deploying CNNs in resource-limited environments remains a persistent challenge.",
+        "surveyScope": "The survey systematically reviews the evolution of Deep CNN architectures from 2015 to 2025. It encompasses architectural innovations such as 1D, 2D, and 3D convolutional models, dilated and grouped convolutions, depthwise separable convolutions, and attention mechanisms. It also covers advancements in activation functions, optimization methods, regularization techniques, structural refinements (spatial-channel exploitation, multi-path design, feature-map enhancement), and efficient preprocessing strategies (Fourier transforms, structured transforms, low-precision computation, weight compression). The review extends to CNN applications across computer vision, NLP, medical diagnosis, and speech recognition, while highlighting emerging learning paradigms (few-shot, zero-shot, weakly supervised, self-supervised, lifelong, federated learning) and future research frontiers."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "The survey systematically classifies Deep CNN architectures based on seven distinct design principles, offering a structured framework for understanding the field's evolution. This taxonomy moves beyond mere chronological overviews, providing a functional decomposition of architectural advancements.",
+        "subcategories": [
+          {
+            "name": "Spatial Exploitation",
+            "approach": "Enhances feature representation and computational efficiency through advanced convolutional variants like dilated, grouped, and depthwise separable convolutions, which optimize spatial information processing within feature maps.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Multi-Path Structures",
+            "approach": "Improves network capacity and feature extraction by incorporating parallel processing branches and combining features at different scales, exemplified by architectures like Inception modules and ResNeXt.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Depth and Width based Models",
+            "approach": "Increases the representational power of CNNs by scaling the number of layers (depth) or the number of channels per layer (width), leading to models with greater capacity for learning complex features.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Dimensionality Expansion",
+            "approach": "Extends the application of CNNs beyond 2D images by adapting convolutions to 1D data (e.g., time series) and 3D data (e.g., medical volumes, video frames), thereby broadening their utility.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Channel Boosting",
+            "approach": "Focuses on enhancing the quality and interdependence of feature maps across channels, often through mechanisms like Squeeze-and-Excitation networks, to improve feature discriminability and network performance.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Attention Mechanisms",
+            "approach": "Integrates modules that allow the network to dynamically weight the importance of different spatial locations or channels, enabling more focused processing and improved feature selection.",
+            "seminalPapers": []
+          },
+          {
+            "name": "Preprocessing Strategies",
+            "approach": "Optimizes inference speed and enables deployment in resource-constrained environments through techniques such as Fourier transforms, structured transforms, low-precision computation, and weight compression.",
+            "seminalPapers": []
+          }
+        ],
+        "gaps": [
+          {
+            "challenge": "Lack of unified taxonomy and critical evaluation in prior surveys.",
+            "reason": "Existing reviews often provided chronological overviews or focused on specific periods, lacking a principled, design-based taxonomy and systematic evaluation of architectural impact on efficiency and scalability."
+          },
+          {
+            "challenge": "Insufficient coverage of efficiency-driven designs and emerging learning paradigms.",
+            "reason": "Previous studies frequently overlooked advancements like Neural Architecture Search (NAS), dynamic convolutions, few-shot, zero-shot, weakly supervised, and self-supervised learning, which are crucial for data-scarce settings and modern model development."
+          },
+          {
+            "challenge": "Minimal attention to optimization techniques for efficient CNN deployment.",
+            "reason": "Critical techniques such as structured transforms, low-precision computation, weight quantization, and energy-efficient architecture design, vital for deployment in resource-constrained environments (e.g., edge devices), were inadequately addressed."
+          },
+          {
+            "challenge": "Limited depth in discussing hybrid models and integration with other Deep Learning frameworks.",
+            "reason": "Prior surveys rarely explored the comprehensive integration of CNNs with Vision Transformers (ViTs), Graph Neural Networks (GNNs), meta-learning frameworks, and NAS, hindering a holistic understanding of advanced, scalable model development."
+          }
+        ],
+        "equationImportance": ""
+      },
+      "taggedConcepts": [
+        {
+          "term": "Deep Convolutional Neural Networks",
+          "nickname": "CNNs",
+          "definition": "A class of deep neural networks, most commonly applied to analyzing visual imagery, characterized by shared-weight architectures and translational invariance.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "Convolutional operation",
+            "Non-linear activation function",
+            "Subsampling",
+            "Weight-sharing"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Neural Architecture Search",
+          "nickname": "NAS",
+          "definition": "An automated process for designing neural network architectures, aiming to discover high-performing models with minimal human intervention.",
+          "origin": "Deep Learning",
+          "relatedTerms": [
+            "AutoML",
+            "Meta-learning",
+            "Reinforcement Learning"
+          ],
+          "paperUrl": "Zoph & Le, 2017"
+        },
+        {
+          "term": "Vision Transformers",
+          "nickname": "ViTs",
+          "definition": "Neural network architectures that apply the Transformer model, originally used for natural language processing, directly to sequences of image patches for computer vision tasks.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "Transformers",
+            "Attention Mechanisms",
+            "Self-attention"
+          ],
+          "paperUrl": "Dosovitskiy et al., 2020"
+        },
+        {
+          "term": "Transfer Learning",
+          "nickname": "TL",
+          "definition": "A machine learning method where a model developed for a task is reused as the starting point for a model on a second task, leveraging pre-trained features.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Fine-tuning",
+            "Feature Extraction",
+            "Pre-trained models"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Depthwise Separable Convolutions",
+          "nickname": "DSC",
+          "definition": "A type of convolution that factorizes a standard convolution into a depthwise convolution (applying a single filter per input channel) and a pointwise convolution (a 1x1 convolution combining the outputs of the depthwise convolution), reducing computational cost.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "MobileNet",
+            "EfficientNet",
+            "Grouped Convolutions"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Attention Mechanisms",
+          "nickname": "Attention",
+          "definition": "Computational modules that enable neural networks to selectively focus on relevant parts of the input data, often by weighting features based on their importance.",
+          "origin": "Deep Learning",
+          "relatedTerms": [
+            "Self-attention",
+            "Channel Attention",
+            "Spatial Attention"
+          ],
+          "paperUrl": "Wang et al., 2018"
+        },
+        {
+          "term": "Federated Learning",
+          "nickname": "FL",
+          "definition": "A distributed machine learning approach that trains an algorithm across multiple decentralized edge devices or servers holding local data samples, without exchanging their data.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Distributed Learning",
+            "Privacy-preserving AI",
+            "Edge Computing"
+          ],
+          "paperUrl": "Konečný et al., 2016"
+        },
+        {
+          "term": "Low-Precision Computation",
+          "nickname": "Quantization",
+          "definition": "The use of fewer bits to represent numerical values (e.g., weights and activations) in a neural network, reducing memory footprint and accelerating inference, often with minimal loss in accuracy.",
+          "origin": "Deep Learning Optimization",
+          "relatedTerms": [
+            "Weight Compression",
+            "Quantization Aware Training",
+            "FP16",
+            "INT8"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "LeCun's 1989 work",
+          "nickname": "LeNet-5 Origins",
+          "definition": "Seminal work by Yann LeCun introducing early convolutional neural networks, demonstrating their effectiveness for tasks like handwritten digit recognition.",
+          "origin": "Neural Networks",
+          "relatedTerms": [
+            "Backpropagation",
+            "Gradient Descent",
+            "CNN History"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Backpropagation algorithm",
+          "nickname": "Backprop",
+          "definition": "A widely used algorithm for training artificial neural networks, which computes the gradient of the loss function with respect to the weights of the network.",
+          "origin": "Neural Networks",
+          "relatedTerms": [
+            "Gradient Descent",
+            "Chain Rule",
+            "Loss Function"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "AlexNet",
+          "nickname": "AlexNet",
+          "definition": "A groundbreaking deep CNN architecture that won the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) in 2012, significantly popularizing deep learning.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "ImageNet",
+            "ReLU",
+            "Data Augmentation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "VGGNet",
+          "nickname": "VGG",
+          "definition": "A deep CNN architecture known for its simplicity and depth, using only 3x3 convolutional layers stacked atop each other to increase depth.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "AlexNet",
+            "ResNet",
+            "Image Classification"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "MobileNetV3",
+          "nickname": "MobileNetV3",
+          "definition": "A family of lightweight deep convolutional neural networks optimized for mobile and embedded vision applications, featuring inverted residual blocks and Squeeze-and-Excitation layers.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "MobileNetV2",
+            "EfficientNet",
+            "Quantization"
+          ],
+          "paperUrl": "Howard et al., 2019"
+        },
+        {
+          "term": "InceptionV4",
+          "nickname": "InceptionV4",
+          "definition": "An advanced Inception architecture that integrates Inception modules with residual connections, improving both performance and training speed.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "InceptionNet",
+            "ResNet",
+            "GoogleNet"
+          ],
+          "paperUrl": "Szegedy et al., 2017"
+        },
+        {
+          "term": "ShuffleNet",
+          "nickname": "ShuffleNet",
+          "definition": "A very efficient CNN architecture designed for mobile devices, which employs pointwise group convolutions and channel shuffling to reduce computational cost while maintaining accuracy.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "MobileNet",
+            "Grouped Convolutions",
+            "Efficient CNNs"
+          ],
+          "paperUrl": "Zhang et al., 2018"
+        },
+        {
+          "term": "6D Vision",
+          "nickname": "6D Vision",
+          "definition": "A field of computer vision focused on estimating the full 6 degrees of freedom (3 for position and 3 for orientation) pose of objects from images or sensor data.",
+          "origin": "Computer Vision",
+          "relatedTerms": [
+            "Pose Estimation",
+            "Object Tracking",
+            "Robotics"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Generative Learning",
+          "nickname": "Generative AI",
+          "definition": "A class of machine learning models designed to generate new data instances that resemble the training data, often used for image synthesis, text generation, or data augmentation.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "GANs",
+            "VAEs",
+            "Diffusion Models"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Meta-learning",
+          "nickname": "Learning to Learn",
+          "definition": "A subfield of machine learning where the goal is to learn how to learn, allowing models to adapt quickly to new tasks or environments with limited data.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Few-shot Learning",
+            "Zero-shot Learning",
+            "Task Adaptation"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Graph Neural Networks",
+          "nickname": "GNNs",
+          "definition": "Neural networks designed to operate directly on graph-structured data, capable of learning representations of nodes, edges, and entire graphs.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Graph Convolutional Networks",
+            "Relational inductive biases",
+            "Irregular data"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Weakly Supervised Learning",
+          "nickname": "WSL",
+          "definition": "A learning paradigm where models are trained using weak, noisy, or imprecise supervision, reducing the need for extensive, precise annotations.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Semi-supervised Learning",
+            "Noisy Labels",
+            "Sparsely Labeled Data"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Self-Supervised Learning",
+          "nickname": "SSL",
+          "definition": "A machine learning approach where a model learns representations from unlabeled data by solving auxiliary tasks that generate their own supervisory signals from the data itself.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Unsupervised Learning",
+            "Pretext Tasks",
+            "Contrastive Learning"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Few-Shot Learning",
+          "nickname": "FSL",
+          "definition": "A machine learning setting where a model must learn to recognize new concepts or categories from only a few training examples.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Meta-learning",
+            "One-shot Learning",
+            "Low-Data Regimes"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Zero-Shot Learning",
+          "nickname": "ZSL",
+          "definition": "A machine learning problem where a model must recognize classes it has not seen during training, typically by leveraging semantic information about the classes.",
+          "origin": "Machine Learning",
+          "relatedTerms": [
+            "Generalized Zero-shot Learning",
+            "Attribute-based Recognition",
+            "Semantic Embeddings"
+          ],
+          "paperUrl": ""
+        }
+      ],
+      "coreIdea": "The paper provides a structured, unified overview of architectural advancements in Deep Convolutional Neural Networks (CNNs) by presenting a novel taxonomy, reviewing diverse applications, and identifying critical challenges and emerging research directions from 2015 to 2025.",
+      "achievements": "This survey provides a comprehensive review of CNN architectural advancements from 2015-2025, introducing a unified, design-principle-based taxonomy for better comparative analysis. It systematically outlines applications across diverse domains and integrates discussions on emerging learning paradigms, such as few-shot, self-supervised, and federated learning. The paper effectively identifies key challenges and delineates crucial future research directions, including hybrid CNN-transformer models and neural architecture search, offering a valuable roadmap for future Deep Learning innovation.",
+      "limitations": "As a survey paper, this work does not introduce novel methodologies, empirical results, or theoretical proofs, instead relying on existing literature. The rapid evolution of the Deep Learning field means that the 'emerging research directions' and 'open challenges' identified, while current at the time of publication (2025), may quickly evolve or be partially addressed by subsequent research."
+    }
+  ]
+}

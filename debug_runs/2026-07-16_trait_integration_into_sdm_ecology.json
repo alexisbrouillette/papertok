@@ -1,0 +1,669 @@
+{
+  "userId": 3,
+  "topic": "trait integration into SDM ecology",
+  "digestDate": "2026-07-16",
+  "papers": [
+    {
+      "category": "foundation",
+      "title": "Bringing Elton and Grinnell Together: a quantitative framework to represent the biogeography of ecological interaction networks",
+      "url": "https://www.semanticscholar.org/paper/2485543d641effe57ca0df971d2efff6ea2c3dfd",
+      "authors": "Dominique Gravel, Benjamin Baiser, Jennifer A. Dunne, Jens-Peter Kopelke, Neo D. Martinez, Tommi Nyman, Timothée Poisot, Daniel B. Stouffer, Jason M. Tylianakis, Spencer A. Wood, Tomas Roslin",
+      "year": 2016,
+      "venue": "bioRxiv",
+      "citationCount": 116,
+      "abstract": "",
+      "rationale": "To understand trait-based SDM, one must ground the research in the fundamental debate between the Grinnellian (environmental) and Eltonian (biotic/functional trait) definitions of the ecological niche.",
+      "pdfUrl": "https://www.biorxiv.org/content/biorxiv/early/2016/05/26/055558.1.full.pdf",
+      "pdfContext": "--- PAGE 1 ---\nTitle: Bringing Elton and Grinnell together: a quantitative framework to represent1\nthe biogeography of ecological interaction networks2\n3\nAuthors: Dominique Gravel1,2,∗, Benjamin Baiser 3, Jennifer A. Dunne 4, Jens-Peter4\nKopelke5, Neo D. Martinez 6, Tommi Nyman 7, Timoth´ ee Poisot2,8, Daniel B. Stouﬀer 9,5\nJason M. Tylianakis 9,10, Spencer A. Wood 11, Tomas Roslin126\n7\n1: Canada Research Chair in Integrative Ecology. D´ epartement de biologie, Univer-8\nsit´ e de Sherbrooke, 2500 Boulevard l’Universit´ e, Sherbrooke (Qu´ ebec). J1K 2R19\n2: Qu´ ebec Centre for Biodiversity Science10\n3: University of Florida, Department of Wildlife Ecology and Conservation, 110 Newins-11\nZiegler Hall, PO Box 110430, Gainesville, Fl. 32611-043012\n4: Santa Fe Institute, 1399 Hyde Park Road, Santa Fe, NM 87501, USA.13\n5: Senckenberg Research Institute and Natural History Museum, Senckenberganlage 25,14\nD-60325 Frankfurt am Main, Germany15\n6: Ecology and Evolutionary Biology Department, University of Arizona, P.O. Box16\n210088, Tucson, AZ 85721, USA17\n7: University of Eastern Finland, Department of Environmental and Biological Sciences,18\nP.O. Box 111, FI-80101 Joensuu, Finland19\n8: Universit´ e de Montr´ eal, D´ epartement des Sciences Biologiques, 90 Avenue Vincent20\nd’Indy, Montr´ eal, QC H2V3S9, Canada.21\n9: Centre for Integrative Ecology, School of Biological Sciences, University of Canterbury,22\nPrivate Bag 4800, Christchurch, New Zealand23\n10: Department of Life Sciences, Imperial College London, Silwood Park Campus, Buck-24\nhurst Road, Ascot, Berkshire SL5 7PY, United Kingdom25\n11: University of Washington, School of Environmental and Forest Sciences, Box 352100,26\nSeattle, WA 98195, USA27\n12: Department of Ecology, Swedish University of Agricultural Sciences, Box 7044, 75028\n07 Uppsala, Sweden29\n30\nKeywords: networks, spatial ecology, co-occurrence, probability of interaction31\nWords in the abstract: 22632\nWords in the main text: 704333\nWords in the legends: 50234\n35\nAuthorship: DG, BB, JAD, NDM, TP, SAW, DBS and JMT contributed to the36\nconceptual framework; JPK, TN and TR contributed the data; DG developped the prob-37\nabilistic approach and performed the analysis; DG, TP and TR wroted the ﬁrst draft and38\nall of the authors edited the manuscript.39\n1\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 2 ---\nAbstract40\nBiogeography has traditionally focused on the spatial distribution and abundance of41\nspecies. Both are driven by the way species interact with one another, but also by the way42\nthese interactions vary across time and space. Here, we call for an integrated approach,43\nadopting the view that community structure is best represented as a network of ecological44\ninteractions, and show how it translates to biogeography questions. We propose that the45\necological niche should encompass the eﬀect of the environment on species distribution46\n(the Grinnellian dimension of the niche) and on the ecological interactions among them47\n(the Eltonian dimension). Starting from this concept, we develop a quantitative theory to48\nexplain turnover of interactions in space and time – i.e. a novel approach to interaction49\ndistribution modelling. We apply this framework to host–parasite interactions across Eu-50\nrope and ﬁnd that two aspects of the environment (temperature and precipitation) exert51\na strong imprint on species co-occurrence, but not on species interactions. Even where52\nspecies co-occur, interaction proves to be stochastic rather than deterministic, adding to53\nvariation in realized network structure. We also ﬁnd that a large majority of host-parasite54\npairs are never found together, thus precluding any inferences regarding their probability55\nto interact. This ﬁrst attempt to explain variation of network structure at large spa-56\ntial scales opens new perspectives at the interface of species distribution modelling and57\ncommunity ecology.58\n2\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 3 ---\nIntroduction59\nCommunity ecology is the study of the interactions that determine the distribution and60\nabundance of organisms (Krebs, 2009). Despite a general consensus on this deﬁnition61\n(Scheiner & Willig, 2007), research on variation in community structure has mostly fo-62\ncused on the spatial and temporal turnover of species composition (Andersonet al., 2011),63\nneglecting variation in the way species interact with each other despite accumulating em-64\npirical evidence that this is a major source of diversity (Poisot et al., 2015b). Given this65\nomission, it is perhaps not surprising that biogeographers are still struggling to establish66\nwhether interactions actually impact the distribution of species at large spatial scales67\n(Wisz et al., 2012; Kissling et al., 2012): treating interactions as ﬁxed events neglects a68\nlarge part of the complexity of empirical communities, and will most likely deliver under-69\nwhelming results. Recent attempts at accounting for interactions in species distribution70\nmodels (Pollock et al., 2014; Pellissier et al., 2013) have brought some methodological71\nadvances, but are not suﬃcient for two reasons. First, these techniques are still based72\non a ‘species-based’ approach to communities, where interactions are merely treated as73\nﬁxed covariates aﬀecting distribution. Second, they failed to provide a conceptual step74\nforward, both in their treatment of interactions and in the quality of the predictions they75\nmake.76\nNetwork approaches oﬀer a convenient representation of communities because they77\nsimultaneously account for species composition and their interactions. Species are repre-78\nsented as nodes, so that networks already encompass all the information used by current79\napproaches; in addition, interactions are represented by links, so that networks provide80\nadditional, higher-order information on community structure. To date, studies of net-81\nwork diversity have mostly been concerned with the distribution of interactions within82\nlocations, and less so with variation among locations (Dunne, 2006; Bascompte & Jor-83\ndano, 2007; Ings et al., 2009; K´ eﬁet al., 2012). There is, however, ample evidence that84\n3\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 4 ---\ninteraction networks vary in space and time (Lalibert´ e & Tylianakis, 2010; Poisotet al.,85\n2012; Albouy et al., 2014; Poisot et al., 2016b; Trøjelsgaard et al., 2015), even though86\nthere is no common framework with which to generalize these results. Metacommunity87\ntheory provides explanations for variation in the distribution of the nodes (Gravel et al.,88\n2011; Pillai et al., 2011), but there is no such explanation to the variation of node and89\nlink occurrences. Consequently, we urgently need a conceptual framework to formalize90\nthese observations, as it is the only way towards fulﬁlling the goal of community ecol-91\nogy: providing cogent predictions about, and understanding of, the structure of ecological92\ncommunities.93\nGiven the historically diﬀerent approaches to modelling the distributions of species vs.94\ninteractions, there is a clear need to bring the two together. Here, we oﬀer an integrated95\napproach to do so, adopting the view that community structure is best represented as96\na network of ecological interactions. Based on this idea, we propose a new description97\nof the basic concept of the ecological niche that integrates the eﬀect of the environment98\non species distribution and on the ecological interactions among them. Building on this99\nconcept, we develop a quantitative theory to explain turnover of interactions in space and100\ntime. We ﬁrst present the conceptual framework, and then formalize it mathematically,101\nusing a probabilistic model to represent the sampling of the regional pool of interactions.102\nAt the level of species pairs, the statistical approach could be conceived as an interaction103\ndistribution model. At the community level, the approach provides a likelihood-based104\nmethod to compare diﬀerent hypotheses of network turnover. As an illustrative example,105\nwe apply this novel framework to a large data set on host–parasite interactions across106\nEurope and ﬁnd that two aspects of the environment (temperature and precipitation)107\nexert a strong imprint on species co-occurrence, but not on species interactions. The108\nnetwork structure changes systematically across the latitudinal gradient, with a peak of109\nconnectance at intermediate latitudes.110\n4\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 49 ---\nFigure 5983\nSalix\nGalls Galls\nParasitoids\n49\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint\n\n--- PAGE 50 ---\nFigure 6984\nSalix richness\n Gall richness\n Parasitoid richness\nLink density − \nSalix & Galls\nLink density − \nGalls & Parasitoids\n Connectance\n50\n.CC-BY-NC-ND 4.0 International licensea \ncertified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under \nThe copyright holder for this preprint (which was notthis version posted May 26, 2016. ; https://doi.org/10.1101/055558doi: bioRxiv preprint",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The paper bridges the gap between Grinnellian (environmental) niche modeling and Eltonian (interaction) network ecology by treating species interaction as a probabilistic event contingent upon co-occurrence, effectively creating an 'interaction distribution model' that formalizes how abiotic filters select for both nodes (species) and edges (interactions) in a biogeographic space.",
+        "beforeState": "Biogeography treated species distribution as largely independent of biotic interactions, while network ecology focused on local community structure without accounting for spatial turnover in interaction probabilities.",
+        "afterState": "A unified framework where interaction probability is conditioned on the joint probability of species co-occurrence and a stochastic interaction component, allowing for large-scale prediction of network structure based on environmental variables.",
+        "assumptions": "Assumes that interactions can be decomposed into an environmental filter on presence and an intrinsic stochasticity in the realized interaction, and that environmental drivers act consistently across regional species pools.",
+        "strategyUsed": "contrast",
+        "theoreticalSignificance": "It establishes a formal mathematical link between SDM (Species Distribution Modeling) and network theory, moving away from 'fixed' interaction matrices towards a dynamic, state-dependent interaction probability model that accounts for sampling bias in large-scale ecological data."
+      },
+      "zoomData": {
+        "rawFormula": "P(I_{ij} | E) = P(O_{ij} | E) \\times P(I_{ij} | O_{ij}, E)",
+        "translation": "The probability of an interaction I between species i and j given environmental factors E is the product of the probability of their co-occurrence and the conditional probability of interaction given that co-occurrence.",
+        "terms": [
+          {
+            "symbol": "P(I_{ij} | O_{ij}, E)",
+            "definition": "Conditional probability of interaction given co-occurrence and environment.",
+            "subDefinitions": [
+              {
+                "term": "P",
+                "definition": "Probability density function"
+              },
+              {
+                "term": "I_{ij}",
+                "definition": "Interaction between species i and j"
+              },
+              {
+                "term": "O_{ij}",
+                "definition": "Event of co-occurrence of i and j"
+              },
+              {
+                "term": "E",
+                "definition": "Environmental covariates"
+              }
+            ],
+            "deepDive": "This term isolates the Eltonian dimension, capturing the stochastic nature of interspecific interaction which remains even when species satisfy their Grinnellian niche requirements."
+          },
+          {
+            "symbol": "P(O_{ij} | E)",
+            "definition": "Joint probability of co-occurrence conditioned on the environment.",
+            "subDefinitions": [
+              {
+                "term": "O_{ij}",
+                "definition": "Co-occurrence event"
+              },
+              {
+                "term": "E",
+                "definition": "Environmental variables"
+              }
+            ],
+            "deepDive": "Represents the Grinnellian dimension of the niche, calculated as the product of individual species distribution probabilities if co-occurrence is assumed independent, or via joint SDM."
+          },
+          {
+            "symbol": "P(I_{ij} | E)",
+            "definition": "Total probability of interaction between species i and j in environment E.",
+            "subDefinitions": [
+              {
+                "term": "I_{ij}",
+                "definition": "Interaction between i and j"
+              },
+              {
+                "term": "E",
+                "definition": "Environmental vector"
+              }
+            ],
+            "deepDive": "The target variable for the interaction distribution model, representing the realized link in a meta-community network."
+          },
+          {
+            "symbol": "I_{ij}",
+            "definition": "Interaction state (1 for observed, 0 otherwise) for species pair ij.",
+            "subDefinitions": [],
+            "deepDive": "A Bernoulli random variable representing the edge existence in the bipartite graph of interactions."
+          },
+          {
+            "symbol": "O_{ij}",
+            "definition": "Co-occurrence indicator for species pair ij.",
+            "subDefinitions": [],
+            "deepDive": "Indicates if both species possess a niche space overlap in a specific geographical unit."
+          },
+          {
+            "symbol": "E",
+            "definition": "Vector of environmental variables.",
+            "subDefinitions": [],
+            "deepDive": "Typically includes temperature, precipitation, and other abiotic climate factors that constrain species ranges."
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Grinnellian Niche",
+          "nickname": "Environmental Niche",
+          "definition": "The view that species distribution is determined primarily by abiotic factors.",
+          "origin": "Joseph Grinnell",
+          "relatedTerms": [
+            "Species Distribution Modeling",
+            "Climate Envelope"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "Eltonian Niche",
+          "nickname": "Functional Niche",
+          "definition": "The view that species niches are defined by their functional roles and biotic interactions.",
+          "origin": "Charles Elton",
+          "relatedTerms": [
+            "Interaction Networks",
+            "Trophic Structure"
+          ],
+          "paperUrl": ""
+        },
+        {
+          "term": "SDM",
+          "nickname": "Species Distribution Modeling",
+          "definition": "Statistical frameworks for modeling the relationship between species occurrence and environmental variables.",
+          "origin": "Ecological Statistics",
+          "relatedTerms": [
+            "Biogeography",
+            "MaxEnt"
+          ],
+          "paperUrl": ""
+        }
+      ],
+      "coreIdea": "The paper bridges the gap between Grinnellian (environmental) niche modeling and Eltonian (interaction) network ecology by treating species interaction as a probabilistic event contingent upon co-occurrence, effectively creating an 'interaction distribution model' that formalizes how abiotic filters select for both nodes (species) and edges (interactions) in a biogeographic space.",
+      "achievements": "The authors successfully proposed a novel probabilistic framework that integrates species distribution modeling with interaction network theory. They demonstrated that while environmental factors drive species co-occurrence, interaction outcomes between these co-occurring species remain largely stochastic.",
+      "limitations": "The framework relies on large-scale presence/absence data which is often plagued by detection bias and sampling incompleteness. Furthermore, the current implementation assumes independence of interactions, which may not capture higher-order indirect effects in complex food webs."
+    },
+    {
+      "category": "crossfield",
+      "title": "Benchmarking remote sensing methods to capture plant functional diversity from space",
+      "url": "https://www.semanticscholar.org/paper/fea283484d9541da586d3a8827ced78a1e407cd2",
+      "authors": "Javier Pacheco-Labrador, Ulisse Gomarasca, Daniel E. Pabon-Moreno, Wantong Li, Mirco Migliavacca, Martin Jung, Gregory Duveiller",
+      "year": 2025,
+      "venue": "bioRxiv",
+      "citationCount": 1,
+      "abstract": "",
+      "rationale": "Remote sensing provides the data layers required for trait-based SDMs. This category targets the integration of leaf-level functional traits with broad-scale geospatial observations.",
+      "pdfUrl": "https://www.biorxiv.org/content/biorxiv/early/2025/10/23/2025.10.22.683881.full.pdf",
+      "pdfContext": "--- PAGE 1 ---\nBenchmarking remote sensing methods to capture \nplant functional diversity from space \nJavier Pacheco-Labrador 1, Ulisse Gomarasca 2, Daniel E. Pabon-Moreno 2, Wantong Li 3, Mirco \nMigliavacca4, Martin Jung2, Gregory Duveiller2 \n \n1Environmental Remote Sensing and Spectroscopy Laboratory (SpecLab), Spanish National Research Council \n(CSIC), Madrid, Spain \n2Max Planck Institute for Biogeochemistry, Jena, D-07745, Germany \n3Department of Environmental Science Policy and Management, UC Berkeley, Berkeley, CA, USA \n4European Commission, Joint Research Centre (JRC), Ispra, Italy \nCorrespondence to: Javier Pacheco-Labrador (javier.pacheco@csic.es) \nABSTRACT \nThe development of remote sensing methods to estimate plant functional diversity is limited by \nmismatches between ecology and remote sensing sampling schemes, and the limited representativeness \nof local field campaigns. The Biodiversity Observing System Simulation Experiment (BOSSE) \nprovides a modeling framework for benchmarking new methodologies. We used BOSSE to simulate \n180 different synthetic “Scenes” encompassing a two-year-long time series of plant trait maps and \nimagery of hyperspectral reflectance factors, spectral indices, sun-induced chlorophyll fluorescence, \nland surface temperature, and estimates of plant traits (optical traits). We used these simulations to \nanswer five fundamental, yet unsolved, questions: \nQ1. How should remote sensing characterize functional diversity in large surfaces (sites)?  \nDiversity metric values saturate with the number of pixels involved, hampering comparisons between \nplant traits and remote sensing estimates in large areas. The average value of metrics computed over \nsmall samples should be used instead. \nQ2. Which sources of spectral information (or combinations thereof) can best capture plant \nfunctional diversity at the site scale? Accounting for background effects is the key. Optical traits (remote \n.CC-BY-NC 4.0 International licenseperpetuity. It is made available under a \npreprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in \nThe copyright holder for thisthis version posted October 23, 2025. ; https://doi.org/10.1101/2025.10.22.683881doi: bioRxiv preprint\n\n--- PAGE 2 ---\nsensing estimates of plant traits) are the best estimators for plant functional diversity. Other variables \nsucceed when filtered out of the soil pixels; their combination did not yield additional advantages. \nQ3. How should remote sensing estimates be validated/compared with plant functional diversity \nmeasurements? Leaf area index (LAI) is a better proxy of abundance than the pixel for QRao, but not for \nvariance-based partitioning. It is more sensitive to sample size, but also more resistant to suboptimal \nspatial resolution.  \nQ4. When (in the phenological year) can remote sensing best capture site-scale plant functional \ndiversity? The estimation error decreased with LAI and stabilized at values above 1 m²/m². \nQ5. Which approaches and remote sensing variables are more resistant to the effects of \nsuboptimal spatial resolution? Optical traits, fluorescence, and reflectance factors were the most robust \nvariables. Still, field data resolution needs to be degraded to match the sensor’s resolution. We found a \nrelative spatial resolution threshold of ~30 % (where the pixel is around three times larger than the \nplants).  \nSimulation frameworks like BOSSE enable testing methodologies beyond local contexts and \naddress the current shortage of suitable global datasets, supporting the application and development of \nmethods for assessing plant functional diversity with remote sensing. In the future, BOSSE could \ncontribute to understanding observational results, refining and pre-testing new methodologies, and \nsupporting the development of comparable experimental datasets. \n \nKeywords: Biodiversity Observing System Simulation Experiment; plant functional diversity; remote \nsensing; species abundance; phenology; spatial resolution. \n \n1. INTRODUCTION \nThe development of remote sensing capabilities for studying plant diversity has increased \nsignificantly over the last decade (Torresani et al., 2024). The reasons behind this rise in interest stem \nfrom both the urgent need to develop a global biodiversity monitoring system (Gonzalez et al., 2023; \n.CC-BY-NC 4.0 International licenseperpetuity. It is made available under a \npreprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in \nThe copyright holder for thisthis version posted October 23, 2025. ; https://doi.org/10.1101/2025.10.22.683881doi: bioRxiv preprint\n\n--- PAGE 3 ---\nSkidmore et al., 2015) and advancements in remote sensing technologies and sensors (Ma et al., 2020; \nSkidmore et al., 2021). As in other areas of environmental monitoring and research (e.g., climate change \n(Yang et al., 2013)), remote sensing could potentially play a key role as a provider of continuous and \nsynoptic information for environmental protection, and in this specific case for the conservation of \nbiodiversity (Cavender-Bares et al., 2022; Hansen et al., 2021)  and ecosystem functioning (Abelleira \nMartínez et al., 2016; J. C abello et al., 2018). However, despite the potential capabilities to capture \ndifferent aspects of plant (and other taxa) diversity, contrasting results suggest that unresolved \nmethodological issues limit advances in this field (Torresani et al., 2024). \nThe spectral variation hypothesis posits that the spatial heterogeneity captured by imagers is \nrelated to habitat and thus taxonomic richness (Palmer et al., 2002). Previous works have questioned \nthis underlying hypothesis or its applicability. For example, simulations and experimental data from \nFassnacht et al. (2022) showed that species identity, rather than taxonomic richness, governed spectral \nvariability. Using simulations, Ludwig et al. (2024) refuted the notion that species richness drives \nspectral variability in grasslands and reported a strong dependency on spectral resolution. These works \nconfirmed the results of earlier experiments, which had reported methodological (e.g., spatial \nresolution, metrics, preprocessing, or soil background effects) or contextual limitations (i.e., dependent \non plant type or identity) to find the relationships predicted by the spectral variation hypothesis \n(Badourdine et al., 2023; Rossi et al., 2021a; Van Cleemput et al., 2023; Wang et al., 2018a, 2018b) . \nThe accumulated literature suggests that, beyond the intrinsic limitations to generalizing the spectral \nvariation hypothesis (i.e., different species can be spectrally similar), numerous methodological \nchallenges still hinder the full capability of remote sensing.  \nBeyond taxonomic diversity, remote sensing could capture functional diversity (i.e., the \ndiversity of functional traits) thanks to the physical links between vegetation’s biophysical properties \nand spectral signals (Jetz et al., 2016). Such connections may serve as a means to access phylogenetic \ndiversity (Schweiger et al., 2018). Remote sensing is already a key tool for monitoring vegetation \nproperties across space and time (Homolová et al., 2013), which can be further advanced with the advent \nof new sensors and methods to monitor vegetation (Kattenborn et al., 2021; Zhang et al., 2021) . \n.CC-BY-NC 4.0 International licenseperpetuity. It is made available under a \npreprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in \nThe copyright holder for thisthis version posted October 23, 2025. ; https://doi.org/10.1101/2025.10.22.683881doi: bioRxiv preprint\n\n--- PAGE 4 ---\nHowever, the estimation of plant functional diversity presents particularities and poses new challenges \nfor remote sensing. Theoretical works (i.e., simulations using radiative transfer models) suggest that \nspectral diversity exhibits a strong inherent correlation with the diversity of vegetation properties \n(Pacheco-Labrador et al., 2022). Nevertheless, the same study shows that such relationships are not \ngeneralizable to all methods used to calculate functional diversity, functional diversity metrics (FDMs), \nor sensor features, and highlights gaps between remote sensing and ecology science that need to be \novercome. Several studies have assessed the ability of different sensors and methods to capture plant \nfunctional diversity. The earliest works utilized airborne sensors to map plant functional traits and assess \ntheir diversity. In these works, plant trait measurements were used to build the statistical models \nestimating the trait maps (Asner et al., 2014; Schneider et al., 2017) . Others compared the FDMs \ncomputed from drone or airborne imagery (reflectance factors and sun-induced chlorophyll \nfluorescence) with FMDs calculated from optical traits (remote sensing estimates of plant traits). These \nstudies utilized ground data for validation (Tagliabue et al., 2020) or parameterization of radiative \ntransfer models (Cimoli et al., 2024). Another line of work has empirically linked Sentinel-2 spaceborne \nimaging spectral reflectance factors with plant trait FDMs (Ma et al., 2019) or directly compared them \nwith FDMs computed from reflectance and optical traits with those calculated from field-sampled plant \ntraits (Pacheco-Labrador et al., 2022). However, even in these cases, field data were never sampled for \nvalidating remote sensing estimates of diversity. Worthy efforts in this direction were made by Hauser \net al. (2021), who matched 3-by-3 sampling plot grids with Sentinel-2 pixels. Nonetheless, these remote \nsensing-dedicated approaches multiply the field sampling efforts, which must be species-based to be \ncomparable with ecological studies. In addition, comparing the results of different studies is complex \ndue to: 1) the numerous and non-overlapping varieties of sensors, sampling designs, diversity metrics, \nplant traits, and vegetation types encompassed in each research work; and 2) the limited spatial extents, \nsince most often they happen in a single site. As a consequence, it is not possible to determine the \nlimitations of each methodology and whether these can be applied globally. Furthermore, the gap \nbetween the variables often sampled by ecologists and remote sensing scientists (e.g., concentrations \nvs. contents) and the different effects these have on the spectral signals (Kattenborn et al., 2019) adds \nanother layer of uncertainty to the exploitation of ecological datasets. Thus, while every study is \n.CC-BY-NC 4.0 International licenseperpetuity. It is made available under a \npreprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in \nThe copyright holder for thisthis version posted October 23, 2025. ; https://doi.org/10.1101/2025.10.22.683881doi: bioRxiv preprint\n\n--- PAGE 38 ---\nPacheco-Labrador, Javier, Weber, U., Li, W., Gomarasca, U., Pabon-Moreno, D.E., Migliavacca, M., \nMartin, J., Duveiller, G., 2025. The Biodiversity Observing System Simulation Experiment \n(BOSSE v1.0) ERA5-Land Meteorological time series. Zenodo. \nPalmer, M.W., Earls, P.G., Hoagland, B.W., White, P.S., Wohlgemuth, T., 2002. Quantitative tools for \nperfecting species lists. Environmetrics 13, 121–137. https://doi.org/10.1002/env.516 \nPandey, P.C., Srivastava, P.K., Chetri, T., Choudhary, B.K., Kumar, P., 2019. Forest biomass estimation \nusing remote sensing and field inventory: a case study of Tripura, India. Environmental \nMonitoring and Assessment 191, 593. https://doi.org/10.1007/s10661-019-7730-7 \nRicotta, C., Pavoine, S., Bacaro, G., Acosta, A.T.R., 2012. Functional rarefaction for species abundance \ndata. Methods in Ecology and Evolution 3, 519–525. https://doi.org/10.1111/j.2041-\n210X.2011.00178.x \nRocchini, D., Marcantonio, M., Ricott",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "The BOSSE framework bridges the gap between ecological trait-based diversity metrics and remote sensing observations by simulating controlled synthetic scenes, allowing for the isolation of specific variables (spatial resolution, background effects, phenology) that typically confound empirical field data.",
+        "beforeState": "Existing literature on remote sensing of functional diversity was hindered by highly variable, non-comparable field-based studies lacking standardized validation data and consistent sampling protocols.",
+        "afterState": "A simulation-based benchmarking framework (BOSSE) allows for testing remote sensing methodologies across controlled, replicable scenarios, establishing thresholds for spatial resolution and identifying optimal vegetation traits for diversity monitoring.",
+        "researchQuestion": "How do various remote sensing methodologies, spectral features, and spatial resolutions perform in characterizing plant functional diversity, and what are the optimal conditions for these estimations?",
+        "studySetup": "The authors utilized the Biodiversity Observing System Simulation Experiment (BOSSE) to generate 180 synthetic scenes, covering a two-year time series that included hyperspectral reflectance, SIF, land surface temperature, and derived optical plant traits, followed by comparative analysis of functional diversity metrics (FDMs).",
+        "theoreticalSignificance": "The study provides a quantitative foundation for the spectral variation hypothesis by demonstrating that spectral signals are primarily governed by species identity and biophysical traits rather than just taxonomic richness, and establishes a relative spatial resolution threshold of ~30%. "
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "Remote sensing of plant functional diversity is most reliably achieved using estimated optical plant traits, provided that soil background effects are mitigated and spatial resolution is maintained within a 30% relative threshold of plant size.",
+        "metrics": [
+          {
+            "category": "Experimental Setup",
+            "label": "Synthetic Scenarios",
+            "rawValue": "180",
+            "explanation": "Total number of unique synthetic scenes simulated in the BOSSE framework for benchmarking."
+          },
+          {
+            "category": "Threshold Metrics",
+            "label": "Relative Spatial Resolution Threshold",
+            "rawValue": "~30%",
+            "explanation": "The point at which pixel size relative to plant size significantly compromises the estimation of functional diversity."
+          },
+          {
+            "category": "Performance Metrics",
+            "label": "Optimal LAI threshold",
+            "rawValue": "> 1 m²/m²",
+            "explanation": "The leaf area index range where estimation error stabilizes, indicating the best phenological timing for diversity capture."
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "BOSSE",
+          "nickname": "Biodiversity Observing System Simulation Experiment",
+          "definition": "A modeling framework for simulating multi-sensor remote sensing data over synthetic plant landscapes.",
+          "origin": "Pacheco-Labrador et al. (2025)",
+          "relatedTerms": [
+            "Functional Diversity",
+            "Radiative Transfer Models",
+            "Spectral Variation Hypothesis"
+          ]
+        },
+        {
+          "term": "Spectral Variation Hypothesis",
+          "nickname": "SVH",
+          "definition": "The proposition that spatial spectral heterogeneity in remote sensing imagery correlates with habitat complexity and species richness.",
+          "origin": "Palmer et al. (2002)",
+          "relatedTerms": [
+            "Plant Functional Diversity",
+            "Hyperspectral Imagery"
+          ]
+        },
+        {
+          "term": "Leaf Area Index",
+          "nickname": "LAI",
+          "definition": "A dimensionless quantity that characterizes plant canopies, defined as the one-sided green leaf area per unit ground surface area.",
+          "origin": "General Remote Sensing",
+          "relatedTerms": [
+            "Biophysical Properties",
+            "Phenology"
+          ]
+        }
+      ],
+      "coreIdea": "The BOSSE framework bridges the gap between ecological trait-based diversity metrics and remote sensing observations by simulating controlled synthetic scenes, allowing for the isolation of specific variables (spatial resolution, background effects, phenology) that typically confound empirical field data.",
+      "achievements": "The paper establishes the BOSSE simulation framework as a standardized benchmark to address the lack of consistent field-validated datasets in remote sensing of biodiversity. It identifies key operational requirements, including the necessity of filtering soil background and maintaining spatial resolution within a 30% relative scale.",
+      "limitations": "As a simulation-based study, the findings rely on the inherent fidelity of the radiative transfer models used to populate the BOSSE scenes. The results might require further calibration for unique ecosystems not represented in the synthetic parameter space."
+    },
+    {
+      "category": "novel",
+      "title": "Eco-ISEA3H, a machine learning ready spatial database for ecometric and species distribution modeling",
+      "url": "https://www.semanticscholar.org/paper/cc89e36f9a8121c5fcc721e0781f577a0ec9037d",
+      "authors": "Michael F. Mechenich, Indrė Žliobaitė",
+      "year": 2023,
+      "venue": "Scientific Data",
+      "citationCount": 24,
+      "abstract": "",
+      "rationale": "Modern SDMs are moving beyond simple bioclimatic envelopes by incorporating trait-environment relationships as latent variables or constraints in predictive models.",
+      "pdfUrl": "https://www.nature.com/articles/s41597-023-01966-x.pdf",
+      "pdfContext": "--- PAGE 1 ---\n1Scientific  Data |           (2023) 10:77  | https://doi.org/10.1038/s41597-023-01966-x\nwww.nature.com/scientificdata\nEco-ISEA3H, a machine learning \nready spatial database for \necometric and species distribution \nmodeling\nMichael F. Mechenich  1 ✉ & Indrė Žliobaitė  1,2\nWe present the Eco-ISEA3H database, a compilation of global spatial data characterizing climate, \ngeology, land cover, physical and human geography, and the geographic ranges of nearly 900 large \nmammalian species. The data are tailored for machine learning (ML)-based ecological modeling, and \nare intended primarily for continental- to global-scale ecometric and species distribution modeling. \nSuch models are trained on present-day data and applied to the geologic past, or to future scenarios \nof climatic and environmental change. Model training requires integrated global datasets, describing \nspecies’ occurrence and environment via consistent observational units. The Eco-ISEA3H database \nincorporates data from 17 sources, and includes 3,033 variables. The database is built on the \nIcosahedral Snyder Equal Area (ISEA) aperture 3 hexagonal (3H) discrete global grid system (DGGS), \nwhich partitions the Earth’s surface into equal-area hexagonal cells. Source data were incorporated \nat six nested ISEA3H resolutions, using scripts developed and made available here. We demonstrate \nthe utility of the database in a case study analyzing the bioclimatic envelopes of ten large, widely \ndistributed mammalian species.\nBackground & Summary\nHuman activity is rapidly altering the Earth system 1, with grave consequences for biotic and human commu -\nnities2. In the Anthropocene epoch, it is increasingly important to understand the complex interdependencies \nof environment and species distributions, and to predict ecosystem response to changing conditions. In this \ncontext, we increasingly look to assess and describe the condition of the global Earth system, and to model the \nrelationships among system components in normal as well as exceptional circumstances.\nEcometric modeling\n3–5 quantifies relationships between the functional traits of communities of organisms \nand their environments. This quantitative modeling approach relies on understanding certain phenotypic traits \nas an adaptive response to environmental conditions, an understanding also used qualitatively to reconstruct \npast climates\n6,7. Classical statistical and state-of-the-art machine learning techniques are commonly utilized. \nEcometric models are trained on present species distribution and environmental datasets; studies variably focus \non prediction in the present\n8–13, or on quantitatively reconstructing climatic and environmental conditions of \nthe past14–18, including the context of early human evolution 19,20. However, in all cases ecometric models are \nintended to be transferable to the geologic past, by utilizing traits which persist in faunal communities for 20 to \n30 million years, and which preserve in the fossil record.\nMethods of ecometric modeling closely relate to those of species distribution modeling (SDM)\n21–24, also \nknown as environmental or ecological niche modeling. Species distribution modeling is a general term referring \nto computational modeling for quantifying associations between organisms and their environments. Classical \nspecies distribution modeling aims at predicting the probability of species occurrence as a function of environ\n-\nmental conditions. While species distribution modeling has traditionally focused on local or regional scales, \nanalyses at increasingly large scales are gaining popularity. Machine learning methods are becoming the leading \ntools for such analyses\n25–28.\n1Department of Computer Science, University of Helsinki, 00014, Helsinki, Finland. 2Department of Geosciences and \nGeography, University of Helsinki, 00014, Helsinki, Finland. ✉e-mail: michael.mechenich@helsinki.fi\nDATA DEScr IpTor\nopEN\n\n--- PAGE 2 ---\n2Scientific  Data |           (2023) 10:77  | https://doi.org/10.1038/s41597-023-01966-x\nwww.nature.com/scientificdatawww.nature.com/scientificdata/\nDeveloping ecometric and species distribution models requires similar large-scale, integrated datasets, \ndescribing species’ occurrences and traits, and the environmental context of those occurrences. The results of \nmany global mapping efforts are already available; examples include the Map of Life29, describing species’ geo-\ngraphic distributions, and WorldClim30,31, describing climatic averages and extremes. These datasets provide \nessential variables for monitoring changes in climate 32 and biodiversity33. However, spatial datasets are often \npublished in differing coordinate reference systems, spatial resolutions, geographic data models, and file for -\nmats. Before proceeding to ecometric or species distribution modeling, an interested researcher must invest \nconsiderable effort in integrating these datasets, mapping them to shared spatial units of analysis. Many eco\n-\nmetric and SDM studies require the same global datasets and the same data preprocessing, even if the ultimate \nmodeling goals vary considerably.\nOur aim was to develop a unified spatial database, built on consistent spatial units of observation and analy\n-\nsis, which may be used directly in continental- to global-scale ecometric and species distribution modeling. To \nthis end, we utilized the Icosahedral Snyder Equal Area (ISEA) aperture 3 hexagonal (3H) discrete global grid \nsystem (DGGS)\n34. A DGGS is a hierarchical system by which the Earth’s surface is divided into observational \nunits: it is discrete , in that it discretizes the surface into areal cells; it is global  in spatial scope; and it is a grid \nsystem, in that it defines regular grids of cells at a number of spatial resolutions 35. Finally, it is hierarchical, in \nthat a systematic relationship exists between grid cells at one resolution, and those at the next coarser or finer \nresolution.\nDGGSs are an essential component of the Digital Earth (DE) vision; such systems provide a regular, system\n-\natic spatial framework with which we may integrate the rapidly growing, multiple-source compendium of geo-\nspatial data available today36. We selected the ISEA3H DGGS because it partitions the Earth’s surface into regular \ngrids of equal-area hexagonal cells. These observational units have uniform topology with neighbors, each shar-\ning an edge with six adjacent cells, and are maximally compact, minimizing within-unit variability in expectation.\nThe resulting Eco-ISEA3H database 37 includes the geographic distributions of extant and recently extinct \nlarge mammalian species in the orders Artiodactyla, Perissodactyla, Primates, and Proboscidea, as well as the \nenvironmental context of their presence and absence, characterized by climate, geology, land cover, and physi\n-\ncal and human geography. Source datasets are sampled and summarized by the hexagonal cells of the ISEA3H \nDGGS, at six nested levels of resolution.\nWe intended this to be a resource for students and researchers in the life and computational sciences, to be \nused without advanced knowledge of geospatial data processing required. Component datasets are preprocessed \nand provided in a plain-text, tabular format, allowing interested researchers to focus attention on computational \nanalysis and modeling. The database may also be used as a benchmark dataset for systematic comparison of \ndiffering computational modeling approaches. Finally, we include scripts for mapping source spatial datasets to \nthe ISEA3H grid system.\nMethods\nOur objective in developing the Eco-ISEA3H database 37 was to compile a coordinated, global set of tabular \ndata, characterizing environmental conditions and the geographic distributions of large mammalian species. \nThe database was built on the ISEA3H DGGS, a multi-resolution system of global grids, each grid dividing the \nEarth’s surface into discrete, equal-area hexagonal cells. These cells constitute areal units of observation , uni\n-\nformly resampling data provided in different coordinate reference systems, spatial resolutions, geographic data \nmodels, and file formats. We included data at six consecutive ISEA3H resolutions, in which cell centroid spacing \nranges from 29 kilometers to approximately 450 kilometers.\nEco-ISEA3H themes and variables were derived from 17 geospatial data sources, and represent 3,033 features \nto be used for ML-based predictive modeling. Source datasets were published in raster or vector format, data mod\n-\nels built on fundamentally different representations of spatial phenomena. Raster datasets comprise regular arrays \nof pixels, each pixel holding a value, while vector datasets comprise point, line, and polygon features, each feature \ndefined by one or more (x, y) coordinate pairs and attributed with one or more values. Our task was to integrate \nthese disparate source datasets, resampling and summarizing the values of raster pixels and vector features via \nthe discrete, equal-area cells of the ISEA3H global grid system. The hexagonal cells on which the Eco-ISEA3H \ndatabase\n37 is built thus serve as unifying observational units for SDM and ecometric analysis and modeling.\nFrom the statistical and ML perspective, each areal observational unit is characterized by (1) a set of envi -\nronmental variables, representing climatic conditions, soil and near-surface lithology, land cover, and physical \ngeography; and (2) a set of occurrence variables, representing the present and estimated natural distributions of \nlarge mammalian species. Predictive modeling tasks for statistical and ML modeling can be formulated in two \ndirections: predicting species’ occurrences as a function of climatic and other environmental conditions (as in \nSDM studies), or predicting climatic and other environmental conditions as a function of species’ occurrences \nand functional traits (as in ecometric studies).\nSpatial units of observation. To study continuous spatial phenomena over a region of interest, it is often \nnecessary to divide the region into a number of discrete, areal observational units, which may be used in statis-\ntical summaries and/or modeling. Machine learning methods for ecometric and species distribution modeling \nrequire discrete observational units, each characterized by two sets of variables, one describing environmental \nconditions, the other species’ geographic distributions. A major question in data representation concerns the \nform of these units; defining discrete spatial units of observation constitutes a well-known problem in geography, \ntermed the modifiable areal unit problem (MAUP)\n38. As we change the size of proposed observational units, or \nchange the boundaries between units while holding unit areas constant, measures of interest within these units - \nand derived summary statistics and model parameters - may differ; these are termed the “scale” and “zone” effects, \nrespectively\n38.\n\n--- PAGE 3 ---\n3Scientific  Data |           (2023) 10:77  | https://doi.org/10.1038/s41597-023-01966-x\nwww.nature.com/scientificdatawww.nature.com/scientificdata/\nOur objective in utilizing the ISEA3H DGGS34 was to implement a robust spatial division of the Earth’s sur-\nface. The grid cells of the DGGS discretize the Earth’s sphere, forming, at each DGGS resolution, a global set of \nareal observational units with which to sample and summarize source datasets. To be optimally effective in the \nobservation, simulation, and visualization of spatial phenomena, such a grid must meet certain structural crite\n-\nria. We propose, modifying the Goodchild Criteria39, the DGGS grid must contain (1) contiguous, (2) equivalent \nobservational units, (3) minimizing intra-unit variability, (4) having uniform topology with neighboring units, \nand (5) being visually effective, facilitating interpretation and communication. Each criterion will be discussed \nin detail; further, we will argue the ISEA3H DGGS selected for this study",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The Eco-ISEA3H database solves the Modifiable Areal Unit Problem (MAUP) in global-scale ecological modeling by providing a unified, multi-resolution hexagonal spatial grid (ISEA3H) that serves as a consistent observational framework, enabling researchers to integrate heterogeneous geospatial data—ranging from raster climate maps to vector species occurrence data—into a standardized format ready for machine learning pipelines.",
+        "beforeState": "Researchers faced significant friction due to the lack of interoperability between climate and biodiversity datasets, which exist in disparate coordinate reference systems, resolutions, and geographic formats, requiring labor-intensive manual alignment for every new modeling study.",
+        "afterState": "Researchers gain access to a ready-to-use, harmonized database of 3,033 variables sampled across six nested ISEA3H grid resolutions, drastically reducing preprocessing overhead and providing a standardized foundation for comparing predictive ML models.",
+        "strategyUsed": "contrast",
+        "studySetup": "The database integrates 17 source datasets representing climate, geology, land cover, and human/physical geography, mapped to a discrete global grid system (DGGS) using ISEA3H apertures, yielding hexagonal cells that ensure equal-area representation and uniform topology across the globe.",
+        "theoreticalSignificance": "By establishing a consistent, hierarchy-aware spatial tessellation, the database mitigates the scale and zone effects inherent in MAUP, allowing for rigorous multi-scale evaluation of ecometric model parameters and species bioclimatic envelopes over deep time or future projections."
+      },
+      "zoomData": {
+        "rawFormula": "A_{h} = \\frac{A_{tot}}{N_{res}}",
+        "translation": "The total surface area of the Earth is divided into N discrete equal-area cells at a given resolution, where each cell area is defined by the global surface constant divided by the total number of cells.",
+        "terms": [
+          {
+            "symbol": "A_{tot}",
+            "definition": "The total surface area of the Earth, which remains invariant across grid resolutions.",
+            "subDefinitions": [
+              {
+                "term": "A",
+                "definition": "Surface area parameter."
+              },
+              {
+                "term": "tot",
+                "definition": "Subscript denoting the totality of the Earth's surface."
+              }
+            ]
+          },
+          {
+            "symbol": "N_{res}",
+            "definition": "The total number of hexagonal cells at a specific hierarchical resolution level.",
+            "subDefinitions": [
+              {
+                "term": "N",
+                "definition": "Total count of units."
+              },
+              {
+                "term": "res",
+                "definition": "Subscript representing the specific resolution depth in the ISEA hierarchy."
+              }
+            ]
+          },
+          {
+            "symbol": "A_{h}",
+            "definition": "The fixed equal-area value assigned to each hexagonal cell in the DGGS.",
+            "subDefinitions": [
+              {
+                "term": "A",
+                "definition": "Area of an individual unit."
+              },
+              {
+                "term": "h",
+                "definition": "Subscript identifying the hexagonal cell geometry."
+              }
+            ]
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [
+          {
+            "stepLabel": "Data Aggregation and Projection",
+            "explanation": "Raster and vector data are resampled into the ISEA3H grid by spatial intersection with hexagonal polygons at specific resolution levels."
+          },
+          {
+            "stepLabel": "Feature Normalization",
+            "explanation": "Variables are aggregated across 3,033 features to align disparate coordinate systems into the discrete hexagonal framework."
+          },
+          {
+            "stepLabel": "Hierarchical Consistency Check",
+            "explanation": "Verification that cells maintain parent-child relationships across nested resolutions, ensuring structural topological integrity."
+          }
+        ],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Modifiable Areal Unit Problem",
+          "nickname": "MAUP",
+          "definition": "A statistical bias occurring when point-based measures of spatial phenomena are aggregated into distinct areal units, affecting results based on boundary or scale changes.",
+          "origin": "Geography/Spatial Statistics",
+          "relatedTerms": [
+            "Scale effect",
+            "Zone effect"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41597-023-01966-x"
+        },
+        {
+          "term": "Discrete Global Grid System",
+          "nickname": "DGGS",
+          "definition": "A spatial reference system that partitions the Earth's surface into a hierarchical sequence of regular cells.",
+          "origin": "Geospatial Science",
+          "relatedTerms": [
+            "ISEA3H",
+            "Digital Earth"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41597-023-01966-x"
+        },
+        {
+          "term": "Ecometric Modeling",
+          "nickname": "Ecometrics",
+          "definition": "A quantitative approach to modeling the relationship between functional traits of organism communities and environmental variables.",
+          "origin": "Paleobiology/Ecology",
+          "relatedTerms": [
+            "Species Distribution Modeling",
+            "Bioclimatic envelopes"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41597-023-01966-x"
+        }
+      ],
+      "coreIdea": "The Eco-ISEA3H database solves the Modifiable Areal Unit Problem (MAUP) in global-scale ecological modeling by providing a unified, multi-resolution hexagonal spatial grid (ISEA3H) that serves as a consistent observational framework, enabling researchers to integrate heterogeneous geospatial data—ranging from raster climate maps to vector species occurrence data—into a standardized format ready for machine learning pipelines.",
+      "achievements": "Developed the Eco-ISEA3H database, a machine learning-ready global spatial dataset covering 3,033 environmental and species occurrence variables. Successfully implemented a hierarchical hexagonal grid system that facilitates multi-scale analysis for both modern and fossil-based ecological modeling.",
+      "limitations": "The database is limited to large mammalian species (Artiodactyla, Perissodactyla, Primates, and Proboscidea), potentially excluding broader biodiversity applications. As a static compilation, it requires future updates to incorporate dynamic environmental changes and newly available species distribution data."
+    },
+    {
+      "category": "surprise",
+      "title": "Trait-based approach confirms the importance of propagule limitation and assembly rules in old-field restoration",
+      "url": "https://www.semanticscholar.org/paper/d29ca64a8d5dbae979d4abc50f5b00ad579941a6",
+      "authors": "Melinda Halassy, Zoltán Botta-Dukát, Anikó Csecserits, Katalin Szitár, Katalin Török",
+      "year": 2019,
+      "venue": "Restoration Ecology",
+      "citationCount": 24,
+      "abstract": "",
+      "rationale": "Methods from community assembly theory often use similar matrix-factorization and optimization techniques to predict species composition based on trait overlaps, offering a different mathematical perspective on distribution.",
+      "pdfUrl": "http://real.mtak.hu/94381/1/HalassyM_etal_RE_ms.pdf",
+      "pdfContext": "--- PAGE 1 ---\n1 \nThis manuscript is contextually identical with the following published paper: 1 \nMelinda Halassy1,*, Zoltán Botta-Dukát1,2, Anikó Csecserits1, Katalin Szitár1, Katalin Török1 2 \n2019. Trait-based approach confirms the importance of propagule limitation and assembly 3 \nrules in old-field restoration 4 \nRestoration Ecology Restoration Ecology 27:840-849. 5 \nThe original published pdf available in this website:   6 \nhttps://onlinelibrary.wiley.com/doi/abs/10.1111/rec.12929 7 \n 8 \n 9 \nTrait-based approach confirms the importance of propagule limitation and assembly rules in 10 \nold-field restoration 11 \nMelinda Halassy1,*, Zoltán Botta-Dukát1,2, Anikó Csecserits1, Katalin Szitár1, Katalin Török1 12 \n1MTA Centre for Ecological Research, Institute of Ecology and Botany, Alkotmány u. 2 -4. 13 \nVácrátót, 2163 Hungary 14 \n2MTA Centre for Ecological Research, GINOP Sustainable Ecosystems Group, 8237 Tihany, 15 \nKlebelsberg Kuno u. 3. 16 \n* Address correspondence to M. Halassy, E-mail: halassy.melinda@okologia.mta.hu 17 \n 18 \nRunning head: Propagule limitation and assembly rules in restoration  19 \n 20 \nAuthors' Contributions 21 \nKT, MH conceived and designed the field experiment; KSZ , MH collected field data; ACS , 48 \nMH collected trait data and computed statistical analyses based on the scripts and advices 49\n\n--- PAGE 2 ---\n2 \nprovided by ZBD; MH wrote the manuscript. All authors contributed critically to the drafts 50 \nand gave final approval for publication. 51 \nAbstract 52 \n 53 \nCommunity assembly th eory is suggested as a guiding principle  for ecological restoration to 54 \nhelp understand the mechanisms that structure biological communities and identify where 55 \nrestoration interventions are needed . We stud ied three hypotheses related to propagule 56 \nlimitation, stress -dominance and limiting similarity concepts in community assembly in a 57 \nrestoration field experiment with a trait-based null model approach. The experiment aimed to 58 \nassist the recovery of sand grassland on former arable land in the Kiskunság, Pannon ian 59 \nbiogeographic region, Europe. Treatments included initial seeding of five grassland species , 60 \ncarbon amendment, low intensity mowing and combinations in 1 m by 1 m plots in three old-61 \nfields from 2003 to 2008. The distribution of ten individual plant traits was compared to the 62 \nnull model and the effect of time and treatments were tested with linear mixed effect models . 63 \nInitial seeding had the most visible impact on species and trait composition confirming 64 \npropagule limitation in grassland recovery. Red ucing nutrient availability through carbon 65 \namendment strengthened trait convergence for length of flowering as expected based on the 66 \nstress-dominance hypothesis. Mowing changed trait divergence to convergence for plant 67 \nheight with a strengthening impact with time, supporting our hypothesis of increasing 68 \ndominance of  limiting similarity  with time . Our results support the idea that community 69 \nassembly is simultaneously influenced by propagule limitation  and multiple trait -based 70 \nprocesses that act through different traits. The limited impact of manipulating environmental 71 \nfiltering and limiting similarity compared to seeding, however, supports the view that only 72 \ntargeting the dispersal and environmental filters in parallel would improve restoration 73 \noutcome. 74\n\n--- PAGE 3 ---\n3 \n 75 \nKey-words: carbon amendment, grassland restoration, limiting similarity, mowing, plant 76 \ntraits, seeding  77\n\n--- PAGE 4 ---\n4 \nImplication for Practice 78 \n 79 \nSeeding of a limited number and amount of well-selected species can strongly enhance 80 \ngrassland restoration on old-fields both in terms of species and trait composition. 81 \nThe dominant process in early succession is environmental filtering, so early restorative 82 \ninterventions should focus on this filter to accelerate the establishment of target ecosystems. 83 \nCarbon amendment can strengthen environmental filtering and help the establishment of 84 \nspecies with stress-adapted traits. 85 \nMowing strengthens environmental filtering in early succession and mitigates competitive 86 \nexclusion later in succession.  87 \nAs community assembly is simultaneously influenced by propagule limitation, environmental 88 \nfiltering and limiting similarity in old-field restoration, targeting the dispersal, abiotic and 89 \nbiotic filters in parallel would improve restoration outcome. 90 \n  91\n\n--- PAGE 34 ---\n34 \nFigure 5.  705 \n 706 \n 707 \n 708 \n709 \n* \n* \n* *\n\n--- PAGE 35 ---\n35 \nSupporting information 710 \nAdditional Supporting Information may be found in the online version of this article: 730 \n 731 \nTable S1. Comparison of traits between seeded and non-seeded species.  732 \nTable S2. Summary of GLMM analyses. 733 \nFig. S1. Changes in cover of seeded species. 734 \nFig. S2. Changes of trait dispersion with seeding. 735 \nFig. S3. Changes of trait dispersion with carbon amendment. 736 \nFig. S4. Changes of trait dispersion with mowing. 737 \nFig. S5. Changes of trait dispersion with time and all treatments. 738 \n 739",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "Community assembly in degraded ecosystems is a multifaceted process governed by the interplay of dispersal constraints (propagule limitation), abiotic environmental filters (stress-dominance), and biotic interactions (limiting similarity), which can be disentangled by evaluating trait distributions against null models.",
+        "beforeState": "Restoration ecology often relied on species-count metrics without explicitly identifying the underlying ecological assembly mechanisms (dispersal, filtering, or competition) driving community recovery on post-arable land.",
+        "afterState": "The study provides a quantitative framework confirming that restoration interventions act selectively on specific plant traits, validating that seeding primarily addresses propagule limitation, while carbon amendment and mowing reinforce environmental filtering and competitive dynamics respectively.",
+        "researchQuestion": "To what extent do propagule limitation, environmental filtering, and limiting similarity govern the assembly of sand grassland communities on former arable land, and how do specific restoration interventions (seeding, carbon amendment, mowing) modify these processes?",
+        "studySetup": "A field experiment in the Kiskunság region (2003–2008) utilizing a 1m x 1m randomized block design in three old-fields. Treatments included initial seeding, carbon amendment (to reduce nitrogen), low-intensity mowing, and their combinations. Researchers monitored ten plant traits and compared observed community trait distributions against null models to determine whether assembly was random, convergent (filtering), or divergent (limiting similarity).",
+        "theoreticalSignificance": "By linking trait-based null models to experimental interventions, the paper bridges abstract community assembly theory with actionable restoration management practices, demonstrating that single-intervention strategies are often insufficient to address the multiple filters controlling succession."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The study confirms that community assembly is simultaneously driven by dispersal constraints and multiple trait-based filters, necessitating parallel interventions for effective old-field grassland restoration.",
+        "metrics": [
+          {
+            "category": "Intervention Impact",
+            "label": "Effect of Initial Seeding",
+            "rawValue": "Strongest Impact",
+            "explanation": "Initial seeding had the most visible impact on species and trait composition across experimental plots."
+          },
+          {
+            "category": "Ecological Process",
+            "label": "Carbon Amendment Effect",
+            "rawValue": "Trait Convergence",
+            "explanation": "Carbon amendment reduced nutrient availability, leading to trait convergence in length of flowering, supporting the stress-dominance hypothesis."
+          },
+          {
+            "category": "Ecological Process",
+            "label": "Mowing Impact",
+            "rawValue": "Increased Trait Divergence/Convergence",
+            "explanation": "Mowing shifted plant height trait distributions toward convergence over time, indicating the increasing influence of limiting similarity."
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Propagule limitation",
+          "nickname": "Dispersal filter",
+          "definition": "The failure of species to colonize suitable habitats due to lack of seed input or dispersal barriers.",
+          "origin": "Community assembly theory",
+          "relatedTerms": [
+            "Dispersal limitation",
+            "Colonization constraint"
+          ],
+          "paperUrl": "https://onlinelibrary.wiley.com/doi/abs/10.1111/rec.12929"
+        },
+        {
+          "term": "Environmental filtering",
+          "nickname": "Abiotic filter",
+          "definition": "The process where abiotic conditions restrict the set of species that can survive in a given environment.",
+          "origin": "Community assembly theory",
+          "relatedTerms": [
+            "Stress-dominance",
+            "Abiotic constraints"
+          ],
+          "paperUrl": "https://onlinelibrary.wiley.com/doi/abs/10.1111/rec.12929"
+        },
+        {
+          "term": "Limiting similarity",
+          "nickname": "Biotic exclusion",
+          "definition": "The hypothesis that species must differ sufficiently in their traits to coexist and minimize competitive exclusion.",
+          "origin": "MacArthur and Levins (1967)",
+          "relatedTerms": [
+            "Niche partitioning",
+            "Competitive exclusion"
+          ],
+          "paperUrl": "https://onlinelibrary.wiley.com/doi/abs/10.1111/rec.12929"
+        }
+      ],
+      "coreIdea": "Community assembly in degraded ecosystems is a multifaceted process governed by the interplay of dispersal constraints (propagule limitation), abiotic environmental filters (stress-dominance), and biotic interactions (limiting similarity), which can be disentangled by evaluating trait distributions against null models.",
+      "achievements": "The study successfully demonstrates how trait-based null models can quantify the relative influence of different assembly processes in restoration. It provides empirical evidence that targeting only one filter is often insufficient for ecosystem recovery.",
+      "limitations": "The study is limited to a specific geographic context (Pannonian sand grasslands) and a 5-year duration, which may not capture the full successional trajectory. The reliance on a limited set of ten plant traits might not account for all functional dimensions driving community assembly."
+    },
+    {
+      "category": "wildcard",
+      "title": "Eco-Evolutionary Dynamics of Trait-Structured, Sexually Reproducing Interacting Populations with Time-Dependent Birth and Mortality Rates",
+      "url": "https://www.semanticscholar.org/paper/3ff623d5d6674be48b57ab009f1333fb3b318adf",
+      "authors": "Manh Hong Duong, Fabian Spill, Blaine Van Rensburg",
+      "year": 2025,
+      "venue": "Journal of Dynamics and Differential Equations",
+      "citationCount": 1,
+      "abstract": "",
+      "rationale": "Ecometrics represents an under-explored angle of SDM where geological time-series data are used to calibrate trait-environment relationships, offering a unique validation dataset.",
+      "pdfUrl": "https://link.springer.com/content/pdf/10.1007/s10884-026-10482-6.pdf",
+      "pdfContext": "--- PAGE 1 ---\nJournal of Dynamics and Differential Equations\nhttps://doi.org/10.1007/s10884-026-10482-6\nEco-Evolutionary Dynamics of Trait-Structured, Sexually\nReproducing Interacting Populations with Time-Dependent\nBirth and Mortality Rates\nManh Hong Duong 1 · Fabian Spill 1 · Blaine Van Rensburg 1\nReceived: 23 June 2025 / Revised: 6 December 2025 / Accepted: 1 January 2026\n© The Author(s) 2026\nAbstract\nThe coupling between evolutionary and ecological changes (eco-evolutionary dynamics) has\nbeen shown to be relevant among diverse species, and is also of interest outside of ecology,\ni.e. in cancer evolution. These dynamics play an important role in determining survival in\nresponse to climate change, motivating the need for mathematical models to capture their\ncomplex interplay. Models incorporating eco-evolutionary dynamics often sacriﬁce analyti-\ncal tractability to capture the complexity of real systems, do not explicitly consider the effect\nof population heterogeneity, or focus on long-term behaviour. In order to capture population\nheterogeneity, both transient, and long-term dynamics, while retaining tractability, we gener-\nalise a moment-based method applicable in the regime of small segregational variance to the\ncase of time-dependent mortality and birth. These results are applied to a predator-prey model,\nwhere ecological parameters such as the contact rate between species are trait-structured. The\ntrait-distribution of the prey species is shown to be approximately Gaussian with constant\nvariance centered on the mean trait, which is asymptotically governed by an autonomous\nODE. In this way, we make explicit the impact of eco-evolutionary dynamics on the transient\nbehaviour and long-term fate of the prey species.\nKeywords PDEs · Integro-differential equation · Inﬁnitesimal model · Moments ·\nEco-evolutionary dynamics\nB Blaine V an Rensburg\nbxv114@alumni.bham.ac.uk\nManh Duong\nh.duong@bham.ac.uk\nFabian Spill\nf.spill@bham.ac.uk\n1 School of Mathematics, University of Birmingham, Birmingham, United Kingdom\n123\n\n--- PAGE 2 ---\nJournal of Dynamics and Differential Equations\n1 Introduction\n1.1 Background on Eco-Evolutionary Dynamics\nPredictive studies on the response of biodiversity to climate change are important to inform\nscientists and policy-makers of risks to biodiversity and possible interventions [ 1]. Predic-\ntion is complicated since the response of a given species to a changing environment depends\non intraspeciﬁc variation (phenotype heterogeneity) [ 2–4], as well as complex interactions\nbetween other species, and the environment more generally (see [ 5]). Complicating mat-\nters is the increasing evidence of coupling between evolutionary and ecological changes,\neco-evolutionary dynamics (reviewed in [ 6–10]). The eco-evolutionary perspective is also\nvaluable in informing our approach to cancer therapies [ 11].\nMathematical models help illuminate the impacts of eco-evolutionary dynamics. Speciﬁ-\ncally, they have predicted that the long-term fate of predator and prey species are impacted\nby the rate at which evolutionary processes occur [ 12, 13], and that host-parasite dynam-\nics are qualitatively altered when bi-directional feedback between ecology and evolution is\nspeciﬁcally included [ 14, 15], i.e. cyclic dynamics emerge due to evolution. However, these\nmodels do not explicitly include the processes that maintain variance on the population, such\nas mutation. The limiting solution as mutation rate approaches 0 for selection-mutation mod-\nels may be qualitatively different than the solution with zero mutation rate (see [ 16]f o ra n\nexample), so it is important to determine the behaviour of models for small, but non-zero,\npopulation heterogeneity\nIntegro-differential equations provide a mathematical framework to model natural\nselection in phenotypically heterogeneous populations, and have tremendous utility in under-\nstanding how a diverse range of factors affect evolution, such as time or space heterogeneity\n[17–20], the competition between populations exhibiting different dispersal rates [ 21, 22],\nand the impact of phenotypic heterogeneity on the response of cancers to therapy [ 23–25].\nHowever, these models do not incorporate eco-evolutionary dynamics. Integro-differential\nequation models which do incorporate eco-evolutionary dynamics have provided unique\ninsights into evolutionary branching [ 26], the interaction between stromal cells and stem\ncells [27], and the co-evolution of predators and prey [ 28]. While these models speciﬁcally\ninvolve mutational processes, they focus on stationary solutions (the evolutionary stable\nstrategies in the language of adaptive dynamics) and so miss the transient dynamics which\nmay be of interest in applications, especially if realistic parameters would require a longer\ntime to converge than the time-frame of interest. Moreover, this means they are not readily\nadapted to the case where the attractor of the system is not a ﬁxed point.\nThe aim of this paper is therefore to study the full eco-evolutionary dynamics of trait-\nstructured, sexually reproducing interacting populations, in which the death and/or birth rates\nare time-dependent. We employ a generalised moment based method, which enables us to\nstudy eco-evolutionary dynamics including the changes in population heterogeneity while\nretaining tractability.\n1.2 Models\nA single-species model\nWe ﬁrst consider the following nonlinear integro-differential evolution equation that models\nthe evolutionary dynamics of a trait-structured, sexually reproducing population:\n123\n\n--- PAGE 3 ---\nJournal of Dynamics and Differential Equations\n⎧\n⎪⎨\n⎪⎩\nε2∂t nε(x, t) = rε(t)Tε[nε](x, t) −\n(˜Mε(x, t) + κρε(t)\n)\nnε(x, t),\nρε(t) =\n∫\nR nε(y, t)dy,\nnε(x, 0) = nε,0(x),\n(1)\nwhere (x, t) ∈ R × (0,∞) and\nTε[n](x) =\n∫\nR\n∫\nR\n/Gamma1ε\n(\nx − (y + y′)\n2\n) n(y)n(y′)∫\nR n(z)dz dydy ′,/Gamma1ε(x) = 1\nε√π exp\n(\n− x2\nε2\n)\n.\n(2)\nThe unknown function nε(x, t) describes the density of the population characterized by a\nphenotypic trait x at time t; rε : t ∈ (0,∞) ↦→ rε(t) ∈ R represents the time-dependent birth\nrate while ˜Mε : (x, t) ∈ R×(0,∞) ↦→ mε(x, t) ∈ R captures a trait and time-dependent per\ncapita mortality rate. We allow both of these demographic rates to depend onε because we aim\nto apply this to a system where these terms depend on the populationnε(x, t). In addition, the\npopulation is also subject to a mortality rate due to uniform competition between individuals,\nrepresented by the termκρ\nε where ρε is the total size of the population. The operatorTε given\nin (2) describes the sexual reproduction and is often referred to as the “inﬁnitesimal model”\nin the literature. The inﬁnitesimal model, ﬁrst introduced in [29], assumes that there are many\nloci, each with a small effect on the ﬁtness, which contribute to the observed one-dimensional\ntrait x, and that the traits of the offspring are normally distributed around the average trait\nof their parents\n(y+y′)\n2 with a variance ε2. The inﬁnitesimal model has been widely used\nin biology and population dynamics; we refer the reader to [ 30] for a rigorous derivation\nfrom a probabilistic viewpoint and to [ 31] for a detailed account of the inﬁnitesimal model.\nThe assumption of small segregational variance ε2 corresponds to the well-established weak\nselection regime [32], and the coefﬁcient ε2 multiplying the time derivative is the appropriate\ntime-scaling to capture evolutionary processes. The model ( 1) with time-independent per\ncapita mortality and birth rates, that is, ˜Mε = ˜Mε(x) and rε = const, is studied recently\nin [33]. In this paper, we extend the results of [ 33] to the case of time-dependent per capita\nmortality and birth rates.\nA predator-prey model with trait-structured prey\nNext, we consider the following predator-prey system\n⎧\n⎪⎪\n⎪⎪⎪⎨\n⎪⎪⎪⎪⎪⎩\nε\n2∂t n1,ε = r1T1,ε[n1,ε]−\n( f (x)ρ2,ε\n1+h ¯f [q1,ε](t)ρ1,ε\n+ (κ1 − δ(x))ρ1,ε\n)\nn1,ε,\nτ∂tρ2,ε =\n(\nγ\n¯f [q1,ε](t)ρ1,ε\n1+h ¯f [q1,ε](t)ρ1,ε\n− κ2ρ2,ε\n)\nρ2,ε,\nρ1,ε(t) =\n∫\nR n1,ε(y, t)dy, q1,ε = n1,ε/ρ1,ε, ¯f [q1,ε](t) =\n∫\nq1,ε(y, t) f (y)dy,\nn1,ε(x, 0) = n1,ε,0(x), ρ 2,ε(0) = ρ2,ε,0.\n(3)\nThis model extends the single-species model ( 1) to the case of predator-prey interacting\npopulations. Here n1,ε : (x, t) ∈ R × (0,∞) ↦→ R and ρ2,ε : t ∈ (0,∞) ↦→ R respectively\ndescribe the density of the prey with a trait x and the predator population size at time t.\nThe trait x is the ‘riskiness’ of prey foraging strategy, i.e. foraging near predator habitats.\nThe term f (x)ρ2,ε\n1+h ¯f [q1,ε](t)ρ1,ε\nrepresents the Holling Type II functional response of the predator,\nwhere contact rate is given by the function f : x ∈ R ↦→ f (x) ∈[ 0,∞). The handling\ntime per prey is h, and we have assumed that the total handling time depends on the average\ncontact rate. The carrying capacity of preys is given by (κ1 − δ(x)), where the function\nδ : x ∈ R ↦→ δ(x) ∈[ 0,∞) accounts for the decrease in competition due to obtaining more\n123\n\n--- PAGE 4 ---\nJournal of Dynamics and Differential Equations\nresources. As such we require that δ(x)<κ 1.B o t hf (x) and δ(x) are assumed to be smooth,\nnon-negative, and increasing. The parameter κ2 corresponds to the predator competition\nstrength, γ is the conversion factor of prey into predator, andτ sets the timescale for predator\ndynamics.\nIn this paper, we focus on the special regime where τ ≪ ε2 for which ( 3) reduces to a\nsingle evolution equation for n1,ε, with a modiﬁed mortality rate\n⎧\n⎪⎪⎨\n⎪⎪⎩\nε2∂t n1,ε = r1T1,ε[n1,ε]−\n(\nγ\nκ2\nf (x) ¯f [q1,ε](t)ρ1,ε\n(1+h ¯f [q1,ε](t)ρ1,ε)2 + (κ1 − δ(x))ρ1,ε\n)\nn1,ε,\nρ1,ε(t) =\n∫\nR n1,ε(y, t)dy, q1,ε = n1,ε/ρ1,ε, ¯f [q1,ε](t) =\n∫\nq1,ε(y, t) f (y)dy,\nn1,ε(x, 0) = n1,ε,0(x).\n(4)\nCompared to the single-species model (1), the mortality rate in the reduced model (4) depends\non the unknown n1,ε itself, thus adding further nonlocality and nonlinearity. The reduction\nfrom the coupled system ( 3) to the single equation ( 4) under the assumption that τ ≪\nε resembles the reduction from the parabolic-parabolic Patlak-Keller-Segel model to the\nparabolic-elliptic one, see for instance [ 34–36]. We will investigate the full coupled system\n(3) in future works.\n1.3 Summary of the Main Results\nThe main results of the paper can be summarised as follows (see Section 2 for precise\nassumptions and statements). Our ﬁrst result, Theorem 1, shows that the trait-distribution\nfor a population whose dynamics are given by ( 1) are approximately Gaussian with constant\nvariance ε\n2, centred on a mean trait which is governed by an ODE, the canonical equation\nof adaptive dynamics. This result is obtained under the assumption that the initial trait dis-\ntribution is sufﬁciently concentrated not too far from an optimal trait, and the optimal trait\ndoes not vary too quickly. Our second main result, Theorem 2, shows that for the reduced\npredator-prey model (4), where the mortality is now dependent on the population size and trait\ndistribution, the same Gaussian approximation as before holds. In this case, the obtained evo-\nlution equation for the mean trait now expresses explicitly the inﬂuence of eco-evolutionary\ndynamics.\n1.4 Organization of the Paper\nThe rest of the paper is organized as follows. In Section 2 we provide precise assumptions\nand the main results of the paper together with an overview of the proofs. The proofs of\nTheorem 1 and Theorem 2 are then given in Section 3 and Section 4 respectively. In Section\n5 we show numerical simulations to demonstrate the analytical results. In the last Section 6\nwe provide further discussion and outlook.\n2 Assumptions and Main Results\nIn this section, we provide precise assumptions and the main results concerning the asymptotic\nanalysis of the co-evolutionary dynamics ( 1)a n d( 4).\n123\n\n--- PAGE 31 ---\nJournal of Dynamics and Differential Equations\nDeclarations\nCompeting interests The authors declare no competing interests.\nOpen Access This article is licensed under a Creative Commons Attribution 4.0 International License, which\npermits use, sharing, ada",
+      "explanation": {
+        "paperType": "theoretical",
+        "coreIntuition": "The paper utilizes a moment-based closure method to reduce complex, non-local integro-differential equations modeling trait-structured, sexually reproducing populations into a tractable, autonomous system of ODEs, specifically operating within the weak selection regime (small segregational variance).",
+        "beforeState": "Existing eco-evolutionary models often sacrificed analytical tractability for biological realism, or ignored transient dynamics by focusing exclusively on stationary states (evolutionarily stable strategies).",
+        "afterState": "The model provides a closed-form system of ODEs that explicitly captures transient eco-evolutionary feedback loops and the impact of time-dependent demographic parameters on trait distribution.",
+        "strategyUsed": "contrast"
+      },
+      "zoomData": {
+        "rawFormula": "ε^{2} \\partial_{t} n_{\\varepsilon}(x, t) = r_{\\varepsilon}(t)T_{\\varepsilon}[n_{\\varepsilon}](x, t) - (\\tilde{M}_{\\varepsilon}(x, t) + \\kappa\\rho_{\\varepsilon}(t))n_{\\varepsilon}(x, t)",
+        "translation": "The rate of change of the trait-structured population density is governed by the balance between reproductive output (in the infinitesimal model framework) and trait-dependent mortality plus density-dependent competition.",
+        "terms": [
+          {
+            "symbol": "\\tilde{M}_{\\varepsilon}(x, t)",
+            "definition": "Trait and time-dependent per capita mortality rate.",
+            "subDefinitions": [
+              {
+                "term": "\\tilde{M}",
+                "definition": "Mortality function operator"
+              },
+              {
+                "term": "\\varepsilon",
+                "definition": "Small segregational variance parameter"
+              },
+              {
+                "term": "x",
+                "definition": "Phenotypic trait value"
+              },
+              {
+                "term": "t",
+                "definition": "Time variable"
+              }
+            ]
+          },
+          {
+            "symbol": "T_{\\varepsilon}[n_{\\varepsilon}]",
+            "definition": "Infinitesimal model reproduction operator.",
+            "subDefinitions": [
+              {
+                "term": "T",
+                "definition": "Reproduction kernel integral operator"
+              },
+              {
+                "term": "\\varepsilon",
+                "definition": "Small segregational variance parameter"
+              },
+              {
+                "term": "n",
+                "definition": "Population density"
+              }
+            ]
+          },
+          {
+            "symbol": "n_{\\varepsilon}(x, t)",
+            "definition": "Population density at trait x and time t.",
+            "subDefinitions": [
+              {
+                "term": "n",
+                "definition": "Population density function"
+              },
+              {
+                "term": "\\varepsilon",
+                "definition": "Small segregational variance parameter"
+              },
+              {
+                "term": "x",
+                "definition": "Phenotypic trait"
+              },
+              {
+                "term": "t",
+                "definition": "Time"
+              }
+            ]
+          },
+          {
+            "symbol": "r_{\\varepsilon}(t)",
+            "definition": "Time-dependent birth rate.",
+            "subDefinitions": [
+              {
+                "term": "r",
+                "definition": "Birth rate function"
+              },
+              {
+                "term": "\\varepsilon",
+                "definition": "Parameter dependency"
+              },
+              {
+                "term": "t",
+                "definition": "Time"
+              }
+            ]
+          },
+          {
+            "symbol": "\\kappa\\rho_{\\varepsilon}(t)",
+            "definition": "Uniform competition mortality term.",
+            "subDefinitions": [
+              {
+                "term": "\\kappa",
+                "definition": "Competition intensity coefficient"
+              },
+              {
+                "term": "\\rho",
+                "definition": "Total population size"
+              },
+              {
+                "term": "t",
+                "definition": "Time"
+              }
+            ]
+          },
+          {
+            "symbol": "\\partial_{t}",
+            "definition": "Partial derivative with respect to time.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\rho_{\\varepsilon}(t)",
+            "definition": "Total population size at time t.",
+            "subDefinitions": [
+              {
+                "term": "\\rho",
+                "definition": "Total population size"
+              },
+              {
+                "term": "\\varepsilon",
+                "definition": "Variance parameter"
+              },
+              {
+                "term": "t",
+                "definition": "Time"
+              }
+            ]
+          },
+          {
+            "symbol": "\\varepsilon",
+            "definition": "Small parameter quantifying phenotypic variance/selection strength.",
+            "subDefinitions": []
+          },
+          {
+            "symbol": "\\kappa",
+            "definition": "Competition coefficient.",
+            "subDefinitions": []
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "The trait-distribution converges to a Gaussian distribution with constant variance scaled by ε^2, where the mean trait evolves according to an autonomous ODE governed by the selection gradient.",
+        "steps": [
+          {
+            "stepLabel": "Gaussian Closure",
+            "explanation": "Demonstrates that the distribution of traits remains approximately Gaussian under the infinitesimal model assumptions, allowing for a reduced-moment description.",
+            "deepDive": "Using the small variance ε assumption, the integral kernel in the infinitesimal model acts as a Gaussian filter, preserving the second moment of the distribution."
+          },
+          {
+            "stepLabel": "Asymptotic Reduction",
+            "explanation": "Shows the convergence of the mean trait to an ODE system by applying a singular perturbation approach to the integro-differential operator.",
+            "deepDive": "Matches the evolution of the population mean to the canonical equation of adaptive dynamics, validating the emergence of the selection gradient as the primary driver of phenotypic change."
+          }
+        ],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Infinitesimal Model",
+          "nickname": "Fisher-Bulmer Model",
+          "definition": "A quantitative genetics model assuming traits are determined by many loci of small effect, resulting in a Gaussian offspring distribution.",
+          "origin": "Fisher (1918)",
+          "relatedTerms": [
+            "Weak Selection",
+            "Quantitative Genetics"
+          ]
+        },
+        {
+          "term": "Adaptive Dynamics",
+          "nickname": "AD",
+          "definition": "A framework for studying long-term evolution by modeling the invasion and substitution of mutant traits.",
+          "origin": "Metz et al. (1992)",
+          "relatedTerms": [
+            "Evolutionary Stable Strategy",
+            "Canonical Equation"
+          ]
+        },
+        {
+          "term": "Holling Type II",
+          "nickname": "Functional Response",
+          "definition": "A model of predator-prey interaction where the predator's intake rate is limited by handling time.",
+          "origin": "Holling (1959)",
+          "relatedTerms": [
+            "Predator-Prey Models",
+            "Non-linear Dynamics"
+          ]
+        }
+      ],
+      "coreIdea": "The paper utilizes a moment-based closure method to reduce complex, non-local integro-differential equations modeling trait-structured, sexually reproducing populations into a tractable, autonomous system of ODEs, specifically operating within the weak selection regime (small segregational variance).",
+      "achievements": "The authors successfully generalized moment-based reduction techniques for trait-structured populations to include time-dependent birth and mortality rates. They also established that the mean trait in predator-prey systems follows a canonical ODE, bridging the gap between transient ecological dynamics and evolutionary stability.",
+      "limitations": "The current results rely on the small segregational variance assumption (weak selection regime), limiting applicability to highly unstable or rapidly diversifying systems. Furthermore, the analysis assumes specific functional forms for trait influence (e.g., riskiness) and requires future work to explore the full coupling in non-reduced systems."
+    }
+  ]
+}

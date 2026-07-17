@@ -209,28 +209,6 @@ export const PaperCard: React.FC<PaperCardProps> = ({
       }
     }
 
-    // Step 4: Key Findings & Results
-    const resultsText = explanation.keyFindings || explanation.synthesis || explanation.consensusAndTrends || paper.achievements;
-    if (resultsText) {
-      steps.push({
-        id: explanation.keyFindings ? 'keyFindings' : (explanation.synthesis ? 'synthesis' : (explanation.consensusAndTrends ? 'consensusAndTrends' : 'achievements')),
-        label: paperType === 'empirical_study' ? 'Key Findings' : 'Achievements & Findings',
-        title: 'Main results and discoveries',
-        content: resultsText
-      });
-    }
-
-    // Step 5: Implications & Significance
-    const implicationsText = explanation.interpretation || explanation.theoreticalSignificance || explanation.openChallenges || paper.limitations;
-    if (implicationsText) {
-      steps.push({
-        id: explanation.interpretation ? 'interpretation' : (explanation.theoreticalSignificance ? 'theoreticalSignificance' : (explanation.openChallenges ? 'openChallenges' : 'limitations')),
-        label: paperType === 'review_survey' ? 'Open Challenges' : 'Significance & Limitations',
-        title: 'Future roadmap and impact constraints',
-        content: implicationsText
-      });
-    }
-
     return steps;
   }, [explanation, paper, paperType]);
 
@@ -337,46 +315,53 @@ export const PaperCard: React.FC<PaperCardProps> = ({
     });
   };
 
-  const renderConceptCard = (blockId: string) => {
-    if (!activeTag || activeTag.blockId !== blockId) return null;
+  const renderConceptCard = (_blockId: string) => {
+    return null; // Rendered globally in bottom sheet overlay to prevent jumping layouts
+  };
+
+  const renderConceptBottomSheet = () => {
+    if (!activeTag) return null;
     const concept = paper.taggedConcepts?.find(c => c && c.term === activeTag.term);
     if (!concept) return null;
 
     return (
-      <div className="concept-detail-card glass-panel anim-slide-up">
-        <div className="concept-card-header">
-          <h5 className="concept-card-title">Concept: {concept.term}</h5>
-          <button
-            className="concept-card-close"
-            onClick={() => setActiveTag(null)}
-            type="button"
-          >
-            ✕
-          </button>
-        </div>
-        <div className="concept-card-body">
-          <div className="concept-section">
-            <span className="concept-section-label">What it is</span>
-            <p className="concept-section-text">{concept.definition}</p>
+      <div className="concept-bottom-sheet-overlay" onClick={() => setActiveTag(null)}>
+        <div className="concept-bottom-sheet glass-panel" onClick={e => e.stopPropagation()}>
+          <div className="concept-bottom-sheet-handle" />
+          <div className="concept-card-header">
+            <h5 className="concept-card-title">Concept: {concept.term}</h5>
+            <button
+              className="concept-card-close"
+              onClick={() => setActiveTag(null)}
+              type="button"
+            >
+              ✕
+            </button>
           </div>
-          {concept.origin && (
+          <div className="concept-card-body">
             <div className="concept-section">
-              <span className="concept-section-label">Where it comes from</span>
-              <p className="concept-section-text">
-                {concept.origin}{' '}
-                {concept.paperUrl && (
-                  <a
-                    href={concept.paperUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="concept-paper-link"
-                  >
-                    [Read Paper <ExternalLink size={10} style={{ display: 'inline', marginLeft: '2px' }} />]
-                  </a>
-                )}
-              </p>
+              <span className="concept-section-label">What it is</span>
+              <p className="concept-section-text">{concept.definition}</p>
             </div>
-          )}
+            {concept.origin && (
+              <div className="concept-section">
+                <span className="concept-section-label">Where it comes from</span>
+                <p className="concept-section-text">
+                  {concept.origin}{' '}
+                  {concept.paperUrl && (
+                    <a
+                      href={concept.paperUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="concept-paper-link"
+                    >
+                      [Read Paper <ExternalLink size={10} style={{ display: 'inline', marginLeft: '2px' }} />]
+                    </a>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -493,58 +478,63 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             />
           </p>
           {renderConceptCard('coreIntuition')}
-
-          {paper.zoomData && (
-            <div className={`interactive-deconstruction-accordion glass-panel ${zoomOpen ? 'open' : ''}`}>
-              <button
-                className="deconstruction-header-btn"
-                onClick={() => setZoomOpen(!zoomOpen)}
-                type="button"
-              >
-                <span className="deconstruction-title-wrap">
-                  <span className="deconstruction-icon">
-                    {paperType === 'methodology' && '📐'}
-                    {paperType === 'empirical_study' && '📊'}
-                    {paperType === 'theoretical' && '📐'}
-                    {paperType === 'review_survey' && '📚'}
-                  </span>
-                  <span className="deconstruction-title">
-                    {paperType === 'methodology' && 'Mathematical Equation (Level 2)'}
-                    {paperType === 'empirical_study' && 'Empirical Trends & Findings (Level 2)'}
-                    {paperType === 'theoretical' && 'Mathematical Proof Steps (Level 2)'}
-                    {paperType === 'review_survey' && 'Taxonomy & Gaps (Level 2)'}
-                  </span>
-                </span>
-                <span className="deconstruction-arrow">{zoomOpen ? '▲' : '▼'}</span>
-              </button>
-
-              {zoomOpen && (
-                <div className="deconstruction-content">
-                  <SemanticZoomPanel 
-                    paperType={paperType as any}
-                    title={paper.title}
-                    data={paper.zoomData}
-                  />
-                </div>
-              )}
-            </div>
-          )}
         </div>
+
+        {paper.zoomData && (
+          <div className={`interactive-deconstruction-accordion glass-panel ${zoomOpen ? 'open' : ''}`} style={{ width: '100%' }}>
+            <button
+              className="deconstruction-header-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomOpen(!zoomOpen);
+              }}
+              type="button"
+            >
+              <span className="deconstruction-title-wrap">
+                <span className="deconstruction-icon">
+                  {paperType === 'methodology' && '📐'}
+                  {paperType === 'empirical_study' && '📊'}
+                  {paperType === 'theoretical' && '📐'}
+                  {paperType === 'review_survey' && '📚'}
+                </span>
+                <span className="deconstruction-title">
+                  {paperType === 'methodology' && 'Mathematical Equation (Level 2)'}
+                  {paperType === 'empirical_study' && 'Empirical Trends & Findings (Level 2)'}
+                  {paperType === 'theoretical' && 'Mathematical Proof Steps (Level 2)'}
+                  {paperType === 'review_survey' && 'Taxonomy & Gaps (Level 2)'}
+                </span>
+              </span>
+              <span className="deconstruction-arrow">{zoomOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {zoomOpen && (
+              <div className="deconstruction-content">
+                <SemanticZoomPanel 
+                  paperType={paperType as any}
+                  title={paper.title}
+                  data={paper.zoomData}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Scientific Purpose */}
-        <div className="summary-block">
-          <h4 className="block-title">Purpose & Question</h4>
-          <p className="block-text">
-            <InteractiveText
-              text={paper.purpose}
-              concepts={getConceptsForBlock('purpose')}
-              blockId="purpose"
-              activeTag={activeTag}
-              onTagClick={handleTagClick}
-            />
-          </p>
-          {renderConceptCard('purpose')}
-        </div>
+        {paper.purpose && (
+          <div className="summary-block">
+            <h4 className="block-title">Purpose & Question</h4>
+            <p className="block-text">
+              <InteractiveText
+                text={paper.purpose}
+                concepts={getConceptsForBlock('purpose')}
+                blockId="purpose"
+                activeTag={activeTag}
+                onTagClick={handleTagClick}
+              />
+            </p>
+            {renderConceptCard('purpose')}
+          </div>
+        )}
 
         {/* ── Collapsible "Under the Hood" Accordion ── */}
         {paperType && (
@@ -643,34 +633,38 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         )}
 
         {/* Achievements */}
-        <div className="summary-block">
-          <h4 className="block-title">Key Achievements</h4>
-          <p className="block-text">
-            <InteractiveText
-              text={paper.achievements}
-              concepts={getConceptsForBlock('achievements')}
-              blockId="achievements"
-              activeTag={activeTag}
-              onTagClick={handleTagClick}
-            />
-          </p>
-          {renderConceptCard('achievements')}
-        </div>
+        {paper.achievements && (
+          <div className="summary-block">
+            <h4 className="block-title">Key Achievements</h4>
+            <p className="block-text">
+              <InteractiveText
+                text={paper.achievements}
+                concepts={getConceptsForBlock('achievements')}
+                blockId="achievements"
+                activeTag={activeTag}
+                onTagClick={handleTagClick}
+              />
+            </p>
+            {renderConceptCard('achievements')}
+          </div>
+        )}
 
         {/* Limitations */}
-        <div className="summary-block">
-          <h4 className="block-title">Shortcomings & Gaps</h4>
-          <p className="block-text">
-            <InteractiveText
-              text={paper.limitations}
-              concepts={getConceptsForBlock('limitations')}
-              blockId="limitations"
-              activeTag={activeTag}
-              onTagClick={handleTagClick}
-            />
-          </p>
-          {renderConceptCard('limitations')}
-        </div>
+        {paper.limitations && (
+          <div className="summary-block">
+            <h4 className="block-title">Shortcomings & Gaps</h4>
+            <p className="block-text">
+              <InteractiveText
+                text={paper.limitations}
+                concepts={getConceptsForBlock('limitations')}
+                blockId="limitations"
+                activeTag={activeTag}
+                onTagClick={handleTagClick}
+              />
+            </p>
+            {renderConceptCard('limitations')}
+          </div>
+        )}
 
         {/* Paper Lineage (Built Upon & Influenced) */}
         {!isLoadingMetadata && ((metadata.references && metadata.references.length > 0) || (metadata.citations && metadata.citations.length > 0)) && (
@@ -746,82 +740,94 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             </div>
           </div>
         )}
-      </div>
 
-      {/* Metrics Section */}
-      <div className="card-metrics-section">
-        {isLoadingMetadata ? (
-          <div className="metrics-loading shimmer"></div>
+        {/* Metrics Section (now inside scrollport) */}
+        <div className="card-metrics-section" style={{ marginTop: '20px' }}>
+          {isLoadingMetadata ? (
+            <div className="metrics-loading shimmer"></div>
+          ) : (
+            <div className="metrics-grid">
+              <div className="metric-badge glass-panel" title="Citations count">
+                <Award className="metric-icon citation-color" />
+                <span className="metric-label">Citations:</span>
+                <span className="metric-value">
+                  {metadata.citationCount !== undefined
+                    ? metadata.citationCount.toLocaleString()
+                    : 'N/A'}
+                </span>
+              </div>
+              <div className="metric-badge glass-panel" title="Publication Venue">
+                <BookOpen className="metric-icon venue-color" />
+                <span className="metric-value-long">{metadata.venue || 'Journal Article'}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Controls (now inside scrollport) */}
+        <footer className="card-footer" style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-glass)' }}>
+          <button
+            className={`action-circle-btn dislike ${isDisliked ? 'selected' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onDislike(); }}
+            title="Dislike"
+            type="button"
+          >
+            <ThumbsDown className="action-icon" />
+          </button>
+
+          <button
+            className="action-pill-btn chat"
+            onClick={(e) => { e.stopPropagation(); onOpenChat(paper, metadata); }}
+            title="Ask AI Guide"
+            type="button"
+          >
+            <MessageSquare className="action-icon-small" />
+            <span>Ask AI</span>
+          </button>
+
+          <button
+            className="action-pill-btn read"
+            onClick={(e) => {
+              e.stopPropagation();
+              const url = metadata.pdfUrl || metadata.paperUrl || `https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title)}`;
+              window.open(url, '_blank', 'noopener,noreferrer');
+            }}
+            title="Read Paper on Publisher Website"
+            type="button"
+          >
+            <ExternalLink className="action-icon-small" />
+            <span>Read Paper</span>
+          </button>
+
+          <button
+            className={`action-circle-btn like ${isLiked ? 'selected anim-heartbeat' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onLike(); }}
+            title="Like"
+            type="button"
+          >
+            <ThumbsUp className="action-icon" />
+          </button>
+        </footer>
+
+        {index === total - 1 ? (
+          <div className="paper-stack-end">
+            <span>🎉 You've reached the end of this digest!</span>
+          </div>
         ) : (
-          <div className="metrics-grid">
-            <div className="metric-badge glass-panel" title="Citations count">
-              <Award className="metric-icon citation-color" />
-              <span className="metric-label">Citations:</span>
-              <span className="metric-value">
-                {metadata.citationCount !== undefined
-                  ? metadata.citationCount.toLocaleString()
-                  : 'N/A'}
-              </span>
-            </div>
-            <div className="metric-badge glass-panel" title="Publication Venue">
-              <BookOpen className="metric-icon venue-color" />
-              <span className="metric-value-long">{metadata.venue || 'Journal Article'}</span>
-            </div>
+          <div className="paper-stack-divider">
+            <span>↓ Scroll down to continue</span>
           </div>
         )}
       </div>
 
-      {/* Footer Controls */}
-      <footer className="card-footer">
-        <button
-          className={`action-circle-btn dislike ${isDisliked ? 'selected' : ''}`}
-          onClick={(e) => { e.stopPropagation(); onDislike(); }}
-          title="Dislike"
-          type="button"
-        >
-          <ThumbsDown className="action-icon" />
-        </button>
-
-        <button
-          className="action-pill-btn chat"
-          onClick={(e) => { e.stopPropagation(); onOpenChat(paper, metadata); }}
-          title="Ask AI Guide"
-          type="button"
-        >
-          <MessageSquare className="action-icon-small" />
-          <span>Ask AI</span>
-        </button>
-
-        <button
-          className="action-pill-btn read"
-          onClick={(e) => {
-            e.stopPropagation();
-            const url = metadata.pdfUrl || metadata.paperUrl || `https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title)}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
-          }}
-          title="Read Paper on Publisher Website"
-          type="button"
-        >
-          <ExternalLink className="action-icon-small" />
-          <span>Read Paper</span>
-        </button>
-
-        <button
-          className={`action-circle-btn like ${isLiked ? 'selected anim-heartbeat' : ''}`}
-          onClick={(e) => { e.stopPropagation(); onLike(); }}
-          title="Like"
-          type="button"
-        >
-          <ThumbsUp className="action-icon" />
-        </button>
-      </footer>
+      {renderConceptBottomSheet()}
 
       <style>{`
         .paper-card {
           width: 100%;
           max-width: var(--max-width-feed);
           border-radius: var(--radius-lg);
-          padding: 16px;
+          padding: 16px 16px 0 16px;
           display: flex;
           flex-direction: column;
           gap: 14px;
@@ -1056,12 +1062,14 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         }
 
         .block-title {
-          font-size: 0.8rem;
+          display: block !important;
+          font-size: 0.82rem !important;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: var(--text-muted);
-          font-weight: 600;
+          color: var(--color-primary) !important;
+          font-weight: 700 !important;
           font-family: var(--font-mono);
+          margin-bottom: 4px;
         }
 
         .block-text {
@@ -1071,7 +1079,6 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         }
 
         .card-metrics-section {
-          margin-top: auto;
           border-top: 1px solid var(--border-glass);
           padding-top: 16px;
         }
@@ -1436,6 +1443,41 @@ export const PaperCard: React.FC<PaperCardProps> = ({
           border-style: solid;
           border-color: var(--color-primary);
           box-shadow: 0 0 12px rgba(27, 73, 49, 0.2);
+        }
+
+        .concept-bottom-sheet-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          z-index: 2000;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+        }
+
+        .concept-bottom-sheet {
+          width: 100%;
+          max-width: var(--max-width-feed, 680px);
+          background: var(--bg-darker);
+          border: 1px solid rgba(45, 106, 79, 0.2);
+          border-top: 2px solid var(--color-primary);
+          box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+          border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+          padding: 20px 24px 32px 24px;
+          text-align: left;
+        }
+
+        .concept-bottom-sheet-handle {
+          width: 36px;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 99px;
+          margin: -10px auto 16px auto;
         }
 
         .concept-detail-card {

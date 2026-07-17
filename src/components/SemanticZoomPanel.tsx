@@ -8,30 +8,114 @@ interface SemanticZoomPanelProps {
   data: ZoomData;
 }
 
+interface CarouselItem {
+  id: string;
+  title: string;
+  label: string;
+  content: string;
+  extraLabel?: string | null;
+  extraText?: string | null;
+  details?: { label: string; value: string }[];
+  subDefinitions?: { term: string; definition: string }[];
+}
+
 export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
   paperType,
   title: _title,
   data
 }) => {
+  const getCarouselItems = (): CarouselItem[] => {
+    switch (paperType) {
+      case 'methodology':
+        return (data.terms || []).map((t) => ({
+          id: t.symbol || t.term || '',
+          title: t.symbol || t.term || '',
+          label: 'Level 3: Term Definition',
+          content: t.definition,
+          extraLabel: t.deepDive ? 'Deep Dive Explanation' : null,
+          extraText: t.deepDive,
+          subDefinitions: t.subDefinitions
+        }));
+      case 'empirical_study':
+        return (data.metrics || []).map((m) => ({
+          id: m.label,
+          title: m.label,
+          label: 'Level 3: Metric Context',
+          content: m.explanation,
+          extraText: m.cohortContext ? `Cohort Context: ${m.cohortContext}` : null,
+          details: [
+            m.controlValue && { label: 'Control / Baseline', value: m.controlValue },
+            m.significance && { label: 'Statistical Significance', value: m.significance },
+            m.measurementMethod && { label: 'Measurement Method / Device', value: m.measurementMethod }
+          ].filter(Boolean) as { label: string; value: string }[]
+        }));
+      case 'theoretical':
+        return (data.steps || []).map((s) => ({
+          id: s.stepLabel,
+          title: s.stepLabel,
+          label: 'Level 3: Proof Details',
+          content: s.explanation,
+          extraLabel: s.deepDive ? 'Proof Deep Dive' : null,
+          extraText: s.deepDive
+        }));
+      case 'review_survey':
+        const subItems = (data.subcategories || []).map((s) => ({
+          id: s.name,
+          title: s.name,
+          label: 'Level 3: Sub-Category Context',
+          content: s.approach,
+          extraLabel: s.seminalPapers && s.seminalPapers.length > 0 ? 'Seminal Publications' : null,
+          extraText: s.seminalPapers?.join(', ')
+        }));
+        const gapItems = (data.gaps || []).map((g) => ({
+          id: g.challenge,
+          title: g.challenge,
+          label: 'Level 3: Gap Analysis',
+          content: g.reason,
+          extraLabel: 'Unresolved Roadblock',
+          extraText: 'Requires novel algorithmic methods or alternative benchmark parameters.'
+        }));
+        return [...subItems, ...gapItems];
+      default:
+        return [];
+    }
+  };
+
   // We track the navigation history stack of active symbols/labels being investigated
   const [investigationStack, setInvestigationStack] = useState<string[]>([]);
+  const [expandedSubTerm, setExpandedSubTerm] = useState<string | null>(null);
+  
+  // Track if a scroll was triggered programmatically (by tapping items) rather than manual swiping
+  const isProgrammaticScroll = React.useRef(false);
 
-  // Reset investigation stack when data changes
+  // Reset investigation stack and select first item by default when data changes
   useEffect(() => {
-    setInvestigationStack([]);
+    const items = getCarouselItems();
+    if (items.length > 0) {
+      isProgrammaticScroll.current = true;
+      setInvestigationStack([items[0].id]);
+    } else {
+      setInvestigationStack([]);
+    }
   }, [paperType, data]);
 
   // Extract active investigated symbol
   const activeSymbol = investigationStack.length > 0 ? investigationStack[investigationStack.length - 1] : null;
 
+  useEffect(() => {
+    setExpandedSubTerm(null);
+  }, [activeSymbol]);
+
   // Resets stack to exactly 1 item (Level 3) representing a new root-level investigation
   const selectMasterItem = (symbol: string) => {
+    isProgrammaticScroll.current = true;
     setInvestigationStack([symbol]);
   };
 
   // Appends item to stack (goes to Level 4, Level 5, etc.) for nested investigations
   const selectDetailItem = (symbol: string) => {
     if (investigationStack[investigationStack.length - 1] !== symbol) {
+      isProgrammaticScroll.current = true;
       setInvestigationStack((prev) => [...prev, symbol]);
     }
   };
@@ -45,6 +129,23 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
       delete (window as any).pushZoomTerm;
     };
   }, []);
+
+  const carouselRef = React.useRef<HTMLDivElement>(null);
+
+  // Scroll to active card when activeSymbol changes
+  useEffect(() => {
+    if (activeSymbol && carouselRef.current) {
+      if (isProgrammaticScroll.current) {
+        // Escape special characters in CSS selector
+        const escapedSymbol = activeSymbol.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const activeCard = carouselRef.current.querySelector(`[data-card-id="${escapedSymbol}"]`);
+        if (activeCard) {
+          activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+        isProgrammaticScroll.current = false;
+      }
+    }
+  }, [activeSymbol]);
 
   const getHeaderTitle = () => {
     if (!activeSymbol) {
@@ -85,14 +186,23 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
 
     // 2. Math operators (do multi-character replacements first)
     res = res
+      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
+      .replace(/\\left\(/g, '(')
+      .replace(/\\right\)/g, ')')
+      .replace(/\\left\[/g, '[')
+      .replace(/\\right\]/g, ']')
+      .replace(/\\left\\\|/g, '|')
+      .replace(/\\right\\\|/g, '|')
+      .replace(/\\left/g, '')
+      .replace(/\\right/g, '')
       .replace(/\\int_\{([^}]+)\}\^\{([^}]+)\}/g, '∫<sub>$1</sub><sup>$2</sup>')
       .replace(/\\int/g, '∫')
       .replace(/\\sum_\{([^}]+)\}\^\{([^}]+)\}/g, '∑<sub>$1</sub><sup>$2</sup>')
       .replace(/\\sum/g, '∑')
       .replace(/\\leq/g, ' ≤ ')
-      .replace(/\\le/g, ' ≤ ')
+      .replace(/\\le(?![a-zA-Z])/g, ' ≤ ')
       .replace(/\\geq/g, ' ≥ ')
-      .replace(/\\ge/g, ' ≥ ')
+      .replace(/\\ge(?![a-zA-Z])/g, ' ≥ ')
       .replace(/\\approx/g, ' ≈ ')
       .replace(/\\neq/g, ' ≠ ')
       .replace(/\\cdot/g, ' · ')
@@ -100,11 +210,11 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
       .replace(/\\partial/g, '∂')
       .replace(/\\infty/g, '∞')
       .replace(/\\nabla/g, '∇')
-      .replace(/\\to/g, ' → ')
+      .replace(/\\to(?![a-zA-Z])/g, ' → ')
       .replace(/\\rightarrow/g, ' → ')
       .replace(/\\gets/g, ' ← ')
       .replace(/\\leftarrow/g, ' ← ')
-      .replace(/\\sim/g, ' ~ ')
+      .replace(/\\sim(?![a-zA-Z])/g, ' ~ ')
       .replace(/\\\|/g, '|');
 
     // 3. Greek Letters
@@ -139,6 +249,13 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
     return res;
   };
 
+  const formatTextWithInlineMath = (text: string) => {
+    if (!text) return '';
+    return text.replace(/\$([^$]+)\$/g, (_, math) => {
+      return `<code class="inline-math">${translateLatexToHtml(math)}</code>`;
+    });
+  };
+
   // Curated editorial pastel colors corresponding to variables/terms
   const PASTEL_PALETTE = [
     { bg: 'rgba(27, 73, 49, 0.06)', border: 'rgba(27, 73, 49, 0.25)', text: '#1b4931', activeBg: '#1b4931', activeText: '#fff' }, // Sage Forest
@@ -157,7 +274,7 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
     // Map terms with stable placeholder IDs based on their original index
     const termsWithIds = (data.terms || []).map((t, idx) => ({
       ...t,
-      placeholderId: `MATHPLH${idx}`,
+      placeholderId: '【' + '❖'.repeat(idx + 1) + '】',
       colorIdx: idx % PASTEL_PALETTE.length
     }));
 
@@ -218,42 +335,100 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
       case 'methodology': {
         const term = data.terms?.find((t) => (t.symbol || t.term) === activeSymbol);
         if (!term) return null;
+
+        // Color-code sub-definition terms within the active term's formula
+        const formatDetailFormula = (formula: string, subDefs: { term: string; definition: string }[]) => {
+          if (!formula || !subDefs || subDefs.length === 0) return translateLatexToHtml(formula);
+          let html = formula;
+          const subsWithIds = subDefs.map((s, i) => ({ ...s, pid: '\u27E6' + '\u25C6'.repeat(i + 1) + '\u27E7', ci: i }));
+          const sorted = [...subsWithIds].sort((a, b) => b.term.length - a.term.length);
+          sorted.forEach((s) => { const esc = s.term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); html = html.replace(new RegExp(esc, 'g'), s.pid); });
+          html = translateLatexToHtml(html);
+          subsWithIds.forEach((s) => { const c = PASTEL_PALETTE[s.ci % PASTEL_PALETTE.length]; const lbl = translateLatexToHtml(s.term); html = html.replaceAll(s.pid, `<span style="color:${c.text};background:${c.bg};border:1px solid ${c.border};padding:1px 5px;border-radius:4px;font-weight:700;">${lbl}</span>`); });
+          return html;
+        };
+
         return (
           <div className="zoom-level3-content anim-slide-in-right">
             <div className="drilldown-header-accent">
               <Layers size={14} className="accent-icon" />
               <span>Level 3: Term Definition</span>
             </div>
-            <p className="level3-text">{term.definition}</p>
+
+            {/* Main active term formula preview — sub-terms color-coded */}
+            <div 
+              className="detail-term-formula" 
+              style={{ margin: '14px 0', padding: '14px', background: 'var(--bg-darker)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)', textAlign: 'center', fontSize: '1.2rem', fontWeight: 600 }}
+              dangerouslySetInnerHTML={{ __html: formatDetailFormula(term.symbol || term.term || '', term.subDefinitions || []) }}
+            />
+
+            <p className="level3-text" dangerouslySetInnerHTML={{ __html: formatTextWithInlineMath(term.definition) }} />
             {term.deepDive && (
               <div className="level3-extra-card">
                 <span className="extra-label">Deep Dive Explanation</span>
-                <p className="extra-text">{term.deepDive}</p>
+                <p className="extra-text" dangerouslySetInnerHTML={{ __html: formatTextWithInlineMath(term.deepDive) }} />
               </div>
             )}
             
             {/* Direct Variable Decomposition rendering */}
             {term.subDefinitions && term.subDefinitions.length > 0 && (
-              <div className="sub-definitions-box">
-                <span className="sub-def-title">Decomposition Breakdown</span>
-                <div className="sub-def-list">
+              <div className="sub-definitions-box" style={{ marginTop: '18px' }}>
+                <span className="sub-def-title" style={{ fontSize: '0.86rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Decomposition Breakdown</span>
+                <div className="sub-def-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {term.subDefinitions.map((sub, idx) => {
                     const isClickable = data.terms?.some(
                       (t) => (t.symbol || t.term) === sub.term
                     );
+                    const isExpanded = expandedSubTerm === sub.term;
+                    const subTermData = isClickable 
+                      ? data.terms?.find((t) => (t.symbol || t.term) === sub.term)
+                      : null;
+
+                    const subColor = PASTEL_PALETTE[idx % PASTEL_PALETTE.length];
+
                     return (
                       <div 
                         key={idx} 
                         className={`sub-def-item ${isClickable ? 'clickable' : ''}`}
-                        onClick={isClickable ? () => selectDetailItem(sub.term) : undefined}
+                        onClick={isClickable ? () => setExpandedSubTerm(isExpanded ? null : sub.term) : undefined}
+                        style={{ cursor: isClickable ? 'pointer' : 'default', padding: '8px 10px', background: 'rgba(9, 9, 11, 0.02)', border: isExpanded ? `1px solid ${subColor.border}` : '1px solid var(--border-glass)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: '0' }}
                       >
-                        <code 
-                          className="sub-def-badge"
-                          dangerouslySetInnerHTML={{ __html: translateLatexToHtml(sub.term) }}
-                        />
-                        <span className="sub-def-desc">
-                          {sub.definition} {isClickable && <span className="nested-arrow">➔</span>}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                          <span 
+                            className="sub-def-badge"
+                            style={{ 
+                              padding: '2px 6px', 
+                              background: subColor.bg, 
+                              border: `1px solid ${subColor.border}`,
+                              borderRadius: '4px', 
+                              fontSize: '0.84rem', 
+                              fontWeight: 600,
+                              fontFamily: 'var(--font-mono)',
+                              display: 'inline-block',
+                              flexShrink: 0
+                            }}
+                            dangerouslySetInnerHTML={{ __html: `<code style="color:${subColor.text}">${translateLatexToHtml(sub.term)}</code>` }}
+                          />
+                          <span 
+                            className="sub-def-desc" 
+                            style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: '1.4', flex: 1 }}
+                            dangerouslySetInnerHTML={{ __html: formatTextWithInlineMath(sub.definition) }}
+                          />
+                          {isClickable && (
+                            <span className="nested-arrow" style={{ fontSize: '0.74rem', color: subColor.text, flexShrink: 0 }}>
+                              {isExpanded ? '▲' : '▼'}
+                            </span>
+                          )}
+                        </div>
+                        {/* Inline expanded definitions and deep dives */}
+                        {isExpanded && subTermData && (
+                          <div className="inline-sub-detail anim-slide-up" style={{ marginTop: '10px', padding: '10px', background: 'var(--bg-darker)', borderRadius: '4px', border: subColor ? `1px solid ${subColor.border}` : '1px solid var(--border-glass-bright)' }} onClick={(e) => e.stopPropagation()}>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-primary)', margin: 0, lineHeight: '1.4' }} dangerouslySetInnerHTML={{ __html: formatTextWithInlineMath(subTermData.definition) }} />
+                            {subTermData.deepDive && (
+                              <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '8px', marginBottom: 0 }} dangerouslySetInnerHTML={{ __html: formatTextWithInlineMath(subTermData.deepDive) }} />
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -372,11 +547,17 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
                   className="equation-latex-render"
                   dangerouslySetInnerHTML={{ __html: formatFormula(data.rawFormula, activeSymbol) }}
                 />
-                {data.translation && (
+                {data.translation && !activeSymbol && (
                   <p className="equation-translation-text">
                     <strong>Translation:</strong> {data.translation}
                   </p>
                 )}
+              </div>
+            )}
+
+            {activeSymbol && (
+              <div className="inline-term-detail-container" style={{ marginTop: '16px' }}>
+                {renderDetailPanel()}
               </div>
             )}
 
@@ -388,36 +569,7 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
               </div>
             )}
 
-            {data.terms && data.terms.length > 0 && (
-              <div className="zoom-section" style={{ marginTop: '16px' }}>
-                <h4 className="zoom-section-title">Tap variables to decode:</h4>
-                <div className="equation-variables-grid">
-                  {data.terms.map((t, idx) => {
-                    const symbolText = t.symbol || t.term;
-                    const isActive = activeSymbol === symbolText;
-                    const color = PASTEL_PALETTE[idx % PASTEL_PALETTE.length];
-                    const btnStyle = isActive
-                      ? { background: color.activeBg, color: color.activeText, borderColor: color.activeBg, borderStyle: 'solid' }
-                      : { background: color.bg, color: color.text, borderColor: color.border, borderStyle: 'solid' };
-                    return (
-                      <button
-                        key={idx}
-                        className={`variable-decode-btn ${isActive ? 'active' : ''}`}
-                        onClick={() => symbolText && selectMasterItem(symbolText)}
-                        style={btnStyle}
-                      >
-                        <code 
-                          className="var-sym"
-                          style={{ background: 'rgba(255, 255, 255, 0.25)', color: 'inherit' }}
-                          dangerouslySetInnerHTML={{ __html: translateLatexToHtml(symbolText || '') }}
-                        />
-                        <span className="var-def" style={{ color: 'inherit' }}>{t.definition}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
           </div>
         );
       case 'empirical_study':
@@ -434,24 +586,34 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
             {data.metrics && data.metrics.length > 0 && (
               <div className="zoom-section" style={{ marginTop: '16px' }}>
                 <h4 className="zoom-section-title">Key Statistical Metrics (Tap for Context)</h4>
-                <div className="metrics-interactive-list">
+                <div className="metrics-interactive-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {data.metrics.map((metric, idx) => {
                     const isActive = activeSymbol === metric.label;
                     return (
-                      <button
-                        key={idx}
-                        className={`metric-row-btn ${isActive ? 'active' : ''}`}
-                        onClick={() => selectMasterItem(metric.label)}
-                      >
-                        <div className="metric-row-left">
-                          <span className="metric-badge-label">{metric.category || 'Performance'}</span>
-                          <span className="metric-row-name">{metric.label}</span>
-                        </div>
-                        <div className="metric-row-right">
-                          <span className="metric-row-val">{metric.rawValue}</span>
-                          <span className="metric-arrow">➔</span>
-                        </div>
-                      </button>
+                      <div key={idx} className="metric-row-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <button
+                          className={`metric-row-btn ${isActive ? 'active' : ''}`}
+                          onClick={() => selectMasterItem(metric.label)}
+                          style={{ width: '100%' }}
+                        >
+                          <div className="metric-row-left">
+                            <span className="metric-badge-label">{metric.category || 'Performance'}</span>
+                            <span className="metric-row-name">{metric.label}</span>
+                          </div>
+                          <div className="metric-row-right">
+                            <span className="metric-row-val">{metric.rawValue}</span>
+                            <span className="metric-arrow">{isActive ? '▲' : '▼'}</span>
+                          </div>
+                        </button>
+                        {isActive && (
+                          <div className="inline-metric-detail anim-slide-up" style={{ padding: '12px', background: 'var(--bg-darker)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass-bright)' }}>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-primary)', margin: 0, lineHeight: '1.4' }}>{metric.explanation}</p>
+                            {metric.cohortContext && <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '8px', marginBottom: 0 }}><strong>Cohort:</strong> {metric.cohortContext}</p>}
+                            {metric.controlValue && <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}><strong>Control/Baseline:</strong> {metric.controlValue}</p>}
+                            {metric.significance && <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}><strong>Significance:</strong> {metric.significance}</p>}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -482,26 +644,34 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
             {data.steps && data.steps.length > 0 && (
               <div className="zoom-section" style={{ marginTop: '16px' }}>
                 <h4 className="zoom-section-title">Proof Pipeline (Tap steps to expand)</h4>
-                <div className="proof-steps-vertical">
+                <div className="proof-steps-vertical" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {data.steps.map((step, idx) => {
                     const isActive = activeSymbol === step.stepLabel;
                     return (
-                      <button
-                        key={idx}
-                        className={`proof-step-row-btn ${isActive ? 'active' : ''}`}
-                        onClick={() => selectMasterItem(step.stepLabel)}
-                      >
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '4px', flex: 1 }}>
-                          <span className="proof-step-tag">Step {idx + 1}: {step.stepLabel}</span>
-                          {step.inequalityUsed && (
-                            <code 
-                              className="proof-step-ineq"
-                              dangerouslySetInnerHTML={{ __html: translateLatexToHtml(step.inequalityUsed) }}
-                            />
-                          )}
-                        </div>
-                        <span className="metric-arrow">➔</span>
-                      </button>
+                      <div key={idx} className="proof-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <button
+                          className={`proof-step-row-btn ${isActive ? 'active' : ''}`}
+                          onClick={() => selectMasterItem(step.stepLabel)}
+                          style={{ width: '100%' }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '4px', flex: 1 }}>
+                            <span className="proof-step-tag">Step {idx + 1}: {step.stepLabel}</span>
+                            {step.inequalityUsed && (
+                              <code 
+                                className="proof-step-ineq"
+                                dangerouslySetInnerHTML={{ __html: translateLatexToHtml(step.inequalityUsed) }}
+                              />
+                            )}
+                          </div>
+                          <span className="metric-arrow">{isActive ? '▲' : '▼'}</span>
+                        </button>
+                        {isActive && (
+                          <div className="inline-step-detail anim-slide-up" style={{ padding: '12px', background: 'var(--bg-darker)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass-bright)' }}>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-primary)', margin: 0, lineHeight: '1.4' }}>{step.explanation}</p>
+                            {step.deepDive && <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '8px', marginBottom: 0 }}><strong>Deep Dive:</strong> {step.deepDive}</p>}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -521,7 +691,7 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
             {data.subcategories && data.subcategories.length > 0 && (
               <div className="zoom-section">
                 <h4 className="zoom-section-title">Sub-Category Explorer</h4>
-                <div className="subcategory-grid">
+                <div className="subcategory-list-vertical" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {data.subcategories.map((sub, idx) => {
                     const isActive = activeSymbol === sub.name;
                     return (
@@ -529,9 +699,27 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
                         key={idx}
                         className={`subcategory-btn ${isActive ? 'active' : ''}`}
                         onClick={() => selectMasterItem(sub.name)}
+                        style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: isActive ? '10px' : '0px', textAlign: 'left', padding: '12px' }}
                       >
-                        <span className="subcategory-name">{sub.name}</span>
-                        <span className="subcategory-lbl">Explore ➔</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <span className="subcategory-name" style={{ fontWeight: 600 }}>{sub.name}</span>
+                          <span className="subcategory-lbl">{isActive ? '▲' : 'Explore ▼'}</span>
+                        </div>
+                        {isActive && (
+                          <div className="inline-subcategory-detail anim-slide-up" style={{ fontSize: '0.82rem', borderTop: '1px solid var(--border-glass-bright)', paddingTop: '8px', color: 'var(--text-primary)' }} onClick={(e) => e.stopPropagation()}>
+                            <p style={{ margin: 0, lineHeight: '1.4' }}>{sub.approach}</p>
+                            {sub.seminalPapers && sub.seminalPapers.length > 0 && (
+                              <div style={{ marginTop: '8px' }}>
+                                <strong style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Seminal Papers:</strong>
+                                <ul style={{ margin: '4px 0 0 16px', padding: 0, fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                  {sub.seminalPapers.map((paper, pIdx) => (
+                                    <li key={pIdx}>{paper}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </button>
                     );
                   })}
@@ -542,7 +730,7 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
             {data.gaps && data.gaps.length > 0 && (
               <div className="zoom-section" style={{ marginTop: '16px' }}>
                 <h4 className="zoom-section-title">Open Challenges & Gaps</h4>
-                <div className="gaps-list">
+                <div className="gaps-list-vertical" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {data.gaps.map((gap, idx) => {
                     const isActive = activeSymbol === gap.challenge;
                     return (
@@ -550,9 +738,18 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
                         key={idx}
                         className={`gap-btn-row ${isActive ? 'active' : ''}`}
                         onClick={() => selectMasterItem(gap.challenge)}
+                        style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: isActive ? '10px' : '0px', textAlign: 'left', padding: '12px' }}
                       >
-                        <div className="gap-challenge-txt">⚠️ {gap.challenge}</div>
-                        <span className="metric-arrow">➔</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="gap-challenge-txt" style={{ fontWeight: 600, fontSize: '0.82rem' }}>⚠️ {gap.challenge}</div>
+                          <span className="metric-arrow">{isActive ? '▲' : '▼'}</span>
+                        </div>
+                        {isActive && (
+                          <div className="inline-gap-detail anim-slide-up" style={{ fontSize: '0.82rem', borderTop: '1px solid var(--border-glass-bright)', paddingTop: '8px', color: 'var(--text-primary)' }} onClick={(e) => e.stopPropagation()}>
+                            <strong style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Reason / Challenge Root:</strong>
+                            <p style={{ margin: '4px 0 0 0', lineHeight: '1.4' }}>{gap.reason}</p>
+                          </div>
+                        )}
                       </button>
                     );
                   })}
@@ -562,6 +759,147 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
           </div>
         );
     }
+  };
+
+  const renderCarousel = () => {
+    // When activeSymbol is selected, it is rendered inline right under its corresponding element.
+    if (activeSymbol) {
+      return null;
+    }
+
+    const items = getCarouselItems();
+    if (items.length === 0) return null;
+
+    // If we're drilled down deep (Level 4+), show a detail panel with back button instead of the carousel
+    if (investigationStack.length > 1) {
+      return (
+        <div style={{ marginTop: '16px', borderTop: '1px solid var(--border-glass)', paddingTop: '12px' }}>
+          {renderDetailPanel()}
+        </div>
+      );
+    }
+
+    return (
+      <div className="zoom-carousel-container">
+        <div className="zoom-carousel-header">
+          <span className="zoom-carousel-lbl">💡 Swipe to explore details</span>
+          <div className="zoom-carousel-dots">
+            {items.map((item, idx) => {
+              const isActive = item.id === activeSymbol;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => selectMasterItem(item.id)}
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: isActive ? 'var(--color-primary, #1b4931)' : 'var(--border-glass-bright)',
+                    padding: 0,
+                    transition: 'background 0.2s'
+                  }}
+                  aria-label={`Go to card ${idx + 1}`}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          ref={carouselRef}
+          className="zoom-carousel-scroll-area"
+          onScroll={(e) => {
+            const container = e.currentTarget;
+            const scrollLeft = container.scrollLeft;
+            const cardWidth = container.clientWidth + 16; // width (100%) + gap
+            const index = Math.round(scrollLeft / cardWidth);
+            if (index >= 0 && index < items.length) {
+              const matchedItem = items[index];
+              if (matchedItem && matchedItem.id !== activeSymbol && investigationStack.length <= 1) {
+                setInvestigationStack([matchedItem.id]);
+              }
+            }
+          }}
+        >
+          {items.map((item) => {
+            const isActive = item.id === activeSymbol;
+            return (
+              <div
+                key={item.id}
+                data-card-id={item.id}
+                className={`zoom-carousel-card ${isActive ? 'active' : ''}`}
+              >
+                <div className="zoom-carousel-card-badge">
+                  <Layers size={12} />
+                  <span>{item.label}</span>
+                </div>
+                <h5 className="zoom-carousel-card-title">{item.title}</h5>
+                <p className="zoom-carousel-card-content">{item.content}</p>
+
+                {item.extraText && (
+                  <div className="zoom-carousel-card-extra">
+                    {item.extraLabel && <span className="zoom-carousel-card-extra-lbl">{item.extraLabel}</span>}
+                    <p className="zoom-carousel-card-extra-txt">{item.extraText}</p>
+                  </div>
+                )}
+
+                {item.details && item.details.length > 0 && (
+                  <div className="zoom-carousel-card-details">
+                    {item.details.map((d, idx) => (
+                      <div key={idx} className="zoom-carousel-card-detail-row">
+                        <span className="zoom-carousel-card-detail-lbl">{d.label}:</span>
+                        <span className="zoom-carousel-card-detail-val">{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Direct Variable Decomposition rendering */}
+                {item.subDefinitions && item.subDefinitions.length > 0 && (
+                  <div className="zoom-carousel-breakdown">
+                    <span className="zoom-carousel-breakdown-lbl">Decomposition Breakdown</span>
+                    <div className="zoom-carousel-breakdown-list">
+                      {item.subDefinitions.map((sub, idx) => {
+                        const isClickable = data.terms?.some(
+                          (t) => (t.symbol || t.term) === sub.term
+                        );
+                        const targetIdx = data.terms?.findIndex(
+                          (t) => (t.symbol || t.term) === sub.term || (t.symbol || t.term || '').includes(sub.term)
+                        );
+                        const subColor = PASTEL_PALETTE[(targetIdx !== undefined && targetIdx !== -1 ? targetIdx : idx) % PASTEL_PALETTE.length];
+
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`zoom-carousel-breakdown-item ${isClickable ? 'clickable' : ''}`}
+                            onClick={isClickable ? () => selectDetailItem(sub.term) : undefined}
+                          >
+                            <code 
+                              className="zoom-carousel-breakdown-term"
+                              dangerouslySetInnerHTML={{ __html: translateLatexToHtml(sub.term) }}
+                              style={{ 
+                                background: subColor.bg, 
+                                border: `1px solid ${subColor.border}`,
+                                color: subColor.text,
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}
+                            />
+                            <span className="zoom-carousel-breakdown-desc">
+                              {sub.definition} {isClickable && <span style={{ marginLeft: '4px', color: subColor.text }}>➔</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -578,20 +916,18 @@ export const SemanticZoomPanel: React.FC<SemanticZoomPanelProps> = ({
             {getLevelBadge()}
           </span>
         </div>
-        <span className="panel-nav-title" style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          {getHeaderTitle()}
-        </span>
+        <span 
+          className="panel-nav-title" 
+          style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+          dangerouslySetInnerHTML={{ __html: translateLatexToHtml(getHeaderTitle()) }}
+        />
       </div>
 
       {/* Master View */}
       {renderMasterView()}
 
-      {/* Detail View */}
-      {activeSymbol && (
-        <div style={{ marginTop: '16px', borderTop: '1px solid var(--border-glass)', paddingTop: '12px' }}>
-          {renderDetailPanel()}
-        </div>
-      )}
+      {/* Detail View Carousel */}
+      {renderCarousel()}
     </div>
   );
 };

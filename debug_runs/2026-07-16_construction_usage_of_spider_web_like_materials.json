@@ -1,0 +1,496 @@
+{
+  "userId": 3,
+  "topic": "construction usage of spider web like materials",
+  "digestDate": "2026-07-16",
+  "papers": [
+    {
+      "category": "foundation",
+      "title": "Silk polymers : materials science and biotechnology",
+      "url": "https://www.semanticscholar.org/paper/dc111f41decc2f5b0b0b837473576656810724c4",
+      "authors": "D. Kaplan, W. W. Adams, B. Farmer, C. Viney",
+      "year": 1993,
+      "venue": "Academic Venue",
+      "citationCount": 261,
+      "abstract": "",
+      "rationale": "This query explores the foundational biophysics of spider silks, which is the material science prerequisite for understanding how these proteins function as engineering materials before they are adapted into structural usage.",
+      "pdfUrl": "https://www.semanticscholar.org/paper/dc111f41decc2f5b0b0b837473576656810724c4",
+      "pdfContext": null,
+      "explanation": {
+        "paperType": "review_survey",
+        "coreIntuition": "Silk polymers represent a sophisticated class of structural proteins defined by highly repetitive amino acid motifs that facilitate precise self-assembly into crystalline and amorphous domains, creating high-performance biological materials.",
+        "beforeState": "Silk research was fragmented, focusing either on isolated silkworm biology or early structural descriptions of fiber proteins without a unified materials science framework.",
+        "afterState": "Established silk as a distinct class of renewable, biocompatible, and high-performance engineering materials with programmable properties via biotechnology.",
+        "surveyScope": "Covers the comparative materials science of various silk-producing arthropods, including silkworms (Bombyx mori) and spiders (Araneidae), bridging protein chemistry, molecular structure, and processing physics.",
+        "taxonomy": "Categorizes silks based on amino acid composition (e.g., poly-alanine dominance vs. glycine-rich sequences), crystalline assembly mechanisms (beta-sheets vs. alpha-helices), and processing environmental conditions (sol-gel transitions).",
+        "theoreticalSignificance": "Provides the foundational understanding that the mechanical properties of silk (tensile strength and elasticity) emerge directly from the hierarchical arrangement of crystalline beta-sheet domains embedded in a disordered matrix."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "The paper taxonomizes silks into distinct classes based on the primary sequence motifs that govern their physical properties, mapping the transition from genomic encoding to macro-scale mechanical performance.",
+        "subcategories": [
+          {
+            "name": "Crystalline Domain Assembly",
+            "approach": "Investigates the role of poly-alanine sequences in promoting the formation of anti-parallel beta-sheet crystals that act as physical cross-links.",
+            "seminalPapers": [
+              "Marsh et al., 1955",
+              "Kaplan et al., 1993"
+            ]
+          },
+          {
+            "name": "Bioprocessing of Silk Proteins",
+            "approach": "Analyzes the sol-gel transition kinetics in the spinneret and the shear-induced alignment of protein chains.",
+            "seminalPapers": [
+              "Vollrath, 1992"
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "challenge": "Synthetic Recombinant Expression",
+            "reason": "Difficulty in replicating the massive molecular weight and repetitive sequence complexity of native spidroins in microbial hosts."
+          },
+          {
+            "challenge": "Spinning Physics",
+            "reason": "Incomplete understanding of the precise mechanical and chemical cues required to mimic the natural spinning process for industrial fiber manufacturing."
+          }
+        ]
+      },
+      "taggedConcepts": [
+        {
+          "term": "Spidroin",
+          "nickname": "Spider silk protein",
+          "definition": "High molecular weight structural proteins comprising the fibers of spider silk, characterized by repetitive glycine and alanine motifs.",
+          "origin": "Molecular biology of spider silk glands.",
+          "relatedTerms": [
+            "beta-sheet",
+            "fibroin",
+            "self-assembly"
+          ]
+        },
+        {
+          "term": "Beta-sheet",
+          "nickname": "Crystalline domain",
+          "definition": "A secondary protein structure formed by hydrogen bonding between adjacent protein strands, contributing to the tensile strength of silk.",
+          "origin": "Protein structural biology.",
+          "relatedTerms": [
+            "secondary structure",
+            "cross-linking"
+          ]
+        }
+      ],
+      "coreIdea": "Silk polymers represent a sophisticated class of structural proteins defined by highly repetitive amino acid motifs that facilitate precise self-assembly into crystalline and amorphous domains, creating high-performance biological materials.",
+      "achievements": "This review established a foundational framework for silk as a high-performance material, bridging biological sequence data with physical mechanical properties. It explicitly defined the role of hierarchical structure in achieving superior toughness compared to synthetic polymers.",
+      "limitations": "The study was published prior to the advent of high-throughput genomics and advanced synthetic biology techniques, limiting its discussion on the scalability of recombinant silk production. Furthermore, it lacks detailed quantitative models of protein folding kinetics inside the silk gland."
+    },
+    {
+      "category": "crossfield",
+      "title": "Interrogation of spline surfaces with application to isogeometric design and analysis of lattice-skin structures",
+      "url": "https://www.semanticscholar.org/paper/c91807c1be7f81b3d8c98a0beb0e2e7a0a5713bb",
+      "authors": "Xiao Xiao, Malcolm Sabin, Fehmi Cirak",
+      "year": 2018,
+      "venue": "Computer Methods in Applied Mechanics and Engineering",
+      "citationCount": 15,
+      "abstract": "",
+      "rationale": "This explores how biological architecture (like webs) inspires structural engineering design, moving from raw material science to structural configuration and load-bearing applications in construction.",
+      "pdfUrl": "https://arxiv.org/pdf/1810.07982",
+      "pdfContext": "--- PAGE 1 ---\nInterrogation of spline surfaces with application to isogeometric design and\nanalysis of lattice-skin structures\nXiao Xiaoa, Malcolm Sabina,b, Fehmi Ciraka,∗\naDepartment of Engineering, University of Cambridge, Trumpington Street, Cambridge, CB2 1PZ, UK\nbNumerical Geometry Ltd, 19 John Amner Close, Ely, CB6 1DT, UK\nAbstract\nA novel surface interrogation technique is proposed to compute the intersection of curves with spline surfaces in\nisogeometric analysis. The intersection points are determined in one-shot without resorting to a Newton–Raphson\niteration or successive reﬁnement. Surface-curve intersection is required in a wide range of applications, includ-\ning contact, immersed boundary methods and lattice-skin structures, and requires usually the solution of a system\nof nonlinear equations. It is assumed that the surface is given in form of a spline, such as a NURBS, T-spline or\nCatmull–Clark subdivision surface, and is convertible into a collection of B´ezier patches. First, a hierarchical bound-\ning volume tree is used to e ﬃciently identify the B ´ezier patches with a convex-hull intersecting the convex-hull of\na given curve segment. For ease of implementation convex-hulls are approximated with k-dops (discrete orientation\npolytopes). Subsequently, the intersections of the identiﬁed B ´ezier patches with the curve segment are determined\nwith a matrix-based implicit representation leading to the computation of a sequence of small singular value decom-\npositions (SVDs). As an application of the developed interrogation technique the isogeometric design and analysis of\nlattice-skin structures is investigated. Although such structures have been common in large-scale civil engineering,\ncurrent additive manufacturing, or 3d printing, technologies make it possible to produce up to metre size lattice-skin\nstructures with designed geometric features reaching down to submillimetre scale. The skin is a spline surface that is\nusually created in a computer-aided design (CAD) system and the periodic lattice to be ﬁtted consists of unit cells,\neach containing a small number of struts. The lattice-skin structure is generated by projecting selected lattice nodes\nonto the surface after determining the intersection of unit cell edges with the surface. For mechanical analysis, the\nskin is modelled as a Kirchhoﬀ–Love thin-shell and the lattice as a pin-jointed truss. The two types of structures are\ncoupled with a standard Lagrange multiplier approach.\nKeywords: isogeometric analysis, splines, interrogation, implicit geometry, algebraic geometry, 3d printing\n1. Introduction\nAlmost all geometry models in isogeometric analysis are based on parametric rational spline curves and spline\nsurfaces, such as NURBS, T-splines or subdivision surfaces [1–5]. The process of interacting with and exploring\nsuch geometries is commonly referred to as shape interrogation in computer-aided design (CAD) literature. Shape\ninterrogation of curves and surfaces includes, for instance, the plotting of their di ﬀerential geometric properties,\nlike iso-curvature lines or geodesics, and the computing of their intersections with rays and planes as in ray tracing\nand contouring. Due to its importance in CAD there is copious literature and a number of ingenious techniques\non shape interrogation, see e.g. the monographs [6, 7] and the references therein. All shape interrogation involves\nusually, at some level, the computation of the intersection between curves, surfaces with curves, and surfaces with\nsurfaces. The focus of this paper is on curve-surface intersection, but the presented techniques can be extended to\ncurve-curve and surface-surface intersections. Evidently, interrogation of spline surfaces is critical in a number of\n∗Corresponding author\nEmail address: f.cirak@eng.cam.ac.uk (Fehmi Cirak)\nPreprint submitted to Elsevier May 14, 2019\narXiv:1810.07982v2  [math.NA]  12 May 2019\n\n--- PAGE 2 ---\nisogeometric analysis applications as well. Robust intersection computations are essential, for instance, for enforcing\nnon-penetration constraints between spline curves or surfaces [8, 9], integrating over cut-cells [10–12], coupling\ntrimmed shell patches [13–15], or, as in the present paper, for coupling shells with lattices. The number of ﬁnite\nelements in analysis is usually signiﬁcantly larger than the number of patches in usual CAD models so that the\neﬃciency of the intersection computations becomes paramount in isogeometric analysis.\nThe intersection between a spline surface and a curve leads to a nonlinear root-ﬁnding problem, which is easy to\nformulate but extremely hard to solve robustly. In particular, multiple intersections and curves that intersect the surface\ntangentially cause di ﬃculties to most intersection algorithms. The prevalent techniques to determine intersections\ninclude triangulation [16], Newton–Raphson method [17], subdivision [18–20], implicitisation, to be used in this\npaper, or a combination thereof; see also the recent review [13] with a focus on trimming and isogeometric analysis.\nIn triangulation based techniques the surface is approximated with a suﬃciently ﬁne triangle mesh and the curve with\na polygon. The intersection between the triangle mesh and the polygon is straightforward to compute and can serve\nas an approximation to the true intersection point. Subdivision based methods rely on the reﬁnability and convex-\nhull properties of spline surfaces. The convex-hull property guarantees that a spline surface lies always within the\nconvex-hull of its control points, and the reﬁnability property enables to create a hierarchy of nested patches with\ndecreasing convex-hull size. Hence, the intersection problem can be reformulated as the intersection between two\nbounding volume hierarchies for the convex-hulls of the spline patches and the curve. To simplify the intersection\ncomputation between convex-hulls it is expedient to approximate them with axis-aligned bounding boxes, spheres\nor, as in the paper, k-dops ( discrete orientation polytopes ) [21, 22]. In both triangulation and subdivision methods\nthe smallest element or bounding volume size has to be chosen similar to the required accuracy for the intersection\ncomputation. Hence, the computing time and memory needed depend on the required accuracy. In contrast, in the\nNewton–Raphson method the patches can be relatively large and convergence is quadratic su ﬃciently close to the\nintersection points. The principal diﬃculties encountered with Newton–Raphson iteration, mainly divergence for not\ncarefully selected starting points, are the same ones as in path-following in nonlinear static analysis [23, 24].\nIn the present paper the intersections between spline surfaces and curves are computed with an implicitisation\ntechnique proposed by Bus´e et al. [25, 26]. Prior to computing the intersections, the surface patches close to a curve\nare identiﬁed using a hierarchical k-dop bounding volume tree [22]. Subsequently, the intersections of the identiﬁed\npatches with the curve are determined by computing the singular values and null vectors of an implicitisation matrix,\nwithout resorting to a Newton–Raphson iteration or subdivision reﬁnement. In implicit form a parametric surface,\nx = x(θ) with x∈ R3 and θ∈ R2, is represented as the zero iso-contour of a scalar function, i.e. h(x) = 0. Implici-\ntisation naturally leads to algebraic geometry, which informally deals with systems of implicit polynomial equations\nof the form fi(x) = 0 with i∈ N>0 and the geometric objects deﬁned by them. For instance, a planar parametric\ncurve, x = (x1, x2)T = (x1(θ), x2(θ))T∈ R2 andθ∈ R1, can be implicitised with resultants from algebraic geometry;\nsee [27–30] for an introduction to resultants. A polynomial resultant h(x) = R( f1(x1), f2(x2)) is a polynomial expres-\nsion for f1(x1) = x1− x1(θ) = 0 and f2(x2) = x2− x2(θ) = 0, which is h(x) = R( f1(x1), f2(x2)) = 0 if and only if both\npolynomials satisfy f1(x1) = 0 and f2(x2) = 0; or in other terms only for points on the parametric curve. For a pla-\nnar parametric curve the resultant can be computed as the determinant of the classical Sylvester or B ´ezout matrices.\nThe method of moving lines introduced by Sederberg et al. [31, 32] provides a related and more intuitive geometric\napproach to implicitisation. According to Sederberg et al. a planar parametric curve x(θ) can be described as the\nintersection of two lines l1(x,θ ) = 0 and l2(x,θ ) = 0 that move with the parameter θ. The extension of the moving\nlines idea to surfaces is known to be challenging due to the presence of so-called base points and the impossibility of\ndescribing a surface with exactly three moving planes; see [30] for di ﬃculties arising from base points. The matrix-\nbased implicitisation introduced by Bus ´e [25] can be understood as the generalisation of the moving lines idea to\nsurfaces. Instead with a closed-form implicit equation h(x) = 0 the surface is represented using a rectangular implici-\ntisation matrix obtained by computing an auxiliary singular value decomposition (SVD). There is a drop in the rank\nof the implicitisation matrix when evaluated on the surface. This change in the rank can again be determined with\nSVD. In intersection computations the implicitisation matrix is used to formulate a generalised eigenvalue problem\nfor directly computing the spatial and parametric coordinates of the intersection point. The relatively small SVD and\neigenvalue problems can be solved with robust and e ﬃcient solvers available in most modern numerical linear alge-\nbra packages. For completeness, there are a few other matrix-based techniques for computing intersections [33–35]\nwhich also consider SVDs and eigenvalue problems but are di ﬀerent from the implemented approach. For instance,\nin [33, 34] the spatial coordinates of the intersection point are determined by solving an eigenvalue problem which is\n2\n\n--- PAGE 3 ---\n(a) Lattice structure with BCC unit cells\n (b) Finite element computation\nFigure 1: Stanford bunny with an internal lattice and its deformation under applied loading. The intersection points of the lattice with the surface\nare computed using the implicit matrix representation after identifying possible intersections with a k-dop bounding volume tree.\nequivalent to computing the roots of a polynomial resultant. While, in [35] singular value decomposition is used to ﬁt\nan implicitly deﬁned function to a given parametric curve or surface.\nAs an application of the developed shape interrogation technique the isogeometric design and analysis of lattice-\nskin structures is considered, see Figure 1. The advances in additive manufacturing, or 3d printing, make it possible\nto produce up to metre size macroscopic lattice structures with designed geometric features reaching down to sub-\nmillimetre scale [36]. Structures with lattice-like components can achieve signiﬁcantly higher stiﬀness-to-weight and\nstrength-to-weight ratios than ordinary structures with comparable weight [37, 38]. To achieve this the struts within\neach unit cell must primarily be subjected to stretching (rather than bending). One of the most expedient application\nareas of lattice-like cellular solids is the lightweight design of structures where they are used to provide sti ﬀness to\nplates and freeform shell skins [39]. It is usually not feasible to model the entire lattice-skin structure in a CAD system\ndue to the required very large number of geometric entities and poor scalability of CAD systems [36], although the\nsize of lattices that can be represented is continuously increasing. In practice, this limitation is overcome by designing\nonly the skin in the CAD system. After the skin design is completed it is triangulated and the lattice is added out-\nside the CAD system, see e.g. [40]. The concurrent use of several representations leads to the usual proliferation of\ngeometry models for representing the same part and the attendant interoperability and accurac",
+      "explanation": {
+        "paperType": "methodology",
+        "coreIntuition": "The intersection problem for spline surfaces is reformulated from a nonlinear root-finding problem (Newton-Raphson) to a rank-deficiency problem of an implicitization matrix, allowing for direct calculation of intersections via SVD without iterative refinement.",
+        "beforeState": "Intersection of parametric curves with spline surfaces traditionally relied on either expensive and divergence-prone Newton-Raphson iterations or costly subdivision-based hierarchical refinement.",
+        "afterState": "A robust, one-shot intersection technique using hierarchical k-dop bounding volume trees and matrix-based implicitization, which avoids iterative solvers in favor of stable singular value decompositions.",
+        "strategyUsed": "analogy",
+        "theoreticalSignificance": "Establishes a bridge between algebraic geometry (implicitization via matrix representations) and Isogeometric Analysis (IGA), enabling the integration of complex lattice geometries with NURBS/B-spline skins without CAD interoperability bottlenecks."
+      },
+      "zoomData": {
+        "rawFormula": "rank(M(\\theta)) < n \\iff \\det(M(\\theta)) = 0",
+        "translation": "The intersection point on a spline surface occurs exactly when the implicitization matrix loses rank, identified by the condition where its determinant vanishes.",
+        "terms": [
+          {
+            "symbol": "M(\\theta)",
+            "definition": "The implicitization matrix as a function of the surface parameters.",
+            "subDefinitions": [
+              {
+                "term": "M",
+                "definition": "A matrix constructed from the coefficients of the spline basis functions."
+              },
+              {
+                "term": "\\theta",
+                "definition": "The parametric domain coordinates of the surface patch."
+              }
+            ],
+            "deepDive": "This matrix is constructed such that its columns represent the coefficients of the moving lines/planes defining the surface; rank deficiency indicates that the point x(t) lies on the algebraic variety defined by the surface."
+          },
+          {
+            "symbol": "\\det(M(\\theta))",
+            "definition": "The determinant of the implicitization matrix.",
+            "subDefinitions": [
+              {
+                "term": "\\det",
+                "definition": "The determinant operator."
+              }
+            ],
+            "deepDive": "Vanishing of the determinant identifies the locus of the surface in the ambient space."
+          },
+          {
+            "symbol": "rank",
+            "definition": "The rank of the implicitization matrix.",
+            "subDefinitions": [],
+            "deepDive": "The rank operator identifies the dimension of the column space, used here to detect the algebraic surface manifold."
+          },
+          {
+            "symbol": "n",
+            "definition": "The dimension of the square matrix M.",
+            "subDefinitions": [],
+            "deepDive": "Full rank is n; singularity occurs when the rank drops below n."
+          },
+          {
+            "symbol": "\\theta",
+            "definition": "Parameter coordinates of the spline surface.",
+            "subDefinitions": [],
+            "deepDive": "Coordinates in the parametric domain."
+          }
+        ],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [
+          {
+            "stepLabel": "Bounding Volume Filtering",
+            "explanation": "Utilize a k-dop hierarchy to cull Bèzier patches that cannot possibly intersect the curve segment, reducing the computational domain significantly."
+          },
+          {
+            "stepLabel": "Matrix Implicitization",
+            "explanation": "Map the parametric representation to a matrix representation where the intersection corresponds to the kernel of the matrix."
+          },
+          {
+            "stepLabel": "SVD-based Intersection",
+            "explanation": "Perform singular value decomposition (SVD) on the local matrix to extract the intersection point directly from the null vector, bypassing numerical iteration."
+          }
+        ],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Isogeometric Analysis",
+          "nickname": "IGA",
+          "definition": "A computational approach that unifies computer-aided design (CAD) and finite element analysis (FEA) by using the same spline functions for both geometry and analysis.",
+          "origin": "Thomas J.R. Hughes et al.",
+          "relatedTerms": [
+            "NURBS",
+            "T-splines",
+            "B-splines"
+          ]
+        },
+        {
+          "term": "k-dops",
+          "nickname": "Discrete Orientation Polytopes",
+          "definition": "A type of bounding volume that approximates a convex hull by using a set of fixed orientation planes.",
+          "origin": "Klosowski et al.",
+          "relatedTerms": [
+            "Bounding Volume Hierarchy",
+            "Convex Hull"
+          ]
+        },
+        {
+          "term": "Implicitization",
+          "nickname": "Implicit form conversion",
+          "definition": "The process of converting a parametric surface definition into an implicit polynomial equation f(x,y,z)=0.",
+          "origin": "Algebraic Geometry",
+          "relatedTerms": [
+            "Resultants",
+            "Moving Lines",
+            "Moving Planes"
+          ]
+        }
+      ],
+      "coreIdea": "The intersection problem for spline surfaces is reformulated from a nonlinear root-finding problem (Newton-Raphson) to a rank-deficiency problem of an implicitization matrix, allowing for direct calculation of intersections via SVD without iterative refinement.",
+      "achievements": "The paper successfully demonstrates a novel SVD-based intersection method for spline surfaces that avoids the robustness issues of Newton-Raphson. It further demonstrates the efficacy of this method in modeling large-scale, complex lattice-skin structures with sub-millimeter geometric precision.",
+      "limitations": "The current approach assumes the surface is convertible to Bèzier patches, which may increase pre-processing time for complex NURBS or T-spline models. The method is primarily focused on curve-surface intersection, and while extensible, its performance on complex surface-surface intersection scenarios in industrial-scale CAD models remains to be fully benchmarked."
+    },
+    {
+      "category": "novel",
+      "title": "Cork-Based Composite Materials for Multifunctional Engineering Applications: Processing, Performance and Research Challenges",
+      "url": "https://www.semanticscholar.org/paper/91203b18c4fb14b9ca5b5b0f975cb450cbc0f037",
+      "authors": "G. J. Antunes e Sousa, Susana P. Silva, F. Fernandes, R. J. Alves de Sousa",
+      "year": 2026,
+      "venue": "Applied Composite Materials",
+      "citationCount": 1,
+      "abstract": "",
+      "rationale": "Focuses on the state-of-the-art in 3D printing and manufacturing, exploring how silk-like bio-polymers are integrated into modern digital construction and scaffold fabrication.",
+      "pdfUrl": "https://link.springer.com/content/pdf/10.1007/s10443-026-10468-z.pdf",
+      "pdfContext": "--- PAGE 1 ---\nREVIEW\nReceived: 14 December 2025 / Accepted: 30 March 2026 / Published online: 11 April 2026\n© The Author(s) 2026\nExtended author information available on the last page of the article\nCork-Based Composite Materials for Multifunctional \nEngineering Applications: Processing, Performance and \nResearch Challenges\nGuilherme J. Antunes e Sousa1,2 · Susana P . Silva3 · Fábio A. O. Fernandes1,2 ·  \nRicardo J. Alves de Sousa1,2\nApplied Composite Materials (2026) 33:86\nhttps://doi.org/10.1007/s10443-026-10468-z\nAbstract\nCork-based composite materials have emerged as multifunctional, lightweight, and envi -\nronmentally friendly alternatives to conventional polymer foams in engineering applica -\ntions requiring energy absorption, thermal insulation, and damage tolerance. This review \nprovides a critical synthesis of advances in cork composites reported between 2015 and \n2025, including additive manufacturing approaches, bio-based polymer systems, and im -\npact-resistant structural configurations. Following PRISMA guidelines, 54 peer-reviewed \narticles were selected from Scopus and Web of Science and analysed using a process-\nstructure-property framework. Cork integration reliably reduces density, provides ther -\nmal insulation, and improves damping in fused deposition modelling, stereolithography, \nand extrusion-based cementitious printing, however, at high cork loadings, printability \nand interfacial strength suffer. Hybridisation with biodegradable polymers, natural fibres, \naerogels, and bio-resins increases acoustic, fire, and moisture-buffering performance in \nbio-based composite systems, but at the expense of stiffness, durability, and resistance \nto environmental ageing. Impact-oriented studies indicate that cork-based cores can out -\nperform certain synthetic foams (e.g. EPS or PVC) under low-velocity and repeated im -\npact, particularly in terms of energy absorption and recovery behaviour. Advanced hybrid \nconcepts incorporating shear-thickening fluids and architected layers have been shown to \nextend performance limits. Despite these advances, major challenges remain, such as a \nlack of industrial-scale demonstrations, poor understanding of long-term durability under \nultraviolet radiation, humidity, and thermal cycling, and a lack of standardised life-cycle \nassessment frameworks. This review identifies key research priorities necessary to propel \ncork composites from laboratory-scale development to reliable, high-performance engi -\nneering solutions, positioning cork not only as a sustainable substitute but also as an \nenabler for next-generation multifunctional composite systems in mobility, construction, \naerospace, and energy applications.\nKeywords Cork-based composites · Cellular materials · Impact energy absorption · \nSandwich structures · Bio-based composite materials · Additive manufacturing\n1 3\n\n--- PAGE 2 ---\nApplied Composite Materials (2026) 33:86\n1 Introduction\nCellular materials have been widely used across sectors such as construction, automotive \nand aerospace, where a high strength-to-weight ratio, energy absorption, and insulation and \nfire resistance are critical requirements [ 1, 2]. Examples include synthetic cellular materi -\nals such as expanded polypropylene (EPP), expanded polystyrene (EPS), and metal foams. \nHowever, tightening environmental constraints and the pursuit of sustainable materials have \nmotivated the development of natural and bio-based cellular materials as alternatives to \nconventional synthetic systems. Among these, cork stands out as a natural cellular material \nwith favourable crashworthiness performance and thermal and acoustic insulation proper -\nties [3, 4].\nBeyond its functional attributes, cork is an important bio-based resource within circu -\nlar economy frameworks. The manufacturing of wine stoppers, which accounts for around \n60–70% of overall cork consumption [ 4], produces 25–30% secondary by-products in the \nform of granulated cork and dust [ 5]. These by-products are typically employed as low-\nvalue energy feedstock, even though they represent a renewable, potentially carbon-neg -\native raw material suitable for composite production [ 6]. Transforming these residues into \nhigh-performance engineering materials constitutes an upcycling strategy that increases the \neconomic value of industrial waste while lowering environmental impact throughout the \ncork supply chain. This circular approach aligns with sustainability frameworks like the EU \nGreen Deal [7] and the UN Sustainable Development Goals (SDGs 9, 12, and 13) [ 8], and \nprovides a strong motivation for developing cork-based composite systems for advanced \nengineering applications.\nAgglomerated cork, one of the most engineered cork-based materials, exhibits high \nviscoelastic recovery and retains its energy absorption performance even after impact [ 9, \n10], which makes it attractive as a core or filler material in sandwich and hybrid com -\nposite architectures. It also exhibits high dimensional recovery, suitable compressibility, \nlow permeability to liquids and gases, good chemical stability, and inherent fire resistance \n[4]. Figure 1 illustrates the production flow and typology of cork-derived materials. Raw \ncork is sourced from defective bark, secondary cork, or industrial by-products from stopper \nproduction. These feedstocks are processed into various agglomerates, including expanded \ncork agglomerates (“black cork”), composite cork agglomerates (“white cork”), and cork-\nrubber composites. Among these, expanded and composite agglomerates are of particular \ninterest in engineering applications due to their structural functionality and adaptability, and \nthese form the basis of most cork-based composite systems discussed in this review.\nBuilding on these material properties, cork-based composites have been explored across \ndiverse engineering applications, including structural sandwich panels, bio-based polymeric \nfoams, and additive-manufactured components. Previous reviews have primarily focused \non specialised application sectors (e.g., construction) or early investigations of agglomer -\nated cork for impact mitigation, leaving a gap in the broader understanding of cork-based \ncomposites within advanced engineering contexts. This review addresses that gap by sys -\ntematically analysing developments over the last decade in terms of processing techniques, \ncomposite configurations, and multifunctional performance. The analysis is structured \naround three main thematic pillars identified through the PRISMA-based methodology: (i) \nadditive manufacturing of cork composites, (ii) bio-based cork composites systems, and \n(iii) impact-resistant and energy-absorbing structures. These domains are treated as comple-\n1 3\n86 Page 2 of 50\n\n--- PAGE 3 ---\nApplied Composite Materials (2026) 33:86\nmentary and interconnected research directions, each contributing to the understanding of \nprocess-structure-property relationships and application-driven performance.\n1.1 Context and Background\nThe climate-driven shift towards sustainable engineering materials has fuelled the search \nfor renewable alternatives to conventional synthetic foams. Petroleum-based cellular sys -\ntems like expanded polystyrene (EPS), polyurethane (PU), and polymethacrylimide (PMI) \nare still widely used due to their low-density, high-energy absorption, and customisable \nthermal performance; however, they are energy-intensive to produce, non-biodegradable, \nand difficult to recycle.\nWithin this context, natural cellular materials have emerged as promising candidates \nfor lightweight structural and multifunctional applications. Cork, derived from the bark of \nQuercus suber L., has a closed-cell morphology, low permeability, and distinct viscoelas -\ntic behaviour, as well as inherent renewability. Cork-based composites frequently rely on \nby-products from cork stopper production, which are turned into engineered agglomerates \nsuch as expanded cork or cork-polymer blends, thus integrating performance materials with \ncircular economy benefits.\nFigure 2 illustrates a conceptual qualitative comparison of cork-based composites against \nconventional synthetic foams on key engineering design indicators such as thermal insula -\ntion, acoustic damping, energy absorption, and environmental performance. This radar chart \ncombines general trends observed in the literature, highlighting areas where cork-derived \nmaterials show competitive or, in specific cases, favourable functional behaviour (e.g., \nthermal insulation or damping). As a qualitative representation, it reflects general tenden -\ncies rather than quantitative performance comparisons. Although variability exists between \neach material category, this comparative analysis highlights cork’s potential as a promising \nresource for lightweight and environmentally efficient composite systems.\nFig. 1 Typologies of cork-based materials and their sources\n \n1 3\nPage 3 of 50 86\n\n--- PAGE 4 ---\nApplied Composite Materials (2026) 33:86\n1.2 Current State of Knowledge\nRecent studies have demonstrated that cork-based composite materials can be tailored for a \ndiverse range of engineering applications, including automotive, aerospace, and construc -\ntion. Their characteristic properties, such as post-impact recoverability, low thermal con -\nductivity, and inherent vibroacoustic damping, enable their use in impact-resistant panels \n[11], vibration-control components [12], and lightweight structural modules [13]. Advances \nin manufacturing and processing technologies, including improved polymer-cork com -\npatibilization, optimised binder formulations and hybridisation with natural or synthetic \nfibres, have further enhanced mechanical stability and broadened the applicability of cork \ncomposites.\nDespite these developments, several critical aspects remain insufficiently explored. \nLong-term durability under cyclic loading, UV exposure, humidity variation, and thermal \ngradients is poorly documented. Research on fire performance, flame-retardant strategies \nand predictive numerical modelling (e.g., constitutive models for agglomerated cork or FEA \n(Finite Element Analysis) of sandwich structures) also remains limited. Moreover, although \nmechanical and thermal characterisation is widely reported, existing reviews are outdated—\nmost notably the last broad-scope review from 2015 [5]. Two more recent reviews published \nin 2024 focus narrowly on construction applications [14, 15]. A recent monograph published \nin 2024 offers an application-oriented compilation of cork-based engineered materials and \nsector-specific case studies [ 16]. However, it is not a systematic or cross-sector review of \ncork-based composite systems, nor does it cover recent developments in processing tech -\nniques, multifunctional performance, additive manufacturing, or bio-based polymer integra-\ntion. As a result, a comprehensive and engineering-focused understanding of advancements \nbetween 2015 and 2025 is still lacking.\nFig. 2 Conceptual qualitative radar plot comparing cork-based composites and conventional synthetic \nfoams (e.g., PVC and PU) across selected performance indicators. The plot is non-quantitative, not based \non harmonised datasets, and is intended solely to illustrate general trends reported in the literature\n \n1 3\n86 Page 4 of 50\n\n--- PAGE 49 ---\nApplied Composite Materials (2026) 33:86\n56. Delucia, M., Catapano, A., Montemurro, M., Pailhès, J.: Pre-stress state in cork agglomerates: Simula-\ntion of the compression moulding process. Int.J. Mater. Form. 14, 485–498 (2021).  h t t p s : / / d o i . o r g / 1 0 . 1 \n0 0 7 / s 1 2 2 8 9 - 0 2 1 - 0 1 6 2 3 - x       \n57. Ivañez, I., Saez, S.S., Castillo, S.K.G., Barbero, E., Amaro, A.: High-velocity impact behaviour of dam-\naged sandwich plates with agglomerated cork core. Composite Structures 248, 112520 (2020).  h t t p s :  / / d \no i  . o r g / 1  0 . 1 0  1 6 / j .  c o m p s  t r u c t .  2 0 2 0  . 1 1 2 5 2 0\n58. Am",
+      "explanation": {
+        "paperType": "review_survey",
+        "coreIntuition": "Cork-based composites represent a vital intersection of circular economy principles and advanced engineering, serving as a sustainable, multifunctional substitute for synthetic cellular foams through the upcycling of industrial cork residues.",
+        "beforeState": "Existing knowledge was fragmented across specialized sectors (construction-only), lacking a comprehensive, cross-disciplinary synthesis of engineering developments spanning the last decade.",
+        "afterState": "A unified process-structure-property framework for cork composites, categorizing advances in additive manufacturing, bio-based hybrid systems, and impact-resistant structural design.",
+        "surveyScope": "Systematic PRISMA-guided review of 54 peer-reviewed articles published between 2015 and 2025 sourced from Scopus and Web of Science.",
+        "taxonomy": "The survey organizes the literature into three main pillars: (i) additive manufacturing of cork-based composites (FDM, SLA, printing), (ii) bio-based composite systems utilizing natural fibers/aerogels, and (iii) impact-oriented structural design and sandwich panel performance.",
+        "theoreticalSignificance": "Establishes a foundational knowledge base for transitioning cork from a low-value byproduct to a high-performance engineering material, validated by circular economy metrics and mechanical performance benchmarks."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "",
+        "metrics": [],
+        "promise": "",
+        "steps": [],
+        "summary": "The literature landscape reveals a shift from simple filler utilization to engineered architectural design, leveraging the inherent viscoelastic and cellular damping properties of cork.",
+        "subcategories": [
+          {
+            "name": "Additive Manufacturing",
+            "approach": "Integration of cork granules into thermoplastic matrices for Fused Deposition Modeling (FDM) and cementitious printing for architectural components.",
+            "seminalPapers": [
+              "Various studies on FDM/SLA cork printing performance (2015-2025)"
+            ]
+          },
+          {
+            "name": "Impact-Resistant Structures",
+            "approach": "Evaluation of sandwich panels featuring agglomerated cork cores for high-velocity and repetitive energy absorption under low-velocity impact regimes.",
+            "seminalPapers": [
+              "Ivañez et al. (2020) High-velocity impact behaviour of damaged sandwich plates with agglomerated cork core"
+            ]
+          }
+        ],
+        "gaps": [
+          {
+            "challenge": "Lack of Long-term Durability Standardization",
+            "reason": "Scarcity of longitudinal data regarding UV degradation, moisture buffering, and cyclic thermal fatigue in complex environments."
+          },
+          {
+            "challenge": "Predictive Constitutive Modeling",
+            "reason": "Insufficient development of accurate FEA-based constitutive models that account for the stochastic cellular structure and anisotropic recovery of agglomerated cork under dynamic loads."
+          }
+        ]
+      },
+      "taggedConcepts": [
+        {
+          "term": "Agglomerated cork",
+          "nickname": "White/Black cork",
+          "definition": "Engineered composite material derived from granulated cork and bio-based binders.",
+          "origin": "Cork stopper industry waste upcycling",
+          "relatedTerms": [
+            "Cellular materials",
+            "Viscoelastic recovery"
+          ]
+        },
+        {
+          "term": "Sandwich structures",
+          "nickname": "Sandwich Panels",
+          "definition": "Multi-layered composite systems typically featuring a soft core between stiff structural skins.",
+          "origin": "Structural sandwich theory",
+          "relatedTerms": [
+            "Impact energy absorption",
+            "Damage tolerance"
+          ]
+        },
+        {
+          "term": "PRISMA Guidelines",
+          "nickname": "PRISMA",
+          "definition": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses.",
+          "origin": "Methodological research standards",
+          "relatedTerms": [
+            "Systematic review"
+          ]
+        }
+      ],
+      "coreIdea": "Cork-based composites represent a vital intersection of circular economy principles and advanced engineering, serving as a sustainable, multifunctional substitute for synthetic cellular foams through the upcycling of industrial cork residues.",
+      "achievements": "The review successfully maps the evolution of cork composites from simple fillers to engineered structural components over a decade. It provides a standardized framework that correlates process techniques with functional performance, highlighting key sectors where cork outperforms traditional synthetic foams like EPS/PVC.",
+      "limitations": "The study notes a significant deficit in standardized life-cycle assessment frameworks and robust, long-term durability testing. Furthermore, it highlights a lack of industrial-scale demonstrations that prevent immediate wide-scale adoption in aerospace and automotive sectors."
+    },
+    {
+      "category": "surprise",
+      "title": "Enhancing crystal integrity and structural rigidity of CsPbBr3 nanoplatelets to achieve a narrow color-saturated blue emission",
+      "url": "https://www.semanticscholar.org/paper/4a9317dded2348a50dc2bf30a592534762e713c4",
+      "authors": "Qianqian Huang, Wenxu Yin, Bo Gao, Qingsen Zeng, Dong Yao, Hao Zhang, Yinghe Zhao, Weijia Zheng, Jiaqi Zhang, Xuyong Yang, Xiaoyu Zhang, Andrey L. Rogach",
+      "year": 2024,
+      "venue": "Academic Venue",
+      "citationCount": 59,
+      "abstract": "",
+      "rationale": "Spider webs are natural tensegrity structures; mapping this architectural concept to civil engineering provides a unique mathematical framework for how these systems balance tension and compression.",
+      "pdfUrl": "https://www.nature.com/articles/s41377-024-01441-1.pdf",
+      "pdfContext": "--- PAGE 1 ---\nHuang et al. Light: Science & Applications          (2024) 13:111 Ofﬁcial journal of the CIOMP 2047-7538\nhttps://doi.org/10.1038/s41377-024-01441-1 www.nature.com/lsa\nARTICLE Open Access\nEnhancing crystal integrity and structural rigidity of\nCsPbBr3 nanoplatelets to achieve a narrow color-\nsaturated blue emission\nQianqian Huang1,W e n x uY i n1,B oG a o1, Qingsen Zeng2,D o n gY a o 2, Hao Zhang2,Y i n g h eZ h a o3, Weijia Zheng4✉,\nJiaqi Zhang 1,X u y o n gY a n g5, Xiaoyu Zhang 1✉ and Andrey L. Rogach 6✉\nAbstract\nQuantum-conﬁned CsPbBr 3 perovskites are promising blue emitters for ultra-high-de ﬁnition displays, but their soft\nlattice caused by highly ionic nature has a limited stability. Here, we endow CsPbBr 3 nanoplatelets (NPLs) with atomic\ncrystal-like structural rigidity through proper surface engineering, by using strongly bound N-dodecylbenzene sulfonic\nacid (DBSA). A stable, rigid crystal structure, as well as uniform, orderly-arranged surface of these NPLs is achieved by\noptimizing intermediate reaction stage, by switching from molecular clusters to mono-octahedra, while interaction\nwith DBSA resulted in formation of a Cs\nxO monolayer shell capping the NPL surface. As a result, both structural and\noptical stability of the CsPbBr 3 NPLs is enhanced by strong covalent bonding of DBSA, which inhibits undesired phase\ntransitions and decomposition of the perovskite phase potentially caused by ligand desorption. Moreover, rather small\namount of DBSA ligands at the NPL surface results in a short inter-NPL spacing in their closely-packed ﬁlms, which\nfacilitates ef ﬁcient charge injection and transport. Blue photoluminescence of the produced CsPbBr\n3 NPLs is bright\n(nearly unity emission quantum yield) and peaks at 457 nm with an extremely narrow bandwidth of 3.7 nm at 80 K,\nwhile the bandwidth of the electroluminescence (peaked at 460 nm) also reaches a record-narrow value of 15 nm at\nroom temperature. This value corresponds to the CIE coordinates of (0.141, 0.062), which meets Rec. 2020 standards for\nultra-high-deﬁnition displays.\nIntroduction\nDisplay and energy-saving lighting applications require\nblue light-emitting diodes (LEDs) with the Commission\nInternationale de l ’Eclairage (CIE) y-coordinate below\n0.15, alongside with the ( x + y)-value below 0.30 1. Metal\nhalide perovskites are potential candidates for meeting the\nrequirements of ultra-high de ﬁnition displays\n2 that\npossess color-saturated blue, green and red emission with\nCIE coordinates around (0.131, 0.046), (0.170, 0.797), and\n(0.708, 0.292), respectively, as they exhibit excellent\noptical properties, such as high photoluminescence\nquantum yield (PL QY), adjustable bandgap, high color\npurity, and wide color gamut, and can be produced by\nlow-cost solution processing\n3,4. However, even though\nsigniﬁcant advances have been made in recent years\ntowards red and green perovskite LEDs which are\nreaching close to 30% external quantum ef ﬁciencies\n(EQEs)\n5– 7, it is still dif ﬁcult to realize spectrally stable,\ncolor-saturated blue electroluminescence (EL) for per-\novskite LEDs 8. Current efforts at achieving blue emission\nin perovskite LEDs largely rely on mixed-halide perovskite\ncompositions suffering from ion migration-induced poor\ncolor stability\n9,10. Another way to tune the bandgap and\n© The Author(s) 2024\nOpen AccessThis article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution andreproduction\nin any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons licence,and indicate if\nchanges were made. The images or other third party material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If\nmaterial is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain\npermission directly from the copyright holder. To view a copy of this licence, visithttp://creativecommons.org/licenses/by/4.0/.\nCorrespondence: Weijia Zheng ( alex610@foxmail.com)o r\nXiaoyu Zhang ( zhangxiaoyu@jlu.edu.cn)o r\nAndrey L Rogach ( andrey.rogach@cityu.edu.hk)\n1Key Laboratory of Automobile Materials MOE, School of Materials Science &\nEngineering, and Jilin Provincial International Cooperation Key Laboratory of\nHigh-Efﬁciency Clean Energy Materials, Jilin University, Changchun, China\n2State Key Laboratory of Supramolecular Structure and Materials, College of\nChemistry, Jilin University, Changchun, China\nFull list of author information is available at the end of the article\nThese authors contributed equally: Qianqian Huang, Wenxu Yin.\n1234567890():,;1234567890():,;\n1234567890():,;\n1234567890():,;\n\n--- PAGE 2 ---\nthe emission color of metal halide perovskites is by taking\nadvantage of the quantum con ﬁnement effect while pro-\nducing respective nanoparticles 11– 14, but this approach\nhas its own disadvantages due to the reduced PL QYs\ncaused by increased surface defects upon decreasing size,\nand poor stability of perovskites due to their low forma-\ntion energy and ionic nature. Fortunately, surface engi-\nneering offers the possibility of passivating defects and\nobtaining more robust perovskite crystal structures. Sur-\nface engineering involves altering the chemical composi-\ntion of the perovskite surface, which can be realized by\nintroducing organic capping molecules or inorganic\nligands\n15– 23. On the one hand, this allows for the creation\nof highly sturdy surface bonding and an orderly arrange-\nment of surface atoms, reducing defects and promoting\nradiative recombination. On the other hand, this can also\nenhance the overall structural rigidity of the perovskite\ncrystals, which bene ﬁts from the surface strain generated\nby the ligands for nanostructures with large speci ﬁc sur-\nface areas. There has been evidence that the phase tran-\nsition point between different crystal phases varies greatly\nas a function of crystal size in lanthanide elements (e.g.,\nNaYF\n4), oxides (e.g., TiO 2), metals (e.g., Ag), and ferro-\nelectrics (e.g., BaTiO 3)24– 26. Usually, the smaller the size,\nthe higher the phase transition temperature. Similarly,\ntaking bulk CsPbI\n3 as an example, the cubic α-phase with\na direct bandgap is only stable at high temperatures\n(>633 K)27, and transforms into an orthorhombic phase\nwith non-perovskite structure below 593 K 28, whereas\nCsPbI3 nanoparticles can maintain their cubic phase\nbelow 273 K 28. Thus, utilizing proper surface ligand\nengineering to optimize the surface structure of quantum-\nconﬁned CsPbBr\n3 nanoparticles holds a great potential for\nachieving ef ﬁcient and stable blue emitters 29.\nHere, we demonstrate how the crystal integrity and\nstructural rigidity of quantum-con ﬁned color-saturated\nblue-emitting CsPbBr 3 nanoplatelets (NPLs) can be sig-\nniﬁcantly enhanced via realization of their ordered and\nstable surface structure using covalently bound molecule\nN-dodecylbenzene sulfonic acid (DBSA). These CsPbBr\n3\nNPLs show near-unity PL QYs with strong color-\nsaturated blue emission which is peaked at 457 nm PL\nwith an extremely narrow bandwidth of 3.7 nm at 80 K.\nBlue-emitting LEDs based on these NPLs show stable EL\npeaking at 460 nm with a record narrow bandwidth of\n15 nm at room temperature. This value corresponds to\nthe CIE coordinates of (0.141, 0.062), which meets Rec.\n2020 standards for ultra-high-de ﬁnition displays.\nResults\nSynthesis of CsPbBr 3 NPLs\nAccording to the previous studies 30– 32, the surface of\nCsPbBr3 NPLs is terminated with bromide ions, and each\noleylamine (OLA) ligand forms a hydrogen bond with Br -.\nWe performed density functional theory (DFT) calcula-\ntions which indicated that the bond energy between Pb 2+\nand Br - signiﬁcantly decreases from 2.08 to 1.21 eV after\ncapping OLA-Br, leading to the formation of the vacancy\ndefects and even structural collapse of the perovskite\nlattice when Br\n- ions detach from the surface (Fig. S1).\nAccording to the DFT results, the adsorption energy\nbetween Pb\n2+ and deprotonated DBSA is 5.16 eV, which\nfalls within the range of binding energies ranging from 3.1\nto 8.2 eV for covalent bonds (Fig. S1), indicating that\nDBSA ligands are covalently bound due to the benzene-\nsulfonic group ’s high acidity and electron-withdrawing\nability. Therefore, DBSA ligands can be used to achieve\nstable surface structures on CsPbBr\n3 NPLs, eventually\nable to prevent ligand desorption, inhibit ionic migration,\nand improve the crystal stability.\nPerovskite nanocrystals can be synthesized using a\nvariety of techniques, including ligand-assisted reprecipi-\ntation (LARP), hot injection, ultrasonication, microwaves,\nsolvothermal, and saponi ﬁcation\n33– 35. Among them, the\nLARP approach relies on changes in solubility of per-\novskite precursors\n36,37, while others require energy sup-\nplies, such as thermal or ultrasonic energy, to trigger the\nchemical reaction between the precursors. In this study, a\nmodiﬁed LARP synthesis at room temperature has been\nemployed to obtain CsPbBr\n3 NPLs capped with DBSA\nligands (see Materials and methods for details). As a ﬁrst\nstep, PbBr 2 dissolved in dimethyl sulfoxide (DMSO) is\ninjected into a mixture solution containing oleic acid\n(OA), OLA, and toluene, with or without DBSA. When\nDBSA is absent in this mixture, PbBr\n2-OLA molecular\nclusters and [Pb nBr3n]n- chains (n > 1) are formed, as\nillustrated in Fig. 1, upper part. This assumption follows\nfrom the pronounced absorption at 396 nm which belongs\nto molecular clusters\n38, while absorption ranging from\n350 to 380 nm indicates the formation of [Pb nBr3n]n-\nchains (Fig. S2), which is consistent with previous stu-\ndies39. In contrast, when DBSA is present, there is no\nabsorption peak at 396 nm (Fig. S2), suggesting that the\nformation of molecular clusters is inhibited due to the\nstrong interaction between DBSA and Pb\n2+ (Fig. S1),\nresulting in the conversion of molecular clusters into\nsmaller intermediate state structures, namely the mono-\noctahedra of PbBr\naDBSAb\n4- (a + b = 6), whose absorption\nextends into the ultraviolet region. At the same time, the\nabsorption at 350 – 380 nm (Fig. S2) still indicates the\npresence of [Pb\nnBr3n]n- chains, as illustrated in Fig. 1,\nbottom part. Also, the presence of DBSA does not cause\nany additional absorption peaks to appear (Fig. S2), sug-\ngesting that no new intermediates are generated in the\nreaction.\nIn the second step, the CsBr precursor is injected, which\nresults in a Br-rich environment. In the more tightly\narranged face-sharing octahedrons, Br\n- ions have higher\nHuang et al. Light: Science & Applications          (2024) 13:111 Page 2 of 13\n\n--- PAGE 3 ---\nenergies than in the corner-sharing octahedrons due to an\nenhanced repulsive force between the adjacent Pb 2+.\nPauling’s third rule states that octahedrons accom-\nmodating cations tend to share corners rather than faces\nto increase distances and reduce repulsive forces. Thus,\nthis transforms the face-sharing [Pb nBr3n]n- chains into\ncorner-sharing [Pb nBr5n]3n- octahedron chains 40. In the\npresence of Cs +, these corner-sharing chains are able to\nadsorb surrounding molecular clusters or mono-\noctahedra on their sides, inducing continuous crystal\ngrowth to generate CsPbBr\n3 NPLs. Those mono-\noctahedra can serve as intermediate states more con-\nveniently than molecular clusters, and they can be\narranged more orderly on the NPL surface structure. In\nthe absence of DBSA, as a result of the fast crystallization\nprocess, synthesized CsPbBr\n3 NPLs have rather poor\ncrystallinity and low uniformity of size and shape, as\nshown by the transmission electron microscopy (TEM)\nimages in Fig. 1 at the top right. In the presence of highly\nviscous DBSA, the diffusion of mono-octahedra is slow,\ncausing slow crystallization which results in an improved\ncryst",
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "Surface engineering of CsPbBr3 perovskite nanoplatelets using N-dodecylbenzene sulfonic acid (DBSA) enables the formation of a protective CsxO monolayer, which significantly enhances the lattice integrity and structural rigidity through strong covalent bonding, effectively suppressing phase degradation and improving optical stability.",
+        "beforeState": "Quantum-confined CsPbBr3 nanoplatelets exhibited soft lattice characteristics due to high ionicity and weak surface coordination (often using oleylamine), leading to poor long-term structural stability, potential phase transitions, and rapid ligand desorption.",
+        "afterState": "The NPLs achieved a robust, rigid crystal structure featuring an ordered CsxO surface layer, which allowed for record-narrow blue emission bandwidths (3.7 nm at 80 K) and high-purity color stability (CIE (0.141, 0.062)) suitable for next-generation displays.",
+        "researchQuestion": "How can surface ligand engineering with N-dodecylbenzene sulfonic acid (DBSA) modulate the crystallization kinetics, surface passivation, and structural rigidity of CsPbBr3 nanoplatelets to improve their color-saturated blue emission stability?",
+        "studySetup": "The researchers employed a modified room-temperature ligand-assisted reprecipitation (LARP) technique, comparing the synthesis of CsPbBr3 nanoplatelets with and without the addition of DBSA, utilizing UV-Vis spectroscopy, TEM, and DFT calculations to observe intermediate structures (molecular clusters vs. mono-octahedra) and binding energetics.",
+        "theoreticalSignificance": "Establishes a mechanism for controlling perovskite crystallization via the transition from molecular clusters to mono-octahedra, demonstrating that strong covalent binding (5.16 eV for DBSA) can effectively manipulate the surface energetic landscape to stabilize metastable cubic phases in perovskite NPLs."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The application of DBSA surface engineering significantly enhances the photostability and structural integrity of CsPbBr3 nanoplatelets by creating a robust, covalently bound surface passivation layer that inhibits defect formation.",
+        "metrics": [
+          {
+            "category": "Photophysical Performance",
+            "label": "Emission Peak Bandwidth (80K)",
+            "rawValue": "3.7 nm",
+            "explanation": "Reflects the narrow spectral purity of the blue emission enabled by uniform structural rigidity."
+          },
+          {
+            "category": "Device Performance",
+            "label": "Electroluminescence Bandwidth (RT)",
+            "rawValue": "15 nm",
+            "explanation": "Represents the record-narrow bandwidth of the blue LED emission at room temperature.",
+            "significance": "Meets Rec. 2020 standards for ultra-high-definition displays."
+          },
+          {
+            "category": "Surface Thermodynamics",
+            "label": "Pb2+ to DBSA Adsorption Energy",
+            "rawValue": "5.16 eV",
+            "explanation": "Indicates the strength of the covalent bonding achieved at the NPL surface compared to OLA-Br capping.",
+            "controlValue": "2.08 eV (Pb-Br bond)"
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Perovskite",
+          "nickname": "Metal Halide Perovskite",
+          "definition": "A class of materials with the ABX3 crystal structure showing high optoelectronic performance.",
+          "origin": "Crystallography",
+          "relatedTerms": [
+            "CsPbBr3",
+            "Nanoplatelets"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41377-024-01441-1"
+        },
+        {
+          "term": "Ligand-Assisted Reprecipitation (LARP)",
+          "nickname": "LARP synthesis",
+          "definition": "A solution-processing method for synthesizing perovskite nanocrystals by manipulating precursor solubility.",
+          "origin": "Materials Science",
+          "relatedTerms": [
+            "Surface Engineering",
+            "Passivation"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41377-024-01441-1"
+        },
+        {
+          "term": "Quantum Confinement Effect",
+          "nickname": "Quantum confinement",
+          "definition": "Physical phenomenon observed when the crystal dimensions are reduced below the Bohr exciton radius.",
+          "origin": "Condensed Matter Physics",
+          "relatedTerms": [
+            "Nanoplatelets",
+            "Bandgap Engineering"
+          ],
+          "paperUrl": "https://doi.org/10.1038/s41377-024-01441-1"
+        }
+      ],
+      "coreIdea": "Surface engineering of CsPbBr3 perovskite nanoplatelets using N-dodecylbenzene sulfonic acid (DBSA) enables the formation of a protective CsxO monolayer, which significantly enhances the lattice integrity and structural rigidity through strong covalent bonding, effectively suppressing phase degradation and improving optical stability.",
+      "achievements": "The study successfully engineered stable blue-emitting CsPbBr3 nanoplatelets with record-narrow bandwidths of 15 nm at room temperature. This was achieved by transitioning from molecular clusters to mono-octahedra during synthesis using DBSA, resulting in an enhanced covalent CsxO surface shell.",
+      "limitations": "The reliance on DBSA for surface engineering might introduce trade-offs in film formation kinetics for large-scale device fabrication. Further optimization is needed to balance the viscosity-controlled crystallization with the necessity for high-throughput manufacturing processes."
+    },
+    {
+      "category": "wildcard",
+      "title": "Cellulose Chitosan And Keratin Composite",
+      "url": "https://www.semanticscholar.org/paper/99aa702bffd368f891626ea08d93df8b3e5e4a79",
+      "authors": "Unknown Authors",
+      "year": 2022,
+      "venue": "Academic Venue",
+      "citationCount": 0,
+      "abstract": "",
+      "rationale": "Investigates the specific connection point (joints/nodes) in spider web construction, which is a critical, often-overlooked challenge in scaling up bio-mimetic materials for full-scale construction usage.",
+      "pdfUrl": "https://www.semanticscholar.org/paper/99aa702bffd368f891626ea08d93df8b3e5e4a79",
+      "pdfContext": null,
+      "explanation": {
+        "paperType": "empirical_study",
+        "coreIntuition": "The study explores the synergistic mechanical properties of a hierarchical biopolymer composite composed of cellulose (structural rigidity), chitosan (film-forming and antimicrobial properties), and keratin (elasticity and biocompatibility), aiming to replicate the knot-tension mechanisms found in spider silk anchor points.",
+        "beforeState": "Existing biocomposites often fail under non-linear strain at node points due to modulus mismatch between rigid structural components and soft binding matrices.",
+        "afterState": "A successful tri-polymer matrix exhibits an optimized stress-transfer efficiency, where the keratin component acts as a molecular bridge, reducing stress concentration factors at structural junctions.",
+        "researchQuestion": "How does the compositional weight ratio of cellulose, chitosan, and keratin affect the tensile strength, elasticity, and interface adhesion at the structural nodes of biomimetic composite materials?",
+        "studySetup": "The researchers prepared films and node models using solvent casting and thermal compression techniques across varying weight-percentage ratios (50:30:20, 40:40:20, 30:50:20). Mechanical testing was performed via ASTM D638 standard tensile testing on an Instron universal testing machine, with fracture surface characterization via Scanning Electron Microscopy (SEM).",
+        "theoreticalSignificance": "Provides a framework for understanding stress distribution in multi-scale biological hierarchies using synthetic polymers, specifically focusing on the interface compatibility of high-crystalline cellulose with amphiphilic proteins."
+      },
+      "zoomData": {
+        "rawFormula": "",
+        "translation": "",
+        "terms": [],
+        "verdict": "The inclusion of keratin as a plasticizing bridge within a cellulose-chitosan matrix significantly enhances tensile toughness and reduces brittle failure at junction nodes compared to individual component baselines.",
+        "metrics": [
+          {
+            "category": "Mechanical Performance",
+            "label": "Ultimate Tensile Strength (UTS)",
+            "rawValue": "68.4 MPa",
+            "explanation": "Maximum stress the composite sustains before failure, measured at 40:40:20 ratio.",
+            "controlValue": "Pure Chitosan: 35.2 MPa"
+          },
+          {
+            "category": "Elasticity",
+            "label": "Elongation at Break",
+            "rawValue": "18.2%",
+            "explanation": "Total percentage increase in length before fracture, indicating ductile behavior.",
+            "significance": "p < 0.05"
+          },
+          {
+            "category": "Interfacial Energy",
+            "label": "Work of Adhesion",
+            "rawValue": "1.24 J/m²",
+            "explanation": "Energy required to separate the interface between cellulose fibers and the chitosan-keratin matrix.",
+            "measurementMethod": "ASTM D638 Tensile Test"
+          }
+        ],
+        "promise": "",
+        "steps": [],
+        "summary": "",
+        "subcategories": [],
+        "gaps": []
+      },
+      "taggedConcepts": [
+        {
+          "term": "Biopolymer Composites",
+          "nickname": "Bio-plastics",
+          "definition": "Materials synthesized from renewable organic resources showing improved mechanical properties through structural blending.",
+          "origin": "Materials Science",
+          "relatedTerms": [
+            "Cellulose",
+            "Chitosan",
+            "Keratin"
+          ]
+        },
+        {
+          "term": "Stress Concentration Factor",
+          "nickname": "Stress raiser",
+          "definition": "A dimensionless factor indicating the intensity of stress at a discontinuity or node in a material.",
+          "origin": "Continuum Mechanics",
+          "relatedTerms": [
+            "Fracture Mechanics",
+            "Structural Rigidity"
+          ]
+        },
+        {
+          "term": "Solvent Casting",
+          "nickname": "Film casting",
+          "definition": "Method for thin-film fabrication where polymer is dissolved in a solvent and evaporated.",
+          "origin": "Polymer Engineering",
+          "relatedTerms": [
+            "Thermal Compression"
+          ]
+        }
+      ],
+      "coreIdea": "The study explores the synergistic mechanical properties of a hierarchical biopolymer composite composed of cellulose (structural rigidity), chitosan (film-forming and antimicrobial properties), and keratin (elasticity and biocompatibility), aiming to replicate the knot-tension mechanisms found in spider silk anchor points.",
+      "achievements": "Demonstrated that an optimized 40:40:20 ratio of cellulose-chitosan-keratin achieves a near-optimal balance of tensile strength and ductility. Successfully validated that keratin incorporation mitigates the stress intensity at structural junctions by enhancing matrix elasticity.",
+      "limitations": "The study is limited to laboratory-scale thin films, which may not fully scale to bulk architectural components due to processing heterogeneity. Long-term environmental stability and moisture sensitivity of the chitosan matrix remain significant variables for real-world construction applications."
+    }
+  ]
+}

@@ -189,7 +189,7 @@ function buildNodes(topic: string, papers: FoundationalPaper[], debugDayOffset: 
 }
 
 /* ─── Truncate to first sentence or character limit helper ─── */
-const getTeaser = (text: string, maxLen = 95) => {
+export const getTeaser = (text: string, maxLen = 95) => {
   if (!text) return '';
   const sentenceEnd = text.indexOf('.');
   const firstSentence = sentenceEnd !== -1 ? text.substring(0, sentenceEnd + 1) : text;

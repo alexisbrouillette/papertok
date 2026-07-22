@@ -59,6 +59,10 @@ export interface FoundationalPaper {
   explanation: DetailedExplanation;
   taggedConcepts?: TaggedConcept[];
   searchKeywords: string;
+  teaserCoreIntuition?: string;
+  teaserWhyRead?: string;
+  heroVisualization?: any;
+  venue?: string;
   references?: string[];
   zoomData?: any;
 }

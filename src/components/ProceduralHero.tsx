@@ -54,6 +54,7 @@ interface ProceduralHeroProps {
     };
     heroVisualization?: UnifiedVisualizationSpec | any;
     category?: string;
+    purpose?: string;
   };
   catTextColor?: string;
   catColor?: string;
@@ -148,7 +149,7 @@ const fitLabel = (label: string, boxWidthPx: number, boxHeightPx: number): FitRe
   return { lines, fontSize };
 };
 
-export const ProceduralHero: React.FC<ProceduralHeroProps> = ({ paper, catTextColor, catColor, expanded = false }) => {
+export const ProceduralHero: React.FC<ProceduralHeroProps> = ({ paper, catTextColor, expanded = false }) => {
   const title = paper.title || 'Scientific Discovery';
   const type = paper.explanation?.paperType || 'methodology';
   const hash = getHash(title);
@@ -1237,7 +1238,6 @@ export const ProceduralHero: React.FC<ProceduralHeroProps> = ({ paper, catTextCo
       return match ? parseFloat(match[0]) : n.highlight ? 92.4 : 68.0;
     };
     const values = nodes.map(parseValue);
-    const maxVal = 100;
 
     // Grid Mapping coords
     const minX = 130;
@@ -1291,7 +1291,6 @@ export const ProceduralHero: React.FC<ProceduralHeroProps> = ({ paper, catTextCo
               
               const barFill = isHighlight ? primaryStroke : '#ffffff';
               const strokeColor = primaryStroke;
-              const textFill = isHighlight ? '#1c1b18' : primaryStroke;
 
               return (
                 <g key={node.id}>
@@ -1386,7 +1385,7 @@ export const ProceduralHero: React.FC<ProceduralHeroProps> = ({ paper, catTextCo
         {spec.primitive === 'pipeline' && renderPipelineCanvas()}
         {spec.primitive === 'tree' && renderTreeCanvas()}
         {spec.primitive === 'spatial_layers' && renderLayeredCanvas()}
-        {spec.primitive === 'math_blueprint' && renderMathCanvas()}
+        {(spec.primitive as string) === 'math_blueprint' && renderMathCanvas()}
       </svg>
     </div>
   );

@@ -262,6 +262,7 @@ Use this context to answer any follow-up questions from the user. Be concise, ac
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         systemInstruction: systemInstruction,
+        tools: [{ googleSearch: {} }]
       });
       responseText = await retryWithDelay(async () => {
         const chat = model.startChat({ history: apiHistory });

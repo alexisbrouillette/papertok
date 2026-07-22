@@ -6,10 +6,11 @@ import { DigestMap } from './components/DigestMap';
 import { LoginScreen } from './components/LoginScreen';
 import { DemoScreen } from './components/DemoScreen';
 import { SemanticZoomDrawer } from './components/SemanticZoomDrawer';
+import { TestViz } from './components/TestViz';
 import { type FoundationalPaper, generateFoundationalPapers } from './services/gemini';
 import { AlertCircle } from 'lucide-react';
 
-type Screen = 'login' | 'key-gate' | 'search' | 'map' | 'demo';
+type Screen = 'login' | 'key-gate' | 'search' | 'map' | 'demo' | 'test-viz';
 
 function App() {
   const [token, setToken] = useState<string>('');
@@ -385,8 +386,34 @@ function App() {
               debugDayOffset={debugDayOffset}
               onAdvanceDay={async () => {
                 const nextOffset = debugDayOffset + 1;
-                localStorage.removeItem('papertok_cached_papers'); // clear local client cache
-                await handleSearch(activeTopic, true, nextOffset); // request fresh papers bypassCache=true
+                let hasHistory = false;
+                try {
+                  const token = localStorage.getItem('papertok_token');
+                  const historyRes = await fetch(`/api/digest/history?topic=${encodeURIComponent(activeTopic)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  if (historyRes.ok) {
+                    const historyData = await historyRes.json();
+                    const historyList = historyData.history || [];
+                    if (historyList[nextOffset]) {
+                      hasHistory = true;
+                    }
+                  }
+                } catch (err) {
+                  console.error('Failed to check database history cache on advance day:', err);
+                }
+
+                if (hasHistory) {
+                  // Cached digest exists in database, load it immediately without creating a new task
+                  await handleSearch(activeTopic, false, nextOffset);
+                } else {
+                  // No cache exists, prompt user to confirm generation
+                  const shouldGenerate = window.confirm(`No cached papers found in database for Day ${nextOffset + 1}. Do you want to trigger a new AI generation task?`);
+                  if (shouldGenerate) {
+                    localStorage.removeItem('papertok_cached_papers');
+                    await handleSearch(activeTopic, true, nextOffset);
+                  }
+                }
               }}
             />
           )}
@@ -397,12 +424,17 @@ function App() {
         <DemoScreen onBack={() => setCurrentScreen('search')} />
       )}
 
+      {currentScreen === 'test-viz' && (
+        <TestViz onBack={() => setCurrentScreen('search')} />
+      )}
+
       {/* Global Settings Modal */}
       {showSettings && (
         <Settings
           currentS2Key={s2ApiKey}
           onClose={() => setShowSettings(false)}
           onSave={handleKeysSaved}
+          onLaunchTestViz={() => setCurrentScreen('test-viz')}
         />
       )}
 

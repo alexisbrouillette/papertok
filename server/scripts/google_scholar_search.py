@@ -88,7 +88,7 @@ async def search_google_scholar_fallback(title):
                 'title': title,
                 'url': f"https://scholar.google.com/scholar?q={urllib.parse.quote(title)}",
                 'authors': "Unknown Authors",
-                'venue': "Google Scholar",
+                'venue': "Academic Repository",
                 'year': None,
                 'citationCount': citations,
                 'abstract': ""

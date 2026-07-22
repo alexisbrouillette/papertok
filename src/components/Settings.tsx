@@ -20,12 +20,14 @@ interface SettingsProps {
   currentS2Key: string;
   onClose: () => void;
   onSave: (keys: { geminiKey: string; s2Key: string }) => void;
+  onLaunchTestViz?: () => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
   currentS2Key,
   onClose,
-  onSave
+  onSave,
+  onLaunchTestViz
 }) => {
   const [s2Key, setS2Key] = useState(currentS2Key);
   const [isSaving, setIsSaving] = useState(false);
@@ -299,6 +301,19 @@ export const Settings: React.FC<SettingsProps> = ({
           >
             Clear Cached Papers & Metadata (Dev Tool)
           </button>
+
+          {onLaunchTestViz && (
+            <button 
+              type="button" 
+              className="test-viz-btn-dev" 
+              onClick={() => {
+                onClose();
+                onLaunchTestViz();
+              }}
+            >
+              📊 Launch Visualization Testing Protocol
+            </button>
+          )}
         </form>
       </div>
 
@@ -509,6 +524,28 @@ export const Settings: React.FC<SettingsProps> = ({
           background: rgba(190, 18, 60, 0.1);
           border-color: rgba(190, 18, 60, 0.5);
           color: #9f1239;
+        }
+
+        .test-viz-btn-dev {
+          width: 100%;
+          padding: 10px;
+          border-radius: var(--radius-md);
+          background: rgba(6, 182, 212, 0.08);
+          border: 1px dashed rgba(6, 182, 212, 0.3);
+          color: #06b6d4;
+          font-weight: 600;
+          font-size: 0.82rem;
+          cursor: pointer;
+          transition: var(--transition-fast);
+          margin-top: 10px;
+          text-align: center;
+          font-family: var(--font-mono);
+        }
+
+        .test-viz-btn-dev:hover {
+          background: rgba(6, 182, 212, 0.15);
+          border-color: rgba(6, 182, 212, 0.5);
+          color: #0891b2;
         }
 
         .notification-btn {

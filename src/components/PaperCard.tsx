@@ -3,6 +3,7 @@ import { BookOpen, ThumbsUp, ThumbsDown, MessageSquare, ExternalLink, Calendar, 
 import type { FoundationalPaper } from '../services/gemini';
 import { enrichPaperMetadata, getCachedMetadata, type EnrichedMetadata } from '../services/literature';
 import { SemanticZoomPanel } from './SemanticZoomPanel';
+import { ProceduralHero } from './ProceduralHero';
 
 interface InteractiveTextProps {
   text: string;
@@ -89,6 +90,7 @@ interface PaperCardProps {
   hideHeader?: boolean;
   children?: React.ReactNode;
   onContentScroll?: (scrollTop: number, isBottom: boolean) => void;
+  onReadNext?: () => void;
 }
 
 export const PaperCard: React.FC<PaperCardProps> = ({
@@ -102,7 +104,8 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   total,
   hideHeader = false,
   children,
-  onContentScroll
+  onContentScroll,
+  onReadNext
 }) => {
   const [metadata, setMetadata] = useState<EnrichedMetadata>({ source: 'google-scholar' });
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
@@ -456,6 +459,12 @@ export const PaperCard: React.FC<PaperCardProps> = ({
         }}
       >
         {children}
+        {/* Expanded Visualization Spec (Delivers the technical truth inside reading mode) */}
+        {paper.heroVisualization && (
+          <div className="paper-reading-hero-viz" style={{ marginBottom: '14px', borderRadius: '12px', overflow: 'hidden' }}>
+            <ProceduralHero paper={paper} expanded={true} />
+          </div>
+        )}
         {/* Core Intuition / Vulgarized Idea */}
         <div className="summary-block highlight">
           <div className="core-intuition-header">
@@ -814,8 +823,33 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             <span>🎉 You've reached the end of this digest!</span>
           </div>
         ) : (
-          <div className="paper-stack-divider">
-            <span>↓ Scroll down to continue</span>
+          <div className="paper-stack-divider-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '16px 20px 28px' }}>
+            {onReadNext && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onReadNext(); }}
+                className="read-next-paper-btn"
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  background: 'var(--color-primary)',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  border: 'none',
+                  boxShadow: '0 4px 14px rgba(27, 73, 49, 0.4)',
+                  transition: 'all 0.2s ease',
+                  width: '100%',
+                  maxWidth: '280px',
+                  textAlign: 'center',
+                }}
+              >
+                Read Next Paper &rarr;
+              </button>
+            )}
+            <div className="paper-stack-divider" style={{ border: 'none', background: 'none', padding: '4px', margin: 0 }}>
+              <span>↓ Or scroll down to continue</span>
+            </div>
           </div>
         )}
       </div>

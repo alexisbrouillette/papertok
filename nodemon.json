@@ -1,0 +1,12 @@
+{
+  "ignore": [
+    "debug_runs",
+    "scratch",
+    "src",
+    "dist",
+    "package-lock.json"
+  ],
+  "watch": [
+    "server"
+  ]
+}

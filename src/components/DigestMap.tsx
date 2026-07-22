@@ -4,6 +4,7 @@ import type { FoundationalPaper, ChatMessage } from '../services/gemini';
 import { askPaperQuestion, generateFoundationalPapers } from '../services/gemini';
 import { PaperCard } from './PaperCard';
 import { getCachedMetadata } from '../services/literature';
+import { ProceduralHero } from './ProceduralHero';
 
 /* ─── Countdown Timer Component (Isolated Rerendering) ─────── */
 interface CountdownTimerProps {
@@ -187,6 +188,18 @@ function buildNodes(topic: string, papers: FoundationalPaper[], debugDayOffset: 
   return list;
 }
 
+/* ─── Truncate to first sentence or character limit helper ─── */
+const getTeaser = (text: string, maxLen = 95) => {
+  if (!text) return '';
+  const sentenceEnd = text.indexOf('.');
+  const firstSentence = sentenceEnd !== -1 ? text.substring(0, sentenceEnd + 1) : text;
+  
+  if (firstSentence.length <= maxLen) {
+    return firstSentence;
+  }
+  return text.substring(0, maxLen).trim() + '...';
+};
+
 /* ─── Progress Ring SVG Component ───────────────────────────── */
 const ProgressRing: React.FC<{ total: number; filled: number; size: number; active: boolean }> = ({
   total,
@@ -261,6 +274,14 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [lastPaperScrolledToBottom, setLastPaperScrolledToBottom] = useState(false);
   const [sentinelIntersected, setSentinelIntersected] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
 
   // Local progress ratings and AI follow-up chat state
@@ -1076,22 +1097,7 @@ export const DigestMap: React.FC<DigestMapProps> = ({
       </div>
       )}
 
-      {/* ── Fixed Bottom Sleeping Banner ── */}
-      {nodes.length > 0 && nodes[debugDayOffset] && nodes[debugDayOffset].readCategories.length === CATEGORIES.length && (
-        <div className="digest-completed-sleeping-card glass-panel anim-slide-up">
-          <div className="sleeping-content">
-            <span className="sleeping-title">All Caught Up!</span>
-            <CountdownTimer prefix="⏳ Next digest in " className="sleeping-timer" />
-          </div>
-          <button
-            className="debug-fast-forward-btn"
-            onClick={handleDebugAdvanceDay}
-            title="[Debug] Skip to next day & generate new digest"
-          >
-            ⏭ Skip Day
-          </button>
-        </div>
-      )}
+
 
       {/* ── Slide-Up Drawer ── */}
       {openNode && (
@@ -1202,6 +1208,16 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                                setLastPaperScrolledToBottom(true);
                              }
                             }}
+                            onReadNext={() => {
+                              const availableKeys = CATEGORIES.map((c) => c.key).filter((k) => openNode.papers[k]);
+                              const nextKey = availableKeys[idx + 1];
+                              if (nextKey && drawerRef.current) {
+                                const item = drawerRef.current.querySelector(`[data-paper-key="${nextKey}"]`);
+                                if (item) {
+                                  item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                              }
+                            }}
                           >
                             <div className="paper-stack-title-header">
                               <div className="card-badge-header">
@@ -1235,8 +1251,161 @@ export const DigestMap: React.FC<DigestMapProps> = ({
                   })}
                 </div>
               </div>
+            ) : isMobile ? (
+              /* ── Mobile Category Carousel Deck ── */
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <div className="digest-drawer-handle" />
+                <div className="digest-drawer-header">
+                  <p className="digest-drawer-super">Today's Digest</p>
+                  <button className="digest-drawer-x" onClick={handleCloseDrawer} aria-label="Close">
+                    <X size={18} />
+                  </button>
+                </div>
+                <p className="digest-drawer-subtitle" style={{ margin: '8px 24px 12px' }}>
+                  {openNode.readCategories.length} of {CATEGORIES.length} papers read — swipe & select a card
+                </p>
+
+                <div className="digest-category-carousel">
+                  {CATEGORIES.map((cat) => {
+                    const paper = openNode.papers[cat.key];
+                    const isRead = openNode.readCategories.includes(cat.key);
+                    if (!paper) return null;
+                    const cachedMeta = getCachedMetadata(paper.title);
+                    const citations = paper.citationCount ?? cachedMeta?.citationCount;
+                    return (
+                      <div
+                        key={cat.key}
+                        className={`digest-carousel-card ${isRead ? 'read' : ''}`}
+                        style={{
+                          '--cat-color': cat.color,
+                          '--cat-glow': cat.glow,
+                          '--cat-text': cat.textColor,
+                        } as React.CSSProperties}
+                        onClick={() => setSelectedCategory(cat.key)}
+                      >
+                        {/* ── Colored left accent strip ── */}
+                        <div className="card-accent-strip" style={{ background: cat.textColor }} />
+                        
+                        {/* ── Header row ── */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 0 0 8px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '1rem' }}>{cat.icon}</span>
+                          <span style={{ fontSize: '0.66rem', fontWeight: 800, textTransform: 'uppercase', color: cat.textColor, letterSpacing: '0.04em', fontFamily: 'var(--font-mono)' }}>{cat.label}</span>
+                          {isRead && <span style={{ color: '#10b981', fontSize: '0.68rem', fontWeight: 'bold' }}>✓</span>}
+                          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontWeight: 600 }}>
+                            <span>{paper.explanation?.paperType?.replace('_', ' ').toUpperCase() || 'ARTICLE'}</span>
+                            <span>•</span>
+                            <span>{paper.year}</span>
+                          </div>
+                        </div>
+                        
+                        {/* ── Paper title ── */}
+                        <h3 className="digest-carousel-card-title-editorial" style={{ padding: '0 8px' }}>{paper.nickname || paper.title}</h3>
+                        
+                        {/* ── Meta row: Author • Venue • Citations ── */}
+                        <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>
+                            By {paper.authors.length > 35 ? paper.authors.substring(0, 33) + '…' : paper.authors}
+                          </p>
+ 
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            {cachedMeta?.venue && (
+                              <span style={{
+                                fontSize: '0.62rem', fontWeight: 700,
+                                background: cat.color.replace(/[\d.]+\)$/, '0.18)'),
+                                color: cat.textColor, padding: '3px 10px', borderRadius: '99px',
+                                fontFamily: 'var(--font-mono)', letterSpacing: '0.02em',
+                                border: `1px solid ${cat.textColor}18`,
+                                maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap', display: 'inline-block'
+                              }}>
+                                📖 {cachedMeta.venue}
+                              </span>
+                            )}
+                            <span style={{
+                              fontSize: '0.62rem', fontWeight: 700,
+                              background: 'rgba(245, 158, 11, 0.1)', color: '#92400e',
+                              padding: '3px 10px', borderRadius: '99px',
+                              fontFamily: 'var(--font-mono)', letterSpacing: '0.02em'
+                            }}>
+                              ⭐ {citations !== undefined && citations > 0 ? citations.toLocaleString() : '—'} citations
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* ── Scrollable content zone ── */}
+                        <div className="card-scroll-content" onClick={(e) => e.stopPropagation()} style={{
+                          flex: 1,
+                          overflowY: 'auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '10px',
+                          minHeight: 0,
+                          paddingRight: '2px'
+                        }}>
+                          {/* ── Hero editorial zone with colored background ── */}
+                          <div className="card-editorial-hero" style={{
+                            background: `linear-gradient(135deg, ${cat.color} 0%, ${cat.color.replace(/[\d.]+\)$/, '0.03)')} 100%)`,
+                            borderLeft: `3px solid ${cat.textColor}`,
+                            borderRadius: '0 12px 12px 0',
+                            padding: '14px 16px',
+                            marginLeft: '4px'
+                          }}>
+                            <ProceduralHero paper={paper} catTextColor={cat.textColor} catColor={cat.color} expanded={false} />
+                          </div>
+                          {/* ── Core insight (full text, scrollable) ── */}
+                          {(paper.teaserCoreIntuition || paper.coreIdea) && (
+                            <div style={{
+                              padding: '10px 12px',
+                              margin: '0 4px',
+                              background: 'rgba(9, 9, 11, 0.025)',
+                              borderRadius: '10px',
+                              borderLeft: `2px solid ${cat.textColor}40`
+                            }}>
+                              <p style={{
+                                fontSize: '0.8rem',
+                                color: 'var(--text-secondary)',
+                                lineHeight: 1.5,
+                                margin: 0,
+                                fontFamily: 'var(--font-sans)'
+                              }}>
+                                <strong style={{ color: cat.textColor, fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: 'var(--font-mono)' }}>💡 Core Insight</strong>
+                                <br />
+                                {paper.coreIdea}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* ── SOTA Delta banner ── */}
+                          {paper.heroVisualization?.deltaCallout?.metric && (
+                            <div style={{
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              background: cat.color.replace(/[\d.]+\)$/, '0.08)'),
+                              border: `1px solid ${cat.textColor}20`,
+                              padding: '8px 12px', borderRadius: '10px', margin: '0 4px',
+                              fontSize: '0.76rem', color: cat.textColor,
+                              fontWeight: '700', fontFamily: 'var(--font-mono)'
+                            }}>
+                              📊 {paper.heroVisualization.deltaCallout.metric} {paper.heroVisualization.deltaCallout.comparisonText}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* ── CTA Button ── */}
+                        <button className="digest-carousel-card-action" style={{ 
+                          width: 'calc(100% - 16px)', 
+                          margin: 'auto 8px 4px 8px',
+                          background: cat.textColor,
+                          color: '#fff'
+                        }}>
+                          Start Reading &rarr;
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ) : (
-              /* ── Category Deck ── */
+              /* ── Desktop Category Deck ── */
               <>
                 <div className="digest-drawer-handle" />
                 <div className="digest-drawer-header">
@@ -1611,7 +1780,10 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           border-top: 1px solid var(--border-glass);
           border-radius: 24px 24px 0 0;
           max-height: 100vh;
-          overflow-y: auto;
+          height: 85vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
           transform: translateY(100%);
           transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), height 0.35s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.35s cubic-bezier(0.32, 0.72, 0, 1);
           padding-bottom: env(safe-area-inset-bottom, 24px);
@@ -1673,6 +1845,253 @@ export const DigestMap: React.FC<DigestMapProps> = ({
           font-size: 0.82rem;
           color: var(--text-muted);
           font-family: var(--font-sans);
+        }
+
+         /* ── Mobile Category Carousel ── */
+        .digest-category-carousel {
+          display: flex;
+          gap: 16px;
+          overflow-x: auto;
+          padding: 12px 24px 24px;
+          scroll-snap-type: x mandatory;
+          scroll-padding: 0 24px;
+          scroll-behavior: smooth;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          align-items: stretch;
+          flex: 1;
+          min-height: 0;
+        }
+        .digest-category-carousel::-webkit-scrollbar {
+          display: none;
+        }
+        .digest-carousel-card {
+          flex: 0 0 92%;
+          scroll-snap-align: center;
+          scroll-snap-stop: always;
+          background: var(--cat-color, rgba(250, 248, 244, 0.95));
+          border: 1px solid rgba(0, 0, 0, 0.06);
+          border-radius: 20px;
+          padding: 18px 18px 14px 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          position: relative;
+          overflow: hidden;
+
+          box-shadow: 0 4px 20px var(--cat-glow, rgba(0,0,0,0.08)), 0 1px 3px rgba(0,0,0,0.04);
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .card-scroll-content {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0,0,0,0.15) transparent;
+        }
+        .card-scroll-content::-webkit-scrollbar {
+          width: 4px;
+        }
+        .card-scroll-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .card-scroll-content::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.12);
+          border-radius: 4px;
+        }
+        .card-accent-strip {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 4px;
+          height: 100%;
+          border-radius: 20px 0 0 20px;
+        }
+        .digest-carousel-card.read {
+          border-color: rgba(15, 81, 50, 0.25);
+          box-shadow: 0 8px 24px rgba(15, 81, 50, 0.08);
+        }
+        .digest-carousel-card-read-badge {
+          font-size: 0.65rem;
+          font-weight: 700;
+          color: #0f5132;
+          background: rgba(15, 81, 50, 0.08);
+          border: 1px solid rgba(15, 81, 50, 0.2);
+          padding: 2px 8px;
+          border-radius: 99px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-family: var(--font-mono);
+          display: inline-flex;
+          align-items: center;
+        }
+        .digest-carousel-card-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+        }
+        .digest-carousel-card-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: var(--cat-text);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          box-shadow: 0 4px 12px var(--cat-glow);
+        }
+        .digest-carousel-card-tag {
+          font-size: 0.72rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: var(--cat-text);
+          letter-spacing: 0.05em;
+          font-family: var(--font-mono);
+        }
+        .digest-carousel-card-check {
+          color: #10b981;
+          margin-left: 6px;
+        }
+        .digest-carousel-card-citations {
+          margin-left: auto;
+          font-size: 0.65rem;
+          color: var(--color-warning);
+          background: rgba(245, 158, 11, 0.08);
+          padding: 2px 6px;
+          border-radius: 99px;
+        }
+        .digest-carousel-card-hero-wrap {
+          width: 100%;
+          min-height: 130px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          background: transparent;
+          border: none;
+        }
+        .digest-carousel-card-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+        .digest-carousel-card-body::-webkit-scrollbar {
+          display: none;
+        }
+        .digest-carousel-card-title {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          margin: 0;
+          line-height: 1.35;
+          font-family: var(--font-display);
+        }
+        .digest-carousel-card-title-editorial {
+          font-family: var(--font-display);
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          margin: 0 0 8px 0;
+          line-height: 1.3;
+          text-align: left;
+        }
+        .digest-editorial-meta-row {
+          font-size: 0.76rem;
+          color: var(--text-secondary);
+          margin: 0 0 5px 0;
+          font-family: var(--font-sans);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          text-align: left;
+          width: 100%;
+        }
+        .meta-value-bold {
+          font-weight: 700;
+          color: var(--text-primary);
+          flex-shrink: 0;
+        }
+        .meta-sep {
+          color: var(--text-muted);
+          opacity: 0.4;
+          font-weight: 300;
+        }
+        .meta-authors-truncated, .meta-journal-truncated {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          flex: 1;
+        }
+        .digest-editorial-divider {
+          height: 1px;
+          background: rgba(0, 0, 0, 0.08);
+          margin: 12px 0;
+          border: none;
+        }
+        .digest-editorial-section {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          text-align: left;
+          flex: 1;
+          min-height: 0;
+        }
+        .digest-editorial-section-title {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: var(--cat-text);
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          margin: 0;
+        }
+        .digest-editorial-section-text {
+          font-family: var(--font-display);
+          font-size: 0.90rem;
+          line-height: 1.5;
+          color: var(--text-primary);
+          margin: 0;
+          font-style: italic;
+        }
+        .digest-carousel-card-action {
+          width: 100%;
+          padding: 10px;
+          border-radius: 12px;
+          background: var(--cat-text);
+          color: var(--bg-darkest);
+          font-weight: 700;
+          font-size: 0.82rem;
+          text-align: center;
+          transition: all 0.2s ease;
+          margin-top: auto; /* Push action button to bottom of card */
+        }
+        .digest-carousel-card:hover .digest-carousel-card-action {
+          filter: brightness(1.1);
+        }
+
+        /* Fullscreen Carousel on Mobile screens */
+        @media (max-width: 767px) {
+          .digest-drawer {
+            height: 100vh !important;
+            border-radius: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-y: hidden !important;
+          }
+          .digest-category-carousel {
+            flex: 1 !important;
+            padding-bottom: 36px !important;
+          }
+          .digest-carousel-card {
+            height: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .why-text {
+            -webkit-line-clamp: 12 !important;
+          }
         }
 
         /* ── Category List ──────────────────────────────────── */

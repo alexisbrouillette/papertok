@@ -2,13 +2,50 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { dbGet, dbRun, dbAll } from '../db.js';
 import fs from 'fs';
 import path from 'path';
-
 // Double-escapes single backslashes in specific LaTeX math keys (rawFormula, symbol, term, inequalityUsed, promise)
 function escapeJsonLatexBackslashes(str) {
   return str.replace(/"(rawFormula|symbol|term|inequalityUsed|promise)":\s*"([^"]*)"/g, (match, key, val) => {
     const cleanVal = val.replace(/\\/g, '\\\\').replace(/\\\\\\\\/g, '\\\\');
     return `"${key}": "${cleanVal}"`;
   });
+}
+
+// Clean markdown code blocks from JSON output
+function cleanJsonString(str) {
+  let cleaned = str.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```[a-zA-Z0-9]*\n?/, '').replace(/\n?```$/, '').trim();
+  }
+  return cleaned;
+}
+
+// API Key Rotator to alternate between multiple keys when rate-limited
+class KeyRotator {
+  constructor(apiKeysString) {
+    this.keys = (apiKeysString || '').split(',').map(k => k.trim()).filter(Boolean);
+    this.currentIndex = 0;
+  }
+
+  getActiveKey() {
+    return this.keys[this.currentIndex] || this.keys[0] || '';
+  }
+
+  getActiveClient() {
+    return new GoogleGenerativeAI(this.getActiveKey());
+  }
+
+  rotate() {
+    if (this.keys.length > 1) {
+      this.currentIndex = (this.currentIndex + 1) % this.keys.length;
+      console.log(`[API Key Rotator] Swapped to API key index ${this.currentIndex} due to rate limits`);
+      return true;
+    }
+    return false;
+  }
+
+  get count() {
+    return this.keys.length;
+  }
 }
 
 // Helper function to retry a function with exponential backoff.
@@ -40,10 +77,13 @@ async function retryWithDelay(fn, retries = 5, delay = 5000, factor = 2) {
 const exhaustedModels = new Set();
 
 // Helper function to try generating content with sequential fallbacks
-async function generateContentWithFallback(genAI, primaryModelName, prompt, config) {
-  // Fallback order: primary → high-quota models → standard Gemini models
-  // Note: Gemma models have only 16K TPM which is too low for paper deconstruction prompts
-  const modelsToTry = [primaryModelName, 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemma-4-31b-it', 'gemma-4-26b-a4b-it'];
+async function generateContentWithFallback(keyRotator, primaryModelName, prompt, config, isHeavy = false) {
+  // Fallback order depending on task size/complexity:
+  // - Heavy tasks (like paper deconstruction) avoid low-TPM or schema-loose Gemma models.
+  // - Light tasks prioritize Gemma to save Gemini quota.
+  const modelsToTry = isHeavy
+    ? [primaryModelName, 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
+    : [primaryModelName, 'gemma-4-31b-it', 'gemma-4-26b-a4b-it', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
   const filteredModels = [...new Set(modelsToTry)].filter(m => !exhaustedModels.has(m));
   const uniqueModels = filteredModels.length > 0 ? filteredModels : [...new Set(modelsToTry)];
 
@@ -52,15 +92,24 @@ async function generateContentWithFallback(genAI, primaryModelName, prompt, conf
     try {
       console.log(`[Gemini API] Attempting generation with model: ${modelName}`);
       const modelConfig = { ...config };
-      // Gemma models don't support responseSchema — strip it and rely on prompt-based JSON
       const isGemma = modelName.includes('gemma');
       if (isGemma) {
         delete modelConfig.responseSchema;
       }
-      const model = genAI.getGenerativeModel({ model: modelName, generationConfig: modelConfig });
+      // Configure thinking mode only for gemini-3 models
+      if (modelName.includes('gemini-3')) {
+        modelConfig.thinkingConfig = { thinkingBudget: 1024 };
+      }
       return await retryWithDelay(async () => {
         try {
-          const result = await model.generateContent(prompt);
+          const genAI = keyRotator.getActiveClient();
+          const model = genAI.getGenerativeModel({ model: modelName, generationConfig: modelConfig });
+          // Add a 35-second fetch timeout wrapper to prevent sockets hanging indefinitely on rate-limits
+          const timeoutPromise = (promise, ms) => Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout: Gemini API request took too long')), ms))
+          ]);
+          const result = await timeoutPromise(model.generateContent(prompt), 35000);
           const text = result.response.text();
           // Guard: reject looping/degenerate outputs (>100K chars is almost certainly repeating)
           if (text.length > 100000) {
@@ -69,7 +118,12 @@ async function generateContentWithFallback(genAI, primaryModelName, prompt, conf
           return text;
         } catch (err) {
           const errMsg = err.message || '';
-          if (errMsg.includes('RequestsPerDay') || errMsg.includes('free_tier_requests') || errMsg.includes('Quota exceeded')) {
+          const isQuota = errMsg.includes('RequestsPerDay') || errMsg.includes('free_tier_requests') || errMsg.includes('Quota exceeded') || errMsg.includes('quota') || (err.status === 429);
+          if (isQuota) {
+            if (keyRotator.rotate()) {
+              console.log(`[API Key Rotator] Swapped keys due to rate limit/quota error on model ${modelName}. Retrying...`);
+              throw new Error('API key rotated. Retry request.');
+            }
             err.isDailyQuota = true;
           }
           throw err;
@@ -436,7 +490,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
         const lineage = await fetchLineageFromSemanticScholar(title);
         return {
           citationCount: topResult.citationCount || lineage.s2Paper?.citationCount || undefined,
-          venue: topResult.venue || lineage.s2Paper?.venue || undefined,
+          venue: (topResult.venue && topResult.venue !== 'Google Scholar' && topResult.venue !== 'Academic Repository') ? topResult.venue : (lineage.s2Paper?.venue || undefined),
           pdfUrl: sanitiseArxivUrl(topResult.url) || await resolveOaPdf(lineage.s2Paper),
           paperUrl: topResult.url,
           source: 'google-scholar-scrape',
@@ -495,6 +549,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
   return {
     paperUrl: `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`,
     pdfUrl: await resolveOaPdf(lineage.s2Paper),
+    venue: lineage.s2Paper?.venue || undefined,
     source: 'google-scholar',
     citations: lineage.citations,
     references: lineage.references
@@ -504,7 +559,7 @@ export async function enrichPaperMetadata(title, searchKeywords, s2ApiKey) {
 // --- GEMINI GENERATION HELPERS ---
 
 async function generatePaperDetails(paper, apiKey) {
-  const genAI = new GoogleGenerativeAI(apiKey);
+  const keyRotator = new KeyRotator(apiKey);
   const prompt = `You are a world-class senior scientist and academic researcher. Your explanations in the "Under the Hood" sections must be highly technical, rigorous, and written specifically for fellow researchers and domain experts who are highly knowledgeable in the field. Avoid oversimplifications, generalities, or superficial descriptions; instead, focus on the exact mathematical formulations, algorithmic steps, specific datasets/architectures, empirical conditions, or theoretical proofs that define the paper's core contribution.
 We are analyzing the foundational paper: "${paper.title}" (${paper.year}) by ${paper.authors}.
 The paper's stated purpose is: "${paper.purpose}"
@@ -656,7 +711,9 @@ Do not wrap response in markdown blocks - return the raw JSON object.`;
 }
 
 async function resolvePdfAndTextForPaper(paper, s2ApiKey) {
-  const { execSync } = await import('child_process');
+  const { exec } = await import('child_process');
+  const { promisify } = await import('util');
+  const execPromise = promisify(exec);
   const { join } = await import('path');
   const { fileURLToPath } = await import('url');
   const __dirname = join(fileURLToPath(import.meta.url), '..');
@@ -728,7 +785,7 @@ async function resolvePdfAndTextForPaper(paper, s2ApiKey) {
 
   console.log(`[PDF Fetcher] Launching Playwright fetcher for paper: "${paper.title}"`);
   try {
-    const stdout = execSync(cmd, { encoding: 'utf8', timeout: 50000 });
+    const { stdout } = await execPromise(cmd, { timeout: 50000 });
     const result = JSON.parse(stdout);
     if (result.success) {
       console.log(`[PDF Fetcher] Successfully retrieved PDF text content for "${paper.title}"`);
@@ -778,7 +835,7 @@ function selectBestPaperFromCandidates(candidates, category) {
   }
 }
 
-async function selectBestCandidatesWithGemini(categoryCandidates, cleanTopic, genAI) {
+async function selectBestCandidatesWithGemini(categoryCandidates, cleanTopic, keyRotator) {
   const activeCategories = [];
   const selectionMap = {};
   
@@ -829,7 +886,7 @@ Format your response as a JSON object where the keys are the active categories a
 
   try {
     const responseText = await generateContentWithFallback(
-      genAI,
+      keyRotator,
       'gemini-3.1-flash-lite',
       prompt,
       {
@@ -844,7 +901,7 @@ Format your response as a JSON object where the keys are the active categories a
       }
     );
     
-    const choice = JSON.parse(responseText);
+    const choice = JSON.parse(cleanJsonString(responseText));
     for (const cat of activeCategories) {
       const idx = choice[cat];
       const list = categoryCandidates[cat].list;
@@ -869,7 +926,7 @@ Format your response as a JSON object where the keys are the active categories a
  */
 export async function generateAndCacheDigest(topic, digestDate, geminiApiKey, onProgress = () => {}, userId = null) {
   const cleanTopic = topic.trim();
-  const genAI = new GoogleGenerativeAI(geminiApiKey);
+  const keyRotator = new KeyRotator(geminiApiKey);
 
   // Fetch all papers previously suggested to the user (read OR just shown in any past digest)
   let excludedPapersList = [];
@@ -927,7 +984,12 @@ First, mentally deconstruct the user's research topic into its 3 to 4 core theor
 - If the user is in "deep learning for cancer drug discovery": The pillars are (1) Molecular docking & chemical binding theory, (2) Oncology & cancer biology pathways, (3) Representation learning on graph structures.
 
 STEP 2: GENERATE SEARCH QUERIES
-Generate exactly 5 highly-targeted search queries to discover real papers on Google Scholar, one for each of the following 5 categories, distributing them across the different pillars to ensure high diversity:
+Generate exactly 5 highly-targeted search queries to discover real papers on Google Scholar, one for each of the following 5 categories, distributing them across the different pillars.
+To prevent visual repetition in the user's daily feed, target a diverse range of paper types across the 5 queries so they naturally map to different visual layout primitives:
+- At least one clinical trial, experimental study, or empirical trial (maps to Stat & Odds or Barometer Card).
+- At least one highly theoretical, mathematical, or theorem-based paper (maps to Typographic Math Card).
+- At least one system architecture, processing pipeline, or algorithm structure paper (maps to Procedural Flowchart SVG).
+- At least one qualitative review, survey, or paradigm-shifting concept paper (maps to Editorial Pull-Quote or Evolution Timeline).
 
 1. 'foundation': A seminal, classic, or foundational landmark paper that originally defined or established one of the historical, theoretical, or mathematical pillars of the user's domain (typically published prior to 2018 or having thousands of citations).
    CRITICAL: The foundation query MUST focus on a non-AI/non-ML pillar of the user's domain (e.g., the core biology, the core statistics, the core physics, or the core chemistry concept, such as "ecological niche theory", "sampling bias in ecological data", "electrocardiogram signal analysis", or "chemical molecular docking scoring functions") and MUST NOT contain modern AI buzzwords (like "transformer", "foundation model", "multimodal", "LLM", "deep learning") which would restrict the search to papers from >2020.
@@ -987,13 +1049,13 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
   };
 
   const queryResponse = await generateContentWithFallback(
-    genAI,
+    keyRotator,
     'gemini-3.1-flash-lite',
     queryPrompt,
     queryConfig
   );
 
-  let searchQueries = JSON.parse(queryResponse);
+  let searchQueries = JSON.parse(cleanJsonString(queryResponse));
   if (!Array.isArray(searchQueries) || searchQueries.length === 0) {
     throw new Error('Invalid JSON structure returned by query generation model');
   }
@@ -1025,15 +1087,104 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
     };
   }
 
+  /**
+   * Primary candidate paper search using Gemini Google Search Grounding (`googleSearch`).
+   * Pass 1: Perform grounded search to query Google for real academic papers matching category search terms.
+   * Pass 2: Parse the text response into structured candidate objects.
+   */
+  async function fetchCandidatesViaGeminiGrounding(item) {
+    const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
+    try {
+      console.log(`[DigestService] Querying Gemini Google Search Grounding for category "${item.category}"...`);
+      const genAI = keyRotator.getActiveClient();
+      const searchModel = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        tools: [{ googleSearch: {} }]
+      });
+
+      const searchPrompt = `Perform a live web search to find 3 seminal, real, published research papers for category "${item.category}" based on query "${item.searchQuery}".
+Return for each paper:
+- Exact Title
+- Authors
+- Year of Publication
+- Venue / Journal / Conference
+- Abstract or summary of key findings
+- Paper URL or arXiv link`;
+
+      const searchResult = await searchModel.generateContent(searchPrompt);
+      const groundedText = searchResult.response.text();
+      console.log(`[DigestService] Gemini Grounded Search returned raw research results for "${item.category}". Parsing...`);
+
+      // Pass 2: Parse raw text into structured JSON array
+      const parseModel = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'ARRAY',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                title: { type: 'STRING' },
+                authors: { type: 'STRING' },
+                year: { type: 'NUMBER' },
+                venue: { type: 'STRING' },
+                url: { type: 'STRING' },
+                abstract: { type: 'STRING' }
+              },
+              required: ['title', 'authors', 'year', 'venue', 'abstract']
+            }
+          }
+        }
+      });
+
+      const parsePrompt = `Extract the research papers from this text into a JSON array:
+${groundedText}`;
+
+      const parseResult = await parseModel.generateContent(parsePrompt);
+      const parsedPapers = JSON.parse(cleanJsonString(parseResult.response.text()));
+
+      if (Array.isArray(parsedPapers) && parsedPapers.length > 0) {
+        const groundedCandidates = [];
+        for (const p of parsedPapers) {
+          if (p.title && p.title.trim().length > 3) {
+            groundedCandidates.push({
+              category: item.category,
+              title: p.title.trim(),
+              url: p.url || '',
+              authors: p.authors || 'Unknown Authors',
+              year: p.year || new Date().getFullYear() - 1,
+              venue: p.venue || 'Academic Venue',
+              citationCount: 0,
+              abstract: p.abstract || '',
+              rationale: item.rationale
+            });
+          }
+        }
+        return groundedCandidates;
+      }
+    } catch (err) {
+      console.warn(`[DigestService] Gemini Google Search Grounding failed for query "${item.searchQuery}":`, err.message);
+    }
+    return [];
+  }
+
   for (const item of searchQueries) {
     console.log(`[DigestService] Running search for category "${item.category}": "${item.searchQuery}"`);
     const candidates = categoryCandidates[item.category].list;
 
-    // 1. Try Google Web Search + Semantic Scholar URL mapping
-    try {
-      const scriptPath = join(__dirname, '../scripts/google_web_search.py');
-      console.log(`[DigestService] Querying Google Web Search for category "${item.category}"...`);
-      const stdout = execSync(`python3 "${scriptPath}" "${item.searchQuery.replace(/"/g, '\\"')}"`, { encoding: 'utf8', timeout: 20000 });
+    // 1. Primary: Use Gemini Google Search Grounding (`googleSearch`)
+    const groundedResults = await fetchCandidatesViaGeminiGrounding(item);
+    if (groundedResults.length > 0) {
+      candidates.push(...groundedResults);
+    }
+
+    // 2. Fallback: Python Playwright Web Search + Semantic Scholar URL mapping (if Grounding returns no candidates)
+    if (candidates.length === 0) {
+      try {
+        const scriptPath = join(__dirname, '../scripts/google_web_search.py');
+        console.log(`[DigestService Fallback] Querying Python Playwright Web Search for category "${item.category}"...`);
+        const stdout = execSync(`python3 "${scriptPath}" "${item.searchQuery.replace(/"/g, '\\"')}"`, { encoding: 'utf8', timeout: 20000 });
       const urls = JSON.parse(stdout);
       
       if (Array.isArray(urls) && urls.length > 0) {
@@ -1064,6 +1215,7 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
     } catch (err) {
       console.warn(`[DigestService] Google Web Search failed for query "${item.searchQuery}":`, err.message);
     }
+  }
 
     // 2. Fallback to Semantic Scholar API search for search query if no candidates resolved
     if (candidates.length === 0) {
@@ -1128,14 +1280,14 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
 
   // --- STEP 2.2: Batch select the best candidate per category using Gemini ---
   onProgress(30, 'Ranking and selecting the most interesting papers for you...');
-  const selectionMap = await selectBestCandidatesWithGemini(categoryCandidates, cleanTopic, genAI);
+  const selectionMap = await selectBestCandidatesWithGemini(categoryCandidates, cleanTopic, keyRotator);
   
-  let papersOutline = [];
   // --- STEP 2.5: Retrieve and Parse PDFs for Grounding Context ---
   onProgress(35, 'Retrieving and parsing paper PDFs for grounding context...');
   const s2ApiKey = process.env.SEMANTIC_SCHOLAR_API_KEY || '';
+  const categories = ['foundation', 'crossfield', 'novel', 'surprise', 'wildcard'];
 
-  for (const cat of ['foundation', 'crossfield', 'novel', 'surprise', 'wildcard']) {
+  const groundingPromises = categories.map(async (cat) => {
     const selected = selectionMap[cat];
     const candidatesList = categoryCandidates[cat]?.list || [];
     const fallback = categoryCandidates[cat]?.fallback;
@@ -1160,9 +1312,11 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
     console.log(`[DigestService] Attempting to ground category "${cat}" by resolving candidate PDFs...`);
     let chosenPaper = null;
 
-    for (let j = 0; j < candidatesToTry.length; j++) {
+    // Limit searching and downloading to the top 3 candidates to significantly speed up execution
+    const maxTries = Math.min(candidatesToTry.length, 3);
+    for (let j = 0; j < maxTries; j++) {
       const candidate = candidatesToTry[j];
-      console.log(`[DigestService] Trying candidate ${j + 1}/${candidatesToTry.length} for "${cat}": "${candidate.title}"`);
+      console.log(`[DigestService] Trying candidate ${j + 1}/${maxTries} for "${cat}": "${candidate.title}"`);
       
       try {
         const pdfResult = await resolvePdfAndTextForPaper(candidate, s2ApiKey);
@@ -1192,16 +1346,31 @@ Format your response as a JSON array containing exactly 5 objects, ordered preci
       };
     }
 
-    papersOutline.push(chosenPaper);
     console.log(`[DigestService] Final selected paper for "${cat}": "${chosenPaper.title}" (${chosenPaper.year})`);
-  }
+    return { cat, chosenPaper };
+  });
+
+  const groundingResults = await Promise.all(groundingPromises);
+  const papersOutline = categories.map(cat => groundingResults.find(r => r.cat === cat).chosenPaper);
 
   const enrichedPapers = [];
+  const chosenPrimitives = [];
   
   for (let i = 0; i < papersOutline.length; i++) {
     const p = papersOutline[i];
     const progressStart = 35 + i * 10;
     onProgress(progressStart, `Deconstructing paper ${i + 1}/5: "${p.title}"...`);
+
+    // Count occurrences of each primitive to enforce a maximum limit of 2 of the same visual style per batch
+    const primitiveCounts = {};
+    chosenPrimitives.forEach(prim => {
+      primitiveCounts[prim] = (primitiveCounts[prim] || 0) + 1;
+    });
+    
+    // Filter the allowed enums to exclude any that have already been selected 2 or more times
+    const basePrimitives = ["pipeline", "tree", "comparison_delta", "spatial_layers", "math_blueprint", "stat_odds", "timeline_evolution", "pull_quote"];
+    const allowedPrimitives = basePrimitives.filter(prim => (primitiveCounts[prim] || 0) < 2);
+    const bannedPrimitives = basePrimitives.filter(prim => (primitiveCounts[prim] || 0) >= 2);
 
     const detailsPrompt = `You are a world-class senior scientist and academic researcher. Your explanations in the "Under the Hood" sections must be highly technical, rigorous, and written specifically for fellow researchers and domain experts who are highly knowledgeable in the field. Avoid oversimplifications, generalities, or superficial descriptions; instead, focus on the exact mathematical formulations, algorithmic steps, specific datasets/architectures, empirical conditions, or theoretical proofs that define the paper's core contribution.
 
@@ -1216,6 +1385,12 @@ Abstract/Context: "${p.abstract}"
 PDF Text Context (Grounding Source): "${p.pdfContext || 'Not available - rely on paper abstract and your internal knowledge base.'}"
 Rationale: ${p.rationale}
 
+${chosenPrimitives.length > 0 ? `BATCH VARIETY CONSTRAINTS:
+To guarantee absolute visual variety for the user and prevent visual repetition in their daily feed, you MUST select a layout primitive DIFFERENT from any that have already been used 2 or more times in today's batch.
+The following visual layout primitives are BANNED for this paper because they are already used 2 or more times: [${bannedPrimitives.join(', ')}].
+You MUST choose one of the remaining allowed layout primitives: [${allowedPrimitives.join(', ')}].
+Examine the paper's core contribution and map it to one of these allowed layouts (e.g. if the method can be shown as a comparison to SOTA/baselines, use 'comparison_delta'; if it presents a significant quote, use 'pull_quote'; if it has strong data statistics, use 'stat_odds').` : ''}
+
 You must classify this paper into one of the following genres:
 - 'methodology': If it introduces a new algorithm, neural network architecture, system, baseline model, or software tool.
 - 'empirical_study': If it presents an experimental trial, benchmark study, clinical trial, or scientific analysis of empirical observations.
@@ -1224,6 +1399,8 @@ You must classify this paper into one of the following genres:
 
 You MUST generate:
 1. Under "explanation", adapt style accordingly:
+    - "teaserCoreIntuition": "A very short, highly punchy but academically rigorous 1-sentence teaser or provocative question summarizing the core intuition, controversy, or debate of the paper (e.g., 'Is spatial leakage a property of the data, or an artifact of model smoothing?'). Max 95 characters. No hype or clickbait. Must serve as a high-contrast typographic pull-quote."
+    - "teaserWhyRead": "A very short, highly punchy but academically rigorous 1-sentence statement of the main finding, stat, or breakthrough (e.g., 'Spatial cross-validation eliminates data leakage inherent to random splits.'). Max 95 characters. No hype. Focuses on the core takeaway."
     - For methodology/theoretical, specify strategyUsed ('metaphor', 'analogy', or 'contrast') and write a spot-on coreIntuition explanation. If the genre is 'methodology', provide a comprehensive list of at least 3 distinct, granular sub-components or algorithmic/implementation steps in the 'deconstructedParts' array.
     - For empirical study, explain researchQuestion, studySetup, keyFindings, and interpretation.
     - For review/survey, explain surveyScope, taxonomy, consensusAndTrends, and openChallenges.
@@ -1273,6 +1450,42 @@ You MUST generate:
    - "extractedYear" (integer): The actual, historical publication year of this paper.
    - "extractedTitle" (string): The exact, correct, clean title of the paper.
    - "extractedAuthors" (string): The complete list of actual authors of the paper.
+6. Generate a "visualizationReasoning" string field containing your design reasoning. Analyze the paper's core contribution and decide which of the 8 visual primitives represents it best, following this Evidentiary Takeaway Hierarchy:
+   - 'stat_odds' (Highest priority: For empirical studies or trials reporting a single massive statistic or cohort ratio, e.g. "95% Efficacy")
+   - 'comparison_delta' (For comparative benchmarks, A/B models, or relative GDT score performance deltas)
+   - 'timeline_evolution' (For historical paradigm shifts, consensus-to-breakthrough transitions, or chronological updates)
+   - 'math_blueprint' (For theorems, complexity bounds, or axiomatic formulas)
+   - 'spatial_layers' (For environmental strata, canopy levels, nested system stacks, or filtering containment funnels)
+   - 'pipeline' (For workflows, processing stages, or algorithmic transformations)
+   - 'tree' (For taxonomies, relationships, or branching structures)
+   - 'pull_quote' (Lowest priority: For qualitative literature reviews, surveys, or paradigm statements without quantitative data)
+7. Based on your decision, populate a polymorphic "heroVisualization" object with:
+   - "primitive": One of: "pipeline", "tree", "comparison_delta", "spatial_layers", "math_blueprint", "stat_odds", "timeline_evolution", "pull_quote"
+   - "title": A brief, premium title (e.g., "Transformer Self-Attention", "Efficacy Trial Results").
+   - "canvas": An object containing "gridType" (either "technical_dots" or "blueprint_grid") and "badge" (e.g. "Efficacy Trial", "SOTA Model", "Paradigm Shift").
+   - "nodes": (Required ONLY for pipeline, tree, comparison_delta, spatial_layers) An array of objects each having "id" (string), "label" (string), "subtext" (string), and "highlight" (boolean).
+     * For comparison_delta: exactly 2 nodes (e.g., Baseline vs Proposed).
+     * For spatial_layers: exactly 3 nodes representing top-down nested containment scale filters.
+     * Keep node labels very short: max 2-3 words (under 12-14 characters where possible, or use standard abbreviations like "Src Embed", "Enc Attn").
+   - "edges": (Optional, for pipeline/tree paths) An array of objects each having "from" (string), "to" (string), and optional "label" (string).
+   - "deltaCallout": (Optional, for comparison_delta) An object with "metric" (e.g. "+24.4 GDT Delta") and "comparisonText" (e.g. "over CASP13 baseline").
+   - "boxPlot": (Optional, for comparison_delta 2D horizontal bar charts) An object with "baselineRange" and "sotaRange" arrays (each containing 3 numbers: min, median, max) mapped to a scale of 0 to 100.
+   - "equation": (Optional, for math_blueprint) A string containing the mathematical LaTeX formula to render. Cap variables legend at max 4.
+   - "statCallout": (Required for stat_odds) An object with "metric" (e.g. "95%"), "label" (e.g. "PRIMARY EFFICACY RATE"), and "text" (e.g. "Conferred protection across N = 43,448 sample size").
+   - "timeline": (Required for timeline_evolution) An object with "pastEra" (e.g. "PRE-1970s // PSYCHOANALYSIS"), "pastConcept" (legacy framework), "breakthroughEra" (e.g. "1979 BREAKTHROUGH"), and "breakthroughConcept" (this paper's shift).
+
+STRICT VISUAL SCHEMA CONSTRAINTS:
+- You are STRICTLY FORBIDDEN from outputting generic meta-terms for node labels, subtexts, or edge labels. Banned words include: "Input", "Input Data", "Data", "Raw Data", "Pipeline", "Proposed Pipeline", "Model", "Proposed Model", "Algorithm", "Method", "Approach", "Outcome", "Outcome Metrics", "Metrics", "Output", "Performance", "Results".
+- Every node label MUST be a specific proper noun, dataset name, protein/gene, mathematical term, algorithm component, or environmental variable/cohort mentioned in the text (e.g. "Src Embed", "Climatic Envelope", "eDNA Soil Core").
+- If the paper presents a benchmark comparison or numerical outcome, you MUST select "comparison_delta". Do not force a flowchart/pipeline.
+- If the paper presents pure mathematical equations or theorems, you MUST select "math_blueprint".
+- Use "pipeline" ONLY if there are at least 3 distinct, domain-specific processing stages.
+- DO NOT default to "pipeline" for every methodology paper. If the method can be represented as scale or nested levels (e.g. environment -> local sensor -> latent embedding), use "spatial_layers". If it has a taxonomic branching or modular dependency tree structure, use "tree".
+- If the paper presents a timeline, paradigm shift, or historical development, you MUST use "timeline_evolution".
+- If the paper is a survey or qualitative review and lacks direct algorithmic flow, you MUST use "pull_quote".
+
+
+
 
 CRITICAL ZOOMDATA POPULATION COMPLIANCE:
 You MUST unconditionally populate the nested arrays and objects inside "zoomData" matching the paper's type:
@@ -1295,6 +1508,93 @@ Format your response as a single JSON object.`;
           extractedYear: { type: "INTEGER" },
           achievements: { type: "STRING" },
           limitations: { type: "STRING" },
+          visualizationReasoning: { type: "STRING" },
+          heroVisualization: {
+            type: "OBJECT",
+            properties: {
+              primitive: {
+                type: "STRING",
+                enum: allowedPrimitives
+              },
+              title: { type: "STRING" },
+              canvas: {
+                type: "OBJECT",
+                properties: {
+                  gridType: { type: "STRING", enum: ["technical_dots", "blueprint_grid"] },
+                  badge: { type: "STRING" }
+                },
+                required: ["gridType", "badge"]
+              },
+              nodes: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    id: { type: "STRING" },
+                    label: { type: "STRING" },
+                    subtext: { type: "STRING" },
+                    highlight: { type: "BOOLEAN" }
+                  },
+                  required: ["id", "label", "subtext", "highlight"]
+                }
+              },
+              edges: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    from: { type: "STRING" },
+                    to: { type: "STRING" },
+                    label: { type: "STRING" }
+                  },
+                  required: ["from", "to"]
+                }
+              },
+              deltaCallout: {
+                type: "OBJECT",
+                properties: {
+                  metric: { type: "STRING" },
+                  comparisonText: { type: "STRING" }
+                },
+                required: ["metric", "comparisonText"]
+              },
+              equation: { type: "STRING" },
+              statCallout: {
+                type: "OBJECT",
+                properties: {
+                  metric: { type: "STRING" },
+                  label: { type: "STRING" },
+                  text: { type: "STRING" }
+                },
+                required: ["metric", "label", "text"]
+              },
+              timeline: {
+                type: "OBJECT",
+                properties: {
+                  pastEra: { type: "STRING" },
+                  pastConcept: { type: "STRING" },
+                  breakthroughEra: { type: "STRING" },
+                  breakthroughConcept: { type: "STRING" }
+                },
+                required: ["pastEra", "pastConcept", "breakthroughEra", "breakthroughConcept"]
+              },
+              boxPlot: {
+                type: "OBJECT",
+                properties: {
+                  baselineRange: {
+                    type: "ARRAY",
+                    items: { type: "NUMBER" }
+                  },
+                  sotaRange: {
+                    type: "ARRAY",
+                    items: { type: "NUMBER" }
+                  }
+                },
+                required: ["baselineRange", "sotaRange"]
+              }
+            },
+            required: ["primitive", "title", "canvas"]
+          },
           explanation: {
             type: "OBJECT",
             properties: {
@@ -1306,6 +1606,8 @@ Format your response as a single JSON object.`;
                 type: "STRING",
                 enum: ["metaphor", "analogy", "contrast"]
               },
+              teaserCoreIntuition: { type: "STRING" },
+              teaserWhyRead: { type: "STRING" },
               coreIntuition: { type: "STRING" },
               beforeState: { type: "STRING" },
               afterState: { type: "STRING" },
@@ -1334,7 +1636,7 @@ Format your response as a single JSON object.`;
               consensusAndTrends: { type: "STRING" },
               openChallenges: { type: "STRING" }
             },
-            required: ["paperType", "coreIntuition", "beforeState", "afterState"]
+            required: ["paperType", "coreIntuition", "beforeState", "afterState", "teaserCoreIntuition", "teaserWhyRead"]
           },
           zoomData: {
             type: "OBJECT",
@@ -1446,20 +1748,26 @@ Format your response as a single JSON object.`;
             }
           }
         },
-        required: ["explanation", "zoomData", "taggedConcepts", "achievements", "limitations", "extractedTitle", "extractedAuthors", "extractedYear"]
+        required: ["explanation", "zoomData", "taggedConcepts", "achievements", "limitations", "extractedTitle", "extractedAuthors", "extractedYear", "heroVisualization", "visualizationReasoning"]
       }
     };
 
     let details;
     try {
       const detailsResponse = await generateContentWithFallback(
-        genAI,
+        keyRotator,
         'gemini-2.5-flash',
         detailsPrompt,
-        detailsConfig
+        detailsConfig,
+        true
       );
-      const sanitizedResponse = escapeJsonLatexBackslashes(detailsResponse);
+      const cleanedResponse = cleanJsonString(detailsResponse);
+      const sanitizedResponse = escapeJsonLatexBackslashes(cleanedResponse);
       details = JSON.parse(sanitizedResponse);
+      
+      if (details.heroVisualization?.primitive) {
+        chosenPrimitives.push(details.heroVisualization.primitive);
+      }
     } catch (err) {
       console.error(`Failed to generate details for paper ${i+1}:`, err);
       details = {
@@ -1468,10 +1776,30 @@ Format your response as a single JSON object.`;
         extractedYear: p.year,
         achievements: 'No key achievements details.',
         limitations: 'No shortcomings details.',
+        visualizationReasoning: 'Failed to generate visual specifications. Falling back to default pipeline.',
+        heroVisualization: {
+          primitive: 'pipeline',
+          title: 'System Flow',
+          canvas: {
+            gridType: 'technical_dots',
+            badge: 'Synthesis Pipeline'
+          },
+          nodes: [
+            { id: 'node_1', label: 'Input', subtext: 'Raw Sample', highlight: false },
+            { id: 'node_2', label: 'Model', subtext: 'Novel Process', highlight: true },
+            { id: 'node_3', label: 'Output', subtext: 'Result Metrics', highlight: false }
+          ],
+          edges: [
+            { from: 'node_1', to: 'node_2' },
+            { from: 'node_2', to: 'node_3' }
+          ]
+        },
         explanation: {
           paperType: 'methodology',
           strategyUsed: 'contrast',
-          coreIntuition: 'No detailed intuition generated.',
+          coreIntuition: 'Presents a systematic framework to analyze domain processes and validate metrics.',
+          teaserCoreIntuition: 'Presents a systematic framework to analyze domain processes.',
+          teaserWhyRead: 'Highlights key validation experiments and research insights.',
           deconstructedParts: [],
           synthesis: 'No synthesis available.',
           beforeState: 'No prior state details.',
@@ -1497,8 +1825,27 @@ Format your response as a single JSON object.`;
         translation: 'No explanation formula translation available.',
         terms: []
       },
+      heroVisualization: details.heroVisualization || {
+        primitive: 'pipeline',
+        title: 'System Flow',
+        canvas: {
+          gridType: 'technical_dots',
+          badge: 'Synthesis Pipeline'
+        },
+        nodes: [
+          { id: 'node_1', label: 'Input', subtext: 'Raw Sample', highlight: false },
+          { id: 'node_2', label: 'Model', subtext: 'Novel Process', highlight: true },
+          { id: 'node_3', label: 'Output', subtext: 'Result Metrics', highlight: false }
+        ],
+        edges: [
+          { from: 'node_1', to: 'node_2' },
+          { from: 'node_2', to: 'node_3' }
+        ]
+      },
       taggedConcepts: details.taggedConcepts,
       coreIdea: details.explanation?.coreIntuition || 'No detailed intuition generated.',
+      teaserCoreIntuition: details.explanation?.teaserCoreIntuition || '',
+      teaserWhyRead: details.explanation?.teaserWhyRead || '',
       achievements: details.achievements || 'No key achievements details.',
       limitations: details.limitations || 'No shortcomings details.'
     });
@@ -1514,9 +1861,9 @@ Format your response as a single JSON object.`;
       [cacheUser, cleanTopic, digestDate, JSON.stringify(enrichedPapers)]
     );
 
-    // Save a developer debug backup to project root
+    // Save a developer debug backup to App Data Directory outside of workspace to prevent Nodemon restarts
     try {
-      const debugDir = path.join(process.cwd(), 'debug_runs');
+      const debugDir = '/home/alexis/.gemini/antigravity/debug_runs';
       if (!fs.existsSync(debugDir)) {
         fs.mkdirSync(debugDir, { recursive: true });
       }

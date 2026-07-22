@@ -1,0 +1,725 @@
+[
+  {
+    "id": "test_viz_attention_is_all_you_need",
+    "category": "computer_science",
+    "title": "Attention Is All You Need",
+    "authors": "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin",
+    "year": 2017,
+    "purpose": "Achieved state-of-the-art results on machine translation benchmarks (WMT 2014 En...",
+    "achievements": "Achieved state-of-the-art results on machine translation benchmarks (WMT 2014 English-to-German and English-to-French) while training significantly faster than previous recurrent or convolutional network architectures.",
+    "limitations": "While demonstrating strong performance and improved parallelization, the quadratic computational complexity ($O(n^2)$) of self-attention with respect to the sequence length $n$ can present challenges for processing extremely long sequences, particularly concerning memory requirements.",
+    "venue": "COMPUTER_SCIENCE Journal",
+    "url": "#",
+    "coreIdea": "We propose a new simple network architecture, the Transformer, based solely on self-attention mechanisms, dispensing with recurrence and convolutions entirely.",
+    "heroVisualization": {
+      "primitive": "pipeline",
+      "title": "Transformer Architecture: Attention Flow",
+      "canvas": {
+        "gridType": "technical_dots",
+        "badge": "SOTA Model"
+      },
+      "nodes": [
+        {
+          "id": "src_emb",
+          "label": "Source Sequence Embeddings",
+          "subtext": "Word Embeddings + Positional Encoding",
+          "highlight": false
+        },
+        {
+          "id": "encoder_multihead_sa",
+          "label": "Encoder Multi-Head Self-Attention",
+          "subtext": "Scaled Dot-Product Aggregation",
+          "highlight": true
+        },
+        {
+          "id": "encoder_ffn",
+          "label": "Encoder Position-wise FFN",
+          "subtext": "ReLU Activated Dense Layers",
+          "highlight": false
+        },
+        {
+          "id": "tgt_emb",
+          "label": "Target Sequence Embeddings",
+          "subtext": "Shifted Right & Positional Encoding",
+          "highlight": false
+        },
+        {
+          "id": "decoder_masked_sa",
+          "label": "Decoder Masked Self-Attention",
+          "subtext": "Autoregressive Context Modeling",
+          "highlight": false
+        },
+        {
+          "id": "enc_dec_cross_attn",
+          "label": "Encoder-Decoder Cross-Attention",
+          "subtext": "Query from Decoder, K/V from Encoder",
+          "highlight": false
+        },
+        {
+          "id": "decoder_ffn",
+          "label": "Decoder Position-wise FFN",
+          "subtext": "ReLU Activated Dense Layers",
+          "highlight": false
+        },
+        {
+          "id": "vocab_projection",
+          "label": "Output Vocabulary Logits",
+          "subtext": "Linear Layer & Softmax",
+          "highlight": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "src_emb",
+          "to": "encoder_multihead_sa",
+          "label": "Encoder Input"
+        },
+        {
+          "from": "encoder_multihead_sa",
+          "to": "encoder_ffn",
+          "label": "Self-Attention Output"
+        },
+        {
+          "from": "encoder_ffn",
+          "to": "enc_dec_cross_attn",
+          "label": "Encoder K/V for Cross-Attention"
+        },
+        {
+          "from": "tgt_emb",
+          "to": "decoder_masked_sa",
+          "label": "Decoder Input"
+        },
+        {
+          "from": "decoder_masked_sa",
+          "to": "enc_dec_cross_attn",
+          "label": "Masked SA Output (Query)"
+        },
+        {
+          "from": "enc_dec_cross_attn",
+          "to": "decoder_ffn",
+          "label": "Cross-Attention Output"
+        },
+        {
+          "from": "decoder_ffn",
+          "to": "vocab_projection",
+          "label": "Final Decoder Output"
+        }
+      ]
+    },
+    "details": {
+      "extractedTitle": "Attention Is All You Need",
+      "extractedAuthors": "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin",
+      "extractedYear": 2017,
+      "achievements": "Achieved state-of-the-art results on machine translation benchmarks (WMT 2014 English-to-German and English-to-French) while training significantly faster than previous recurrent or convolutional network architectures.",
+      "limitations": "While demonstrating strong performance and improved parallelization, the quadratic computational complexity ($O(n^2)$) of self-attention with respect to the sequence length $n$ can present challenges for processing extremely long sequences, particularly concerning memory requirements.",
+      "visualizationReasoning": "The paper's core contribution is the introduction of the Transformer architecture, a novel sequence transduction model based entirely on self-attention mechanisms, eschewing recurrence and convolutions. This architecture inherently involves a series of distinct, domain-specific processing stages (embedding, multi-head attention, feed-forward networks, and their interactions across encoder and decoder stacks) that operate sequentially on the input to produce an output. Therefore, the 'pipeline' primitive is the most suitable representation to illustrate this architectural flow. It effectively captures the logical progression of information through the encoder and decoder components, highlighting the key attention mechanisms and their interconnections. The 'Multi-Head Self-Attention' within the encoder is selected as the highlighted component, as it represents the fundamental and most novel aspect of the proposed architecture.",
+      "heroVisualization": {
+        "primitive": "pipeline",
+        "title": "Transformer Architecture: Attention Flow",
+        "canvas": {
+          "gridType": "technical_dots",
+          "badge": "SOTA Model"
+        },
+        "nodes": [
+          {
+            "id": "src_emb",
+            "label": "Source Sequence Embeddings",
+            "subtext": "Word Embeddings + Positional Encoding",
+            "highlight": false
+          },
+          {
+            "id": "encoder_multihead_sa",
+            "label": "Encoder Multi-Head Self-Attention",
+            "subtext": "Scaled Dot-Product Aggregation",
+            "highlight": true
+          },
+          {
+            "id": "encoder_ffn",
+            "label": "Encoder Position-wise FFN",
+            "subtext": "ReLU Activated Dense Layers",
+            "highlight": false
+          },
+          {
+            "id": "tgt_emb",
+            "label": "Target Sequence Embeddings",
+            "subtext": "Shifted Right & Positional Encoding",
+            "highlight": false
+          },
+          {
+            "id": "decoder_masked_sa",
+            "label": "Decoder Masked Self-Attention",
+            "subtext": "Autoregressive Context Modeling",
+            "highlight": false
+          },
+          {
+            "id": "enc_dec_cross_attn",
+            "label": "Encoder-Decoder Cross-Attention",
+            "subtext": "Query from Decoder, K/V from Encoder",
+            "highlight": false
+          },
+          {
+            "id": "decoder_ffn",
+            "label": "Decoder Position-wise FFN",
+            "subtext": "ReLU Activated Dense Layers",
+            "highlight": false
+          },
+          {
+            "id": "vocab_projection",
+            "label": "Output Vocabulary Logits",
+            "subtext": "Linear Layer & Softmax",
+            "highlight": false
+          }
+        ],
+        "edges": [
+          {
+            "from": "src_emb",
+            "to": "encoder_multihead_sa",
+            "label": "Encoder Input"
+          },
+          {
+            "from": "encoder_multihead_sa",
+            "to": "encoder_ffn",
+            "label": "Self-Attention Output"
+          },
+          {
+            "from": "encoder_ffn",
+            "to": "enc_dec_cross_attn",
+            "label": "Encoder K/V for Cross-Attention"
+          },
+          {
+            "from": "tgt_emb",
+            "to": "decoder_masked_sa",
+            "label": "Decoder Input"
+          },
+          {
+            "from": "decoder_masked_sa",
+            "to": "enc_dec_cross_attn",
+            "label": "Masked SA Output (Query)"
+          },
+          {
+            "from": "enc_dec_cross_attn",
+            "to": "decoder_ffn",
+            "label": "Cross-Attention Output"
+          },
+          {
+            "from": "decoder_ffn",
+            "to": "vocab_projection",
+            "label": "Final Decoder Output"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "test_viz_the_theory_of_island_biogeography",
+    "category": "ecology",
+    "title": "The Theory of Island Biogeography",
+    "authors": "Robert H. MacArthur, Edward O. Wilson",
+    "year": 1967,
+    "purpose": "Formulated a foundational dynamic equilibrium model explaining species richness ...",
+    "achievements": "Formulated a foundational dynamic equilibrium model explaining species richness on islands as a balance between colonization and extinction rates. This framework quantitatively predicted and demonstrated the effects of island size and isolation on species diversity, subsequently leading to the empirical species-area relationship ($S = cA^z$) and providing a predictive ecological theory for community assembly and conservation biogeography.",
+    "limitations": "The model operates under several simplifying assumptions that limit its ecological realism: it assumes a uniform, constant species pool on the mainland and treats all species as ecologically equivalent, neglecting explicit consideration of interspecific competition, predation, or trophic interactions. Furthermore, the model's generic functional forms for colonization and extinction rates (often monotonic) do not fully capture complex non-linear ecological dynamics, habitat heterogeneity, or the stochasticity inherent in population processes. It also does not explicitly incorporate in-situ speciation, co-evolutionary dynamics, or historical contingency and priority effects, which can significantly influence island biodiversity patterns over longer evolutionary timescales.",
+    "venue": "ECOLOGY Journal",
+    "url": "#",
+    "coreIdea": "The species richness of an island represents a dynamic equilibrium determined by the balance between immigration of new species and local extinction.",
+    "heroVisualization": {
+      "primitive": "math_blueprint",
+      "title": "Dynamic Equilibrium Model of Island Biogeography",
+      "canvas": {
+        "gridType": "blueprint_grid",
+        "badge": "Theoretical Model"
+      },
+      "nodes": [
+        {
+          "id": "S_dt",
+          "label": "Net Species Richness Change",
+          "subtext": "$\\frac{dS}{dt}$: The instantaneous rate of change in the number of species (S) on an island. Equilibrium ($\\hat{S}$) is achieved when $\\frac{dS}{dt} = 0$, implying $C(S, D) = E(S, A)$. This point defines the predicted species richness.",
+          "highlight": true
+        },
+        {
+          "id": "ColonizationRate",
+          "label": "Colonization Rate Function",
+          "subtext": "$C(S, D)$: The rate at which new species immigrate from the mainland species pool and successfully establish. It is generally modeled as a monotonically decreasing function of existing species richness (S) on the island, and inversely related to island isolation (D).",
+          "highlight": false
+        },
+        {
+          "id": "ExtinctionRate",
+          "label": "Extinction Rate Function",
+          "subtext": "$E(S, A)$: The rate at which established species populations on the island go locally extinct. It is typically modeled as a monotonically increasing function of existing species richness (S) due to increased competition, and inversely related to island area (A) due to smaller population sizes in restricted habitats.",
+          "highlight": false
+        },
+        {
+          "id": "IslandArea",
+          "label": "Island Area (A)",
+          "subtext": "A key environmental variable that inversely affects the extinction rate ($E(S, A)$). Larger island areas generally support larger population sizes and more diverse habitats, thereby reducing local extinction probabilities.",
+          "highlight": false
+        },
+        {
+          "id": "IslandIsolation",
+          "label": "Island Isolation (D)",
+          "subtext": "A key environmental variable that inversely affects the colonization rate ($C(S, D)$). Greater isolation (distance from the mainland) reduces the probability of successful immigration and colonization.",
+          "highlight": false
+        },
+        {
+          "id": "SpeciesRichness",
+          "label": "Species Richness (S)",
+          "subtext": "The current number of species present on the island. Both colonization and extinction rates are modeled as functions of S.",
+          "highlight": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "ColonizationRate",
+          "to": "S_dt",
+          "label": "Positive flux contribution"
+        },
+        {
+          "from": "ExtinctionRate",
+          "to": "S_dt",
+          "label": "Negative flux contribution"
+        },
+        {
+          "from": "IslandArea",
+          "to": "ExtinctionRate",
+          "label": "Modifies rate (inverse)"
+        },
+        {
+          "from": "IslandIsolation",
+          "to": "ColonizationRate",
+          "label": "Modifies rate (inverse)"
+        },
+        {
+          "from": "SpeciesRichness",
+          "to": "ColonizationRate",
+          "label": "Feeds into function"
+        },
+        {
+          "from": "SpeciesRichness",
+          "to": "ExtinctionRate",
+          "label": "Feeds into function"
+        }
+      ],
+      "equation": "\\frac{dS}{dt} = C(S, D) - E(S, A)"
+    },
+    "details": {
+      "extractedTitle": "The Theory of Island Biogeography",
+      "extractedAuthors": "Robert H. MacArthur, Edward O. Wilson",
+      "extractedYear": 1967,
+      "achievements": "Formulated a foundational dynamic equilibrium model explaining species richness on islands as a balance between colonization and extinction rates. This framework quantitatively predicted and demonstrated the effects of island size and isolation on species diversity, subsequently leading to the empirical species-area relationship ($S = cA^z$) and providing a predictive ecological theory for community assembly and conservation biogeography.",
+      "limitations": "The model operates under several simplifying assumptions that limit its ecological realism: it assumes a uniform, constant species pool on the mainland and treats all species as ecologically equivalent, neglecting explicit consideration of interspecific competition, predation, or trophic interactions. Furthermore, the model's generic functional forms for colonization and extinction rates (often monotonic) do not fully capture complex non-linear ecological dynamics, habitat heterogeneity, or the stochasticity inherent in population processes. It also does not explicitly incorporate in-situ speciation, co-evolutionary dynamics, or historical contingency and priority effects, which can significantly influence island biodiversity patterns over longer evolutionary timescales.",
+      "visualizationReasoning": "The core contribution of MacArthur and Wilson's 'The Theory of Island Biogeography' is the development of a theoretical, mathematical model explaining dynamic equilibrium in species richness. This model posits that the number of species on an island is determined by the balance of two opposing forces: colonization and extinction, both of which are functional dependencies of species richness, island area, and isolation. Given that the paper fundamentally establishes a mathematical framework and relationships rather than a sequential process, a direct empirical comparison, or hierarchical structure, the 'math_blueprint' primitive is the most appropriate visualization. It allows for the explicit representation of the central differential equation that governs the system's dynamics and the key functional components that influence the rates of change. The chosen equation, $\\frac{dS}{dt} = C(S, D) - E(S, A)$, directly encapsulates the dynamic interplay between colonization and extinction, which is the heart of the theoretical model. The nodes are used to articulate the specific variables and functional dependencies within this foundational equation.",
+      "heroVisualization": {
+        "primitive": "math_blueprint",
+        "title": "Dynamic Equilibrium Model of Island Biogeography",
+        "canvas": {
+          "gridType": "blueprint_grid",
+          "badge": "Theoretical Model"
+        },
+        "nodes": [
+          {
+            "id": "S_dt",
+            "label": "Net Species Richness Change",
+            "subtext": "$\\frac{dS}{dt}$: The instantaneous rate of change in the number of species (S) on an island. Equilibrium ($\\hat{S}$) is achieved when $\\frac{dS}{dt} = 0$, implying $C(S, D) = E(S, A)$. This point defines the predicted species richness.",
+            "highlight": true
+          },
+          {
+            "id": "ColonizationRate",
+            "label": "Colonization Rate Function",
+            "subtext": "$C(S, D)$: The rate at which new species immigrate from the mainland species pool and successfully establish. It is generally modeled as a monotonically decreasing function of existing species richness (S) on the island, and inversely related to island isolation (D).",
+            "highlight": false
+          },
+          {
+            "id": "ExtinctionRate",
+            "label": "Extinction Rate Function",
+            "subtext": "$E(S, A)$: The rate at which established species populations on the island go locally extinct. It is typically modeled as a monotonically increasing function of existing species richness (S) due to increased competition, and inversely related to island area (A) due to smaller population sizes in restricted habitats.",
+            "highlight": false
+          },
+          {
+            "id": "IslandArea",
+            "label": "Island Area (A)",
+            "subtext": "A key environmental variable that inversely affects the extinction rate ($E(S, A)$). Larger island areas generally support larger population sizes and more diverse habitats, thereby reducing local extinction probabilities.",
+            "highlight": false
+          },
+          {
+            "id": "IslandIsolation",
+            "label": "Island Isolation (D)",
+            "subtext": "A key environmental variable that inversely affects the colonization rate ($C(S, D)$). Greater isolation (distance from the mainland) reduces the probability of successful immigration and colonization.",
+            "highlight": false
+          },
+          {
+            "id": "SpeciesRichness",
+            "label": "Species Richness (S)",
+            "subtext": "The current number of species present on the island. Both colonization and extinction rates are modeled as functions of S.",
+            "highlight": false
+          }
+        ],
+        "edges": [
+          {
+            "from": "ColonizationRate",
+            "to": "S_dt",
+            "label": "Positive flux contribution"
+          },
+          {
+            "from": "ExtinctionRate",
+            "to": "S_dt",
+            "label": "Negative flux contribution"
+          },
+          {
+            "from": "IslandArea",
+            "to": "ExtinctionRate",
+            "label": "Modifies rate (inverse)"
+          },
+          {
+            "from": "IslandIsolation",
+            "to": "ColonizationRate",
+            "label": "Modifies rate (inverse)"
+          },
+          {
+            "from": "SpeciesRichness",
+            "to": "ColonizationRate",
+            "label": "Feeds into function"
+          },
+          {
+            "from": "SpeciesRichness",
+            "to": "ExtinctionRate",
+            "label": "Feeds into function"
+          }
+        ],
+        "equation": "\\frac{dS}{dt} = C(S, D) - E(S, A)"
+      }
+    }
+  },
+  {
+    "id": "test_viz_an_analysis_of_the_grinnellian_niche_concept",
+    "category": "ecology",
+    "title": "An Analysis of the Grinnellian Niche Concept",
+    "authors": "Joseph Grinnell",
+    "year": 1917,
+    "purpose": "Formalized the ecological niche as a spatially explicit region defined by the ag...",
+    "achievements": "Formalized the ecological niche as a spatially explicit region defined by the aggregate of environmental conditions permitting species persistence, thereby establishing a foundational framework for predicting species distributions based primarily on abiotic and biotic habitat requirements.",
+    "limitations": "Primarily descriptive, the initial formulation of the Grinnellian niche concept often lacked explicit mechanistic details regarding interspecific interactions or resource partitioning. It emphasized the 'address' (habitat) over the 'profession' (functional role), thus limiting its direct application in rigorously accounting for dynamic biotic interactions (e.g., competition, predation) and its predictive power regarding species co-existence or ecosystem function, aspects later elaborated by Elton and Hutchinson.",
+    "venue": "ECOLOGY Journal",
+    "url": "#",
+    "coreIdea": "The ecological niche represents the ultimate distributional unit of a species, constrained and bounded by its physiological requirements and physical barriers.",
+    "heroVisualization": {
+      "primitive": "spatial_layers",
+      "title": "Grinnellian Niche: Environmental Stratification",
+      "canvas": {
+        "gridType": "blueprint_grid",
+        "badge": "Foundational Concept"
+      },
+      "nodes": [
+        {
+          "id": "node1",
+          "label": "Continental Geographic Expanse",
+          "subtext": "Initial spatial domain representing all potential areas, unrestricted by specific ecological criteria.",
+          "highlight": false
+        },
+        {
+          "id": "node2",
+          "label": "Climatic Envelope",
+          "subtext": "Layer defined by species' physiological tolerances to macro-climatic variables (e.g., annual temperature isotherms, precipitation regimes).",
+          "highlight": false
+        },
+        {
+          "id": "node3",
+          "label": "Physiographic Constraints",
+          "subtext": "Layer incorporating topographic features (e.g., elevation gradients, mountain ranges, hydrological networks) acting as dispersal barriers.",
+          "highlight": false
+        },
+        {
+          "id": "node4",
+          "label": "Habitat Structure & Resources",
+          "subtext": "Layer identifying specific vegetation communities, substrate types, and essential resource availability required for foraging and reproduction.",
+          "highlight": false
+        },
+        {
+          "id": "node5",
+          "label": "Grinnellian Niche (Occupied Range)",
+          "subtext": "The resultant geographically bounded space where a species is observed to persist, defined by the intersection of all favorable environmental requirements.",
+          "highlight": true
+        }
+      ],
+      "edges": []
+    },
+    "details": {
+      "extractedTitle": "An Analysis of the Grinnellian Niche Concept",
+      "extractedAuthors": "Joseph Grinnell",
+      "extractedYear": 1917,
+      "achievements": "Formalized the ecological niche as a spatially explicit region defined by the aggregate of environmental conditions permitting species persistence, thereby establishing a foundational framework for predicting species distributions based primarily on abiotic and biotic habitat requirements.",
+      "limitations": "Primarily descriptive, the initial formulation of the Grinnellian niche concept often lacked explicit mechanistic details regarding interspecific interactions or resource partitioning. It emphasized the 'address' (habitat) over the 'profession' (functional role), thus limiting its direct application in rigorously accounting for dynamic biotic interactions (e.g., competition, predation) and its predictive power regarding species co-existence or ecosystem function, aspects later elaborated by Elton and Hutchinson.",
+      "visualizationReasoning": "The Grinnellian niche concept posits that a species' distribution is fundamentally constrained by its environmental requirements, leading to a specific geographic range. This conceptualization involves an implicit layering of abiotic and, to a lesser extent, biotic factors that cumulatively define the habitable space. The 'spatial_layers' primitive is chosen because the paper effectively describes how various environmental parameters (e.g., temperature, humidity, vegetation type) act as sequential filters or strata, each delineating a progressively refined subset of the total geographic space where a species can potentially survive and reproduce. This creates a vertical profile of environmental conditions that, when combined, define the ecological niche as a geographically bounded region.",
+      "heroVisualization": {
+        "primitive": "spatial_layers",
+        "title": "Grinnellian Niche: Environmental Stratification",
+        "canvas": {
+          "gridType": "blueprint_grid",
+          "badge": "Foundational Concept"
+        },
+        "nodes": [
+          {
+            "id": "node1",
+            "label": "Continental Geographic Expanse",
+            "subtext": "Initial spatial domain representing all potential areas, unrestricted by specific ecological criteria.",
+            "highlight": false
+          },
+          {
+            "id": "node2",
+            "label": "Climatic Envelope",
+            "subtext": "Layer defined by species' physiological tolerances to macro-climatic variables (e.g., annual temperature isotherms, precipitation regimes).",
+            "highlight": false
+          },
+          {
+            "id": "node3",
+            "label": "Physiographic Constraints",
+            "subtext": "Layer incorporating topographic features (e.g., elevation gradients, mountain ranges, hydrological networks) acting as dispersal barriers.",
+            "highlight": false
+          },
+          {
+            "id": "node4",
+            "label": "Habitat Structure & Resources",
+            "subtext": "Layer identifying specific vegetation communities, substrate types, and essential resource availability required for foraging and reproduction.",
+            "highlight": false
+          },
+          {
+            "id": "node5",
+            "label": "Grinnellian Niche (Occupied Range)",
+            "subtext": "The resultant geographically bounded space where a species is observed to persist, defined by the intersection of all favorable environmental requirements.",
+            "highlight": true
+          }
+        ],
+        "edges": []
+      }
+    }
+  },
+  {
+    "id": "test_viz_safety_and_efficacy_of_the_bnt162b2_mrna_covid-19_vaccine",
+    "category": "medicine",
+    "title": "Safety and Efficacy of the BNT162b2 mRNA Covid-19 Vaccine",
+    "authors": "Fernando P. Polack et al.",
+    "year": 2020,
+    "purpose": "Demonstrated 95% efficacy of the BNT162b2 mRNA vaccine against laboratory-confir...",
+    "achievements": "Demonstrated 95% efficacy of the BNT162b2 mRNA vaccine against laboratory-confirmed Covid-19 in participants aged 16 years or older, achieving the primary endpoint with high statistical significance. This efficacy was consistent across age, sex, race, ethnicity, and pre-existing medical conditions. The vaccine also showed a favorable safety profile with mostly mild to moderate, transient reactogenicity.",
+    "limitations": "The study's follow-up period was relatively short (median of 2 months post-second dose), limiting insights into long-term vaccine efficacy and safety, including the duration of protection. The trial was not powered to assess efficacy against severe Covid-19, asymptomatic infection, or transmission. Specific populations, such as immunocompromised individuals, pregnant women, and children under 12, were not extensively studied. Furthermore, the genetic diversity of SARS-CoV-2 variants circulating at the time of the trial was limited, meaning efficacy against future emergent variants was unknown.",
+    "venue": "MEDICINE Journal",
+    "url": "#",
+    "coreIdea": "A two-dose regimen of BNT162b2 conferred 95% protection against symptomatic Covid-19 in persons 16 years of age or older.",
+    "heroVisualization": {
+      "primitive": "stat_odds",
+      "title": "BNT162b2 Vaccine Efficacy",
+      "canvas": {
+        "gridType": "technical_dots",
+        "badge": "Efficacy Trial"
+      },
+      "statCallout": {
+        "metric": "95%",
+        "label": "PRIMARY EFFICACY RATE",
+        "text": "Conferred high protection against symptomatic Covid-19 infection across a sample size of N = 43,448 participants."
+      }
+    },
+    "details": {
+      "extractedTitle": "Safety and Efficacy of the BNT162b2 mRNA Covid-19 Vaccine",
+      "extractedAuthors": "Fernando P. Polack et al.",
+      "extractedYear": 2020,
+      "achievements": "Demonstrated 95% efficacy of the BNT162b2 mRNA vaccine against laboratory-confirmed Covid-19 in participants aged 16 years or older, achieving the primary endpoint with high statistical significance. This efficacy was consistent across age, sex, race, ethnicity, and pre-existing medical conditions. The vaccine also showed a favorable safety profile with mostly mild to moderate, transient reactogenicity.",
+      "limitations": "The study's follow-up period was relatively short (median of 2 months post-second dose), limiting insights into long-term vaccine efficacy and safety, including the duration of protection. The trial was not powered to assess efficacy against severe Covid-19, asymptomatic infection, or transmission. Specific populations, such as immunocompromised individuals, pregnant women, and children under 12, were not extensively studied. Furthermore, the genetic diversity of SARS-CoV-2 variants circulating at the time of the trial was limited, meaning efficacy against future emergent variants was unknown.",
+      "visualizationReasoning": "Given the empirical, clinical-trial nature of the vaccine efficacy paper, the primary contribution is a singular, landmark statistic of protection rate. A timeline or process model is not central. Therefore, the 'stat_odds' primitive is the most effective way to highlight this outcome, featuring the 95% efficacy rate alongside details of the trial size (N=43,448).",
+      "heroVisualization": {
+        "primitive": "stat_odds",
+        "title": "BNT162b2 Vaccine Efficacy",
+        "canvas": {
+          "gridType": "technical_dots",
+          "badge": "Efficacy Trial"
+        },
+        "statCallout": {
+          "metric": "95%",
+          "label": "PRIMARY EFFICACY RATE",
+          "text": "Conferred high protection against symptomatic Covid-19 infection across a sample size of N = 43,448 participants."
+        }
+      }
+    }
+  },
+  {
+    "id": "test_viz_highly_accurate_protein_structure_prediction_with_alphafold",
+    "category": "biology",
+    "title": "Highly accurate protein structure prediction with AlphaFold",
+    "authors": "John Jumper et al.",
+    "year": 2021,
+    "purpose": "Demonstrated structures matching experimental methods, accelerating structural m...",
+    "achievements": "Demonstrated structures matching experimental methods, accelerating structural molecular biology studies.",
+    "limitations": "The model's accuracy is heavily reliant on the availability of rich Multiple Sequence Alignments (MSAs); performance degrades significantly for proteins lacking sufficient evolutionary relatives. Computational cost for extremely large protein complexes remains substantial. The current framework primarily predicts a static, single-state structure, not explicitly modeling protein dynamics or conformational ensembles.",
+    "venue": "BIOLOGY Journal",
+    "url": "#",
+    "coreIdea": "AlphaFold predicts protein structures to atomic accuracy, bridging a half-century challenge between genomic sequence and physical structure.",
+    "heroVisualization": {
+      "primitive": "comparison_delta",
+      "title": "AlphaFold2 vs Baseline structural prediction accuracy",
+      "canvas": {
+        "gridType": "blueprint_grid",
+        "badge": "SOTA Benchmark"
+      },
+      "nodes": [
+        {
+          "id": "af2",
+          "label": "AlphaFold2 System",
+          "subtext": "Median GDT Score: 92.4 (High accuracy band)",
+          "highlight": true
+        },
+        {
+          "id": "prior_sota",
+          "label": "Prior Physics SOTA (CASP13)",
+          "subtext": "Median GDT Score: 68.0 (Variable alignment)",
+          "highlight": false
+        }
+      ],
+      "boxPlot": {
+        "baselineRange": [
+          58,
+          68,
+          74
+        ],
+        "sotaRange": [
+          87,
+          92.4,
+          96
+        ]
+      },
+      "deltaCallout": {
+        "metric": "+24.4 GDT Delta",
+        "comparisonText": "Median gain over historical baseline"
+      }
+    },
+    "details": {
+      "extractedTitle": "Highly accurate protein structure prediction with AlphaFold",
+      "extractedAuthors": "John Jumper et al.",
+      "extractedYear": 2021,
+      "achievements": "Demonstrated structures matching experimental methods, accelerating structural molecular biology studies.",
+      "limitations": "The model's accuracy is heavily reliant on the availability of rich Multiple Sequence Alignments (MSAs); performance degrades significantly for proteins lacking sufficient evolutionary relatives. Computational cost for extremely large protein complexes remains substantial. The current framework primarily predicts a static, single-state structure, not explicitly modeling protein dynamics or conformational ensembles.",
+      "visualizationReasoning": "To showcase AlphaFold2's impact, comparing its accuracy (GDT score) directly against the historical state-of-the-art using a 2D box plot/range graph represents its landmark performance shift with high scientific rigor.",
+      "heroVisualization": {
+        "primitive": "comparison_delta",
+        "title": "AlphaFold2 vs Baseline structural prediction accuracy",
+        "canvas": {
+          "gridType": "blueprint_grid",
+          "badge": "SOTA Benchmark"
+        },
+        "nodes": [
+          {
+            "id": "af2",
+            "label": "AlphaFold2 System",
+            "subtext": "Median GDT Score: 92.4 (High accuracy band)",
+            "highlight": true
+          },
+          {
+            "id": "prior_sota",
+            "label": "Prior Physics SOTA (CASP13)",
+            "subtext": "Median GDT Score: 68.0 (Variable alignment)",
+            "highlight": false
+          }
+        ],
+        "boxPlot": {
+          "baselineRange": [
+            58,
+            68,
+            74
+          ],
+          "sotaRange": [
+            87,
+            92.4,
+            96
+          ]
+        },
+        "deltaCallout": {
+          "metric": "+24.4 GDT Delta",
+          "comparisonText": "Median gain over historical baseline"
+        }
+      }
+    }
+  },
+  {
+    "id": "test_viz_the_path_of_the_law",
+    "category": "law",
+    "title": "The Path of the Law",
+    "authors": "Oliver Wendell Holmes Jr.",
+    "year": 1897,
+    "purpose": "Introduced the bad-man theory of law, distinguishing between law and morality in...",
+    "achievements": "Introduced the bad-man theory of law, distinguishing between law and morality in statutory interpretation and establishing a positivist, predictive framework for legal study.",
+    "limitations": "The 'bad-man' perspective, while effective for analytical clarity, can be critiqued for potentially oversimplifying the inherent moral dimensions within legislative intent and judicial reasoning, thereby risking an overly cynical or amoral interpretation of legal development and reform.",
+    "venue": "LAW Journal",
+    "url": "#",
+    "coreIdea": "Law is not a system of reason or morals, but a prediction of public force: the bad-man cares only for the material consequences of what the courts will do in fact.",
+    "heroVisualization": {
+      "primitive": "pull_quote",
+      "title": "Axiomatic Definition of Law",
+      "canvas": {
+        "gridType": "technical_dots",
+        "badge": "Jurisprudential Axiom"
+      }
+    },
+    "details": {
+      "extractedTitle": "The Path of the Law",
+      "extractedAuthors": "Oliver Wendell Holmes Jr.",
+      "extractedYear": 1897,
+      "achievements": "Introduced the bad-man theory of law, distinguishing between law and morality in statutory interpretation and establishing a positivist, predictive framework for legal study.",
+      "limitations": "The 'bad-man' perspective, while effective for analytical clarity, can be critiqued for potentially oversimplifying the inherent moral dimensions within legislative intent and judicial reasoning, thereby risking an overly cynical or amoral interpretation of legal development and reform.",
+      "visualizationReasoning": "This is a theoretical qualitative text survey. Drawing a flowchart or system diagram would be arbitrary and cluttered. Fall back to an editorial pull-quote highlighting Holmes' predictive legal realism axiom.",
+      "heroVisualization": {
+        "primitive": "pull_quote",
+        "title": "Axiomatic Definition of Law",
+        "canvas": {
+          "gridType": "technical_dots",
+          "badge": "Jurisprudential Axiom"
+        }
+      }
+    }
+  },
+  {
+    "id": "test_viz_cognitive_therapy_of_depression",
+    "category": "psychology",
+    "title": "Cognitive Therapy of Depression",
+    "authors": "Aaron T. Beck, A. John Rush, Brian F. Shaw, Gary Emery",
+    "year": 1979,
+    "purpose": "Delineated a comprehensive cognitive-behavioral therapy framework showing signif...",
+    "achievements": "Delineated a comprehensive cognitive-behavioral therapy framework showing significant decreases in depressive symptomatology and lower relapse rates compared to antidepressant medications.",
+    "limitations": "The study was mainly conducted on outpatients with moderate depression, which limits generalizability to hospitalized patients or those with severe psychotic features.",
+    "venue": "PSYCHOLOGY Journal",
+    "url": "#",
+    "coreIdea": "Cognitive therapy demonstrates equal or superior clinical efficacy to pharmacotherapy (Imipramine) for depressed outpatients, with significantly lower relapse rates at 12 months.",
+    "heroVisualization": {
+      "primitive": "timeline_evolution",
+      "title": "Shift in Depression Therapeutic Paradigm",
+      "canvas": {
+        "gridType": "technical_dots",
+        "badge": "Evolutionary Paradigm"
+      },
+      "timeline": {
+        "pastEra": "PRE-1970s // PSYCHOANALYSIS",
+        "pastConcept": "Depression interpreted as anger turned inward against the self. Focused on long-term unconscious conflict resolution.",
+        "breakthroughEra": "1979 BREAKTHROUGH // COGNITIVE RESTRUCTURING",
+        "breakthroughConcept": "Depression resolved by restructuring automatic negative thoughts and dysfunctional schemas in structured, short-term sessions."
+      }
+    },
+    "details": {
+      "extractedTitle": "Cognitive Therapy of Depression",
+      "extractedAuthors": "Aaron T. Beck, A. John Rush, Brian F. Shaw, Gary Emery",
+      "extractedYear": 1979,
+      "achievements": "Delineated a comprehensive cognitive-behavioral therapy framework showing significant decreases in depressive symptomatology and lower relapse rates compared to antidepressant medications.",
+      "limitations": "The study was mainly conducted on outpatients with moderate depression, which limits generalizability to hospitalized patients or those with severe psychotic features.",
+      "visualizationReasoning": "Beck's paper represents a paradigm-shifting leap in psychology, contrasting previous psychoanalytic models against the cognitive behavioral model. The 'timeline_evolution' layout is perfect to illustrate this historical transition.",
+      "heroVisualization": {
+        "primitive": "timeline_evolution",
+        "title": "Shift in Depression Therapeutic Paradigm",
+        "canvas": {
+          "gridType": "technical_dots",
+          "badge": "Evolutionary Paradigm"
+        },
+        "timeline": {
+          "pastEra": "PRE-1970s // PSYCHOANALYSIS",
+          "pastConcept": "Depression interpreted as anger turned inward against the self. Focused on long-term unconscious conflict resolution.",
+          "breakthroughEra": "1979 BREAKTHROUGH // COGNITIVE RESTRUCTURING",
+          "breakthroughConcept": "Depression resolved by restructuring automatic negative thoughts and dysfunctional schemas in structured, short-term sessions."
+        }
+      }
+    }
+  }
+]

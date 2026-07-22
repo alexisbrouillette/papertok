@@ -1,13 +1,19 @@
+import 'dotenv/config';
 import { createClient } from '@libsql/client';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // In dev (no TURSO_DATABASE_URL), use a local SQLite file via libSQL's file: protocol.
 // In production (Render + Turso), use the cloud URL + auth token.
-const url = process.env.TURSO_DATABASE_URL || `file:${join(__dirname, 'papertok.db')}`;
+let url = process.env.TURSO_DATABASE_URL;
+if (!url) {
+  const localDbPath = join(__dirname, 'papertok.db');
+  url = `file:${localDbPath}`;
+}
 const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
 
 export const client = createClient({ url, authToken });

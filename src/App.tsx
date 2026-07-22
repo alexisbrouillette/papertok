@@ -105,7 +105,7 @@ function App() {
     
     // If selecting the currently active topic and we already have papers, just return to the map instantly
     if (activeTopic.toLowerCase() === query.trim().toLowerCase() && papers.length > 0 && dayOffset === 0 && !bypassCache) {
-      setCurrentScreen('map');
+      navigateToScreen('map');
       return;
     }
 
@@ -162,7 +162,7 @@ function App() {
             localStorage.setItem('papertok_cached_topic', query);
             localStorage.setItem('papertok_cached_papers', JSON.stringify(targetPapers));
             setPapers(targetPapers);
-            setCurrentScreen('map');
+            navigateToScreen('map');
             return; // cache hit from database!
           }
         }
@@ -179,7 +179,7 @@ function App() {
       try {
         const cachedPapers = JSON.parse(cachedPapersStr);
         setPapers(cachedPapers);
-        setCurrentScreen('map');
+        navigateToScreen('map');
         return; // loaded from local storage cache!
       } catch {
         console.error('Failed to parse cached papers, calling API...');
@@ -188,7 +188,7 @@ function App() {
 
     // If cache missed, clear papers, show map screen with loading spinner, and fetch from API
     setPapers([]);
-    setCurrentScreen('map');
+    navigateToScreen('map');
 
     // 3. Request papers from Gemini
     try {
@@ -286,6 +286,31 @@ function App() {
     fetchUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle mobile browser history / swipe-back navigation for screens & settings
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (showSettings) {
+        setShowSettings(false);
+        return;
+      }
+      if (e.state && e.state.screen) {
+        setCurrentScreen(e.state.screen);
+      } else if (currentScreen === 'map') {
+        setCurrentScreen('search');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [showSettings, currentScreen]);
+
+  // Helper to change screen with history state push
+  const navigateToScreen = (screen: Screen) => {
+    if (currentScreen !== screen) {
+      window.history.pushState({ screen }, '', window.location.href);
+      setCurrentScreen(screen);
+    }
+  };
 
   const handleUpdateTopic = async (newTopic: string) => {
     const historyList = Array.isArray(searchHistory) ? searchHistory : [];

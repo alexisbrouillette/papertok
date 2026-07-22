@@ -289,6 +289,36 @@ export const DigestMap: React.FC<DigestMapProps> = ({
   const [chatPaper, setChatPaper] = useState<FoundationalPaper | null>(null);
   const [chatMetadata, setChatMetadata] = useState<{ citationCount?: number; venue?: string; pdfUrl?: string } | null>(null);
 
+  // Push history state when opening overlays, and intercept popstate (swipe-back / back button) to close them in order
+  useEffect(() => {
+    const handlePopState = () => {
+      if (chatPaper) {
+        setChatPaper(null);
+        return;
+      }
+      if (selectedCategory) {
+        setSelectedCategory(null);
+        return;
+      }
+      if (openNodeId) {
+        setDrawerVisible(false);
+        setTimeout(() => {
+          setOpenNodeId(null);
+        }, 300);
+        return;
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [chatPaper, selectedCategory, openNodeId]);
+
+  // Push history state whenever an overlay opens
+  useEffect(() => {
+    if (chatPaper || selectedCategory || openNodeId) {
+      window.history.pushState({ modal: true }, '', window.location.href);
+    }
+  }, [chatPaper, selectedCategory, openNodeId]);
+
   /* ─── SVG path geometry ─────────────────────────────── */
   const svgWidth = 320;
   

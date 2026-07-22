@@ -22,7 +22,7 @@ export async function enqueueDigestGeneration(userId, topic, priority = 0, diges
       targetDate = tomorrow.toISOString().split('T')[0];
     }
 
-    // Check if task already exists in pending or processing status to avoid duplicates on client reconnects/reloads
+    // Check if task already exists in pending or processing status
     const existingTask = await dbGet(`
       SELECT id, status FROM generation_queue 
       WHERE user_id = ? AND topic = ? AND digest_date = ? AND status IN ('pending', 'processing')
@@ -30,10 +30,16 @@ export async function enqueueDigestGeneration(userId, topic, priority = 0, diges
     `, [userId, cleanTopic, targetDate]);
 
     if (existingTask) {
-      console.log(`[DigestQueue] Task already exists in state "${existingTask.status}" for user ${userId}, topic "${cleanTopic}". Skipping duplicate enqueue.`);
+      console.log(`[DigestQueue] Task already running/pending (status: "${existingTask.status}") for user ${userId}, topic "${cleanTopic}". Resuming status stream...`);
       triggerQueueRunner();
       return;
     }
+
+    // Clean up any old failed tasks for this topic/date so the user can retry cleanly
+    await dbRun(`
+      DELETE FROM generation_queue
+      WHERE user_id = ? AND topic = ? AND digest_date = ? AND status = 'failed'
+    `, [userId, cleanTopic, targetDate]);
 
     // Insert or update priority if already pending
     await dbRun(`

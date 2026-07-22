@@ -122,7 +122,7 @@ router.get('/generate', requireAuth, async (req, res) => {
       // Check queue status
       const queueTask = await dbGet(`
         SELECT status, progress, status_text FROM generation_queue 
-        WHERE user_id = ? AND topic = ? AND digest_date = ?
+        WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ?
         ORDER BY id DESC LIMIT 1
       `, [userId, cleanTopic, digestDate]);
 

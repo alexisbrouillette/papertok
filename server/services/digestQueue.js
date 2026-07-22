@@ -25,7 +25,7 @@ export async function enqueueDigestGeneration(userId, topic, priority = 0, diges
     // Check if task already exists in pending or processing status
     const existingTask = await dbGet(`
       SELECT id, status FROM generation_queue 
-      WHERE user_id = ? AND topic = ? AND digest_date = ? AND status IN ('pending', 'processing')
+      WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ? AND status IN ('pending', 'processing')
       LIMIT 1
     `, [userId, cleanTopic, targetDate]);
 
@@ -38,7 +38,7 @@ export async function enqueueDigestGeneration(userId, topic, priority = 0, diges
     // Clean up any old failed tasks for this topic/date so the user can retry cleanly
     await dbRun(`
       DELETE FROM generation_queue
-      WHERE user_id = ? AND topic = ? AND digest_date = ? AND status = 'failed'
+      WHERE user_id = ? AND LOWER(topic) = LOWER(?) AND digest_date = ? AND status = 'failed'
     `, [userId, cleanTopic, targetDate]);
 
     // Insert or update priority if already pending
